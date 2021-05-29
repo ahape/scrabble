@@ -1,0 +1,35 @@
+define(["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var Letter;
+    (function (Letter) {
+        Letter["UNSET"] = "";
+        Letter["BLANK"] = "?";
+        Letter["A"] = "A";
+        Letter["B"] = "B";
+        Letter["C"] = "C";
+        Letter["D"] = "D";
+        Letter["E"] = "E";
+        Letter["F"] = "F";
+        Letter["G"] = "G";
+        Letter["H"] = "H";
+        Letter["I"] = "I";
+        Letter["J"] = "J";
+        Letter["K"] = "K";
+        Letter["L"] = "L";
+        Letter["M"] = "M";
+        Letter["N"] = "N";
+        Letter["O"] = "O";
+        Letter["P"] = "P";
+        Letter["Q"] = "Q";
+        Letter["R"] = "R";
+        Letter["S"] = "S";
+        Letter["T"] = "T";
+        Letter["U"] = "U";
+        Letter["V"] = "V";
+        Letter["W"] = "W";
+        Letter["X"] = "X";
+        Letter["Y"] = "Y";
+        Letter["Z"] = "Z";
+    })(Letter = exports.Letter || (exports.Letter = {}));
+});

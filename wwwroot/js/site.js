@@ -1,4 +1,11 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿requirejs.config({
+    baseUrl: "js/",
+});
 
-// Write your JavaScript code.
+// Set RequireJS entry point.
+/*
+requirejs(["viewmodels/app"], function (app) {
+    // Kick off app.
+    ko.applyBindings(new app.App);
+});
+*/
