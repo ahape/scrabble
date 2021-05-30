@@ -1,7 +1,8 @@
-define(["require", "exports", "letter"], function (require, exports, letter_1) {
+define(["require", "exports", "./letter"], function (require, exports, letter_1) {
     "use strict";
     var _a;
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.letterValueMap = void 0;
     exports.letterValueMap = (_a = {},
         _a[letter_1.Letter.UNSET] = 0,
         _a[letter_1.Letter.BLANK] = 0,

@@ -1,6 +1,7 @@
-define(["require", "exports", "multiplier"], function (require, exports, multiplier_1) {
+define(["require", "exports", "./multiplier"], function (require, exports, multiplier_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.coordinatesToMultiplier = void 0;
     exports.coordinatesToMultiplier = {
         // Triple words
         "A1": multiplier_1.Multiplier.Triple,

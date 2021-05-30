@@ -4,6 +4,7 @@ export interface IMove {
     x: number;
     y: number;
     isVertical: boolean;
-    letters: Letter[];
+    /** Raw character values, so that intended blank letter is known */
+    letters: string[];
     id: string;
 }

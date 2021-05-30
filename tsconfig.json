@@ -63,5 +63,15 @@
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
   },
-  "exclude": ["ts/tests"]
+  "exclude": ["ts/tests", "ts/cli"]
+  /*
+  "ts-node": {
+    "compilerOptions": {
+      "moduleResolution": "node",
+      "module": "commonjs",
+      "target": "es5",
+      "rootDir": "./ts"
+    }
+  }
+  */
 }

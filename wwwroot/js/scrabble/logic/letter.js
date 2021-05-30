@@ -1,6 +1,7 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Letter = void 0;
     var Letter;
     (function (Letter) {
         Letter["UNSET"] = "";

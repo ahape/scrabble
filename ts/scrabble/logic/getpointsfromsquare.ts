@@ -2,8 +2,7 @@ import { letterValueMap } from "./lettervaluemap";
 import { ISquare } from "./isquare";
 import { Letter } from "./letter";
 import { MultiplierType } from "./multipliertype";
-
-const lowerCaseRx = /[a-z]/;
+import { parseLetter } from "./parseletter";
 
 /**
  * Returns points for a letter played on a square.
@@ -14,7 +13,7 @@ const lowerCaseRx = /[a-z]/;
 export function getPointsFromSquare(sq: ISquare, multipliers: number[])
     : number
 {
-    let points = letterValueMap[lowerCaseRx.test(sq.letter) ? Letter.BLANK : sq.letter];
+    let points = letterValueMap[parseLetter(sq.letter)];
 
     if (!sq.played) {
         if (sq.multiplierType === MultiplierType.Word) {

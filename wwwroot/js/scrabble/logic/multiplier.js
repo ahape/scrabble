@@ -1,6 +1,7 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Multiplier = void 0;
     var Multiplier;
     (function (Multiplier) {
         Multiplier[Multiplier["None"] = 0] = "None";

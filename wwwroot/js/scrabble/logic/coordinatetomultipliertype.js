@@ -1,6 +1,7 @@
-define(["require", "exports", "multipliertype"], function (require, exports, multipliertype_1) {
+define(["require", "exports", "./multipliertype"], function (require, exports, multipliertype_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.coordinatesToMultiplierType = void 0;
     exports.coordinatesToMultiplierType = {
         // Triple words
         "A1": multipliertype_1.MultiplierType.Word,

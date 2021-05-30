@@ -1,6 +1,6 @@
 import { MultiplierType } from "./multipliertype";
 
-export const coordinatesToMultiplierType = {
+export const coordinatesToMultiplierType: Record<string, MultiplierType> = {
     // Triple words
     "A1": MultiplierType.Word,
     "H1": MultiplierType.Word,
