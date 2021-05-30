@@ -7,6 +7,7 @@ import { Multiplier } from "./multiplier";
 import { MultiplierType } from "./multipliertype";
 import { getPointsFromSquare } from "./getpointsfromsquare";
 import { parseLetter } from "./parseletter";
+import { printBoard } from "./printboard";
 import { MAX_RACK_TILES } from "./constants";
 
 const lowerCaseRx = /[a-z]/;
@@ -14,7 +15,7 @@ const lowerCaseRx = /[a-z]/;
 // Is first word?
 
 export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
-    const isFirstWord = board.every(row => row.every(sq => !sq.played));
+    const isFirstWord = board.every((row) => row.every((sq) => !sq.played));
     const wordMultipliers: number[] = [];
     let connectsToPlayedSquare = false;
     let points = 0;
@@ -22,12 +23,13 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
     let result: IPlayResult = {
         board: ko.toJS(board),
         words: [],
+        usedLetters: [],
     };
 
     if (move.isVertical) {
         let moveY = move.y;
 
-        move.letters.forEach(letter => {
+        move.letters.forEach((letter) => {
             const sq = result.board[moveY][move.x];
 
             if (sq.played && sq.letter !== letter) {
@@ -38,8 +40,9 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                 // Set the letter.
                 sq.letter = parseLetter(letter);
 
-                if (lowerCaseRx.test(letter))
-                    sq.blankLetter = letter;
+                result.usedLetters.push(sq.letter);
+
+                if (lowerCaseRx.test(letter)) sq.blankLetter = letter;
             } else {
                 connectsToPlayedSquare = true;
             }
@@ -65,7 +68,7 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                         if (crossSq && crossSq.letter) {
                             word.unshift(crossSq);
                         }
-                    } while (--x >= 0 && crossSq.letter)
+                    } while (--x >= 0 && crossSq.letter);
                 }
 
                 if (word.length > 0) {
@@ -84,7 +87,7 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                         if (crossSq && crossSq.letter) {
                             word.push(crossSq);
                         }
-                    } while (++x < xLength && crossSq.letter)
+                    } while (++x < xLength && crossSq.letter);
                 }
 
                 // If a word is forming, and we haven't already added to
@@ -94,15 +97,15 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                 }
 
                 const mults: number[] = [];
-                word.forEach(_sq => {
+                word.forEach((_sq) => {
                     crossingPoints += getPointsFromSquare(_sq, mults);
                 });
-                mults.forEach((m) => crossingPoints *= m);
+                mults.forEach((m) => (crossingPoints *= m));
 
                 if (word.length > 0) {
                     connectsToPlayedSquare = true;
                     result.words.push({
-                        word: word.map(_sq => _sq.letter).join(""),
+                        word: word.map((_sq) => _sq.letter).join(""),
                         points: crossingPoints,
                     });
                 }
@@ -114,7 +117,7 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
     } else {
         let moveX = move.x;
 
-        move.letters.forEach(letter => {
+        move.letters.forEach((letter) => {
             const sq = result.board[move.y][moveX];
 
             if (sq.played && sq.letter !== letter) {
@@ -124,8 +127,9 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
             if (!sq.played) {
                 sq.letter = parseLetter(letter);
 
-                if (lowerCaseRx.test(letter))
-                    sq.blankLetter = letter;
+                result.usedLetters.push(sq.letter);
+
+                if (lowerCaseRx.test(letter)) sq.blankLetter = letter;
             } else {
                 connectsToPlayedSquare = true;
             }
@@ -150,7 +154,7 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                         if (crossSq && crossSq.letter) {
                             word.unshift(crossSq);
                         }
-                    } while (--y >= 0 && crossSq.letter)
+                    } while (--y >= 0 && crossSq.letter);
                 }
 
                 if (word.length > 0) {
@@ -169,7 +173,7 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                         if (crossSq && crossSq.letter) {
                             word.push(crossSq);
                         }
-                    } while (++y < yLength && crossSq.letter)
+                    } while (++y < yLength && crossSq.letter);
                 }
 
                 if (word.length > 0 && word.indexOf(sq) === -1) {
@@ -177,15 +181,15 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                 }
 
                 const mults: number[] = [];
-                word.forEach(_sq => {
+                word.forEach((_sq) => {
                     crossingPoints += getPointsFromSquare(_sq, mults);
                 });
-                mults.forEach((m) => crossingPoints *= m);
+                mults.forEach((m) => (crossingPoints *= m));
 
                 if (word.length > 0) {
                     connectsToPlayedSquare = true;
                     result.words.push({
-                        word: word.map(_sq => _sq.letter).join(""),
+                        word: word.map((_sq) => _sq.letter).join(""),
                         points: crossingPoints,
                     });
                 }
@@ -204,7 +208,7 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
         throw new Error("Word is larger than maximum amount of tiles");
     }
 
-    wordMultipliers.forEach(mult => {
+    wordMultipliers.forEach((mult) => {
         // Add up points for word in play command.
         points *= mult;
     });

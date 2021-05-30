@@ -1,81 +1,49 @@
-// start new game
-// read commands:
-// - print (+ commands and score)
-// - play
-
 import * as readline from "readline";
 import { parseBoard } from "../scrabble/logic/parseboard";
 import { printBoard } from "../scrabble/logic/printboard";
-import { parsePlayCommand } from "../scrabble/logic/parsePlayCommand";
-import { playMove } from "../scrabble/logic/playMove";
+import { parsePlayCommand } from "../scrabble/logic/parseplaycommand";
+import { createNewBoard } from "../scrabble/logic/createnewboard";
+import { playMove } from "../scrabble/logic/playmove";
+import { Game } from "../scrabble/game";
 
-let board = parseBoard(`
-   A B C D E F G H I J K L M N O
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 1| | | | | | | | | | | | | | | |0
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 2| | | | | | | | | | | | | | | |1
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 3| | | | | | | | | | | | | | | |2
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 4| | | | | | | | | | | | | | | |3
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 5| | | | | | | | | | | | | | | |4
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 6| | | | | | | | | | | | | | | |5
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 7| | | | | | | | | | | | | | | |6
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 8| | | | | | | | | | | | | | | |7
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 9| | | | | | | | | | | | | | | |8
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-10| | | | | | | | | | | | | | | |9
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-11| | | | | | | | | | | | | | | |10
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-12| | | | | | | | | | | | | | | |11
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-13| | | | | | | | | | | | | | | |12
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-14| | | | | | | | | | | | | | | |13
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-15| | | | | | | | | | | | | | | |14
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4
-`);
+const game = new Game(3);
 
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
 });
 
-console.log("Commands are:\nplay 'word' 'coords' 'dir letter'\nprint");
+console.log(
+    "Commands are:" +
+        "\t\n'play <word> <coordnates> <direction>'\texample: 'play WORD H8 V'" +
+        "\t\n'print'\tprints all game information" +
+        "\t\n'undo'\tundoes action" +
+        "\t\n'redo'\tredoes action" +
+        "\t\n'skip'\tskips turn" +
+        "\t\n'draw'\tdraws tiles from bag onto rack"
+);
 
-const commands: string[] = [];
-let totalScore = 0;
-
-console.log(printBoard(board));
+game.print();
 
 function loop() {
     rl.question("What's next? ", (answer) => {
         if (answer.indexOf("play") === 0) {
-            const cmd = answer.substr("play ".length);
-            const move = parsePlayCommand(cmd);
-            console.log("Parsed move was ", move);
-            const result = playMove(move, board);
-
-            commands.push(cmd);
-
-            board = result.board;
-            result.words.forEach((w) => {
-                console.log("Played " + w.word + " for " + w.points);
-                totalScore += w.points;
-            });
-            console.log("\nTotal score is now " + totalScore);
-            console.log(printBoard(board));
-        } else if (answer.indexOf("print") === 0) {
-            commands.forEach((cmd) => console.log(cmd));
+            game.play(answer);
+            game.print();
+        } else if (answer == "print") {
+            game.print();
+        } else if (answer == "undo") {
+            game.undo();
+            game.print();
+        } else if (answer == "redo") {
+            game.redo();
+            game.print();
+        } else if (answer == "skip") {
+            game.skip();
+            game.print();
+        } else if (answer == "draw") {
+            game.draw();
+            game.print();
         } else {
             console.log("Unknown command");
         }

@@ -1,7 +1,9 @@
+import { createRackFromActions } from "../scrabble/logic/createrackfromactions";
 import { getPointsFromSquare } from "../scrabble/logic/getpointsfromsquare";
 import { playCommandHasLettersFromRack } from "../scrabble/logic/playcommandhaslettersfromrack";
 import { parsePlayCommand } from "../scrabble/logic/parseplaycommand";
 import { parseBoard } from "../scrabble/logic/parseboard";
+import { createNewBoard } from "../scrabble/logic/createnewboard";
 import { playMove } from "../scrabble/logic/playmove";
 import { ISquare } from "../scrabble/logic/isquare";
 import { IMove } from "../scrabble/logic/imove";
@@ -534,6 +536,7 @@ describe("Logic", () => {
         });
     });
 
+    // TODO: Add human readable 'out of bounds' errors
     describe("#playMove", () => {
         it("throws error when starting a word with a different letter on a square that is occupied", () => {
             const boardString = `
@@ -587,43 +590,7 @@ describe("Logic", () => {
         });
 
         it("throws an error if the first word on the board doesn't cross over the middle square", () => {
-            const boardString = `
-   A B C D E F G H I J K L M N O
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 1| | | | | | | | | | | | | | | |0
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 2| | | | | | | | | | | | | | | |1
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 3| | | | | | | | | | | | | | | |2
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 4| | | | | | | | | | | | | | | |3
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 5| | | | | | | | | | | | | | | |4
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 6| | | | | | | | | | | | | | | |5
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 7| | | | | | | | | | | | | | | |6
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 8| | | | | | | | | | | | | | | |7
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 9| | | | | | | | | | | | | | | |8
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-10| | | | | | | | | | | | | | | |9
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-11| | | | | | | | | | | | | | | |10
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-12| | | | | | | | | | | | | | | |11
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-13| | | | | | | | | | | | | | | |12
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-14| | | | | | | | | | | | | | | |13
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-15| | | | | | | | | | | | | | | |14
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4
-            `;
-
-            const board = parseBoard(boardString);
+            const board = createNewBoard();
             const move = parsePlayCommand("FIRST d1 v");
             let errorMessage = "";
             let result = null;
@@ -740,43 +707,7 @@ describe("Logic", () => {
         });
 
         it("permits valid moves - example game 1", () => {
-            const boardString = `
-   A B C D E F G H I J K L M N O
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 1| | | | | | | | | | | | | | | |0
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 2| | | | | | | | | | | | | | | |1
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 3| | | | | | | | | | | | | | | |2
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 4| | | | | | | | | | | | | | | |3
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 5| | | | | | | | | | | | | | | |4
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 6| | | | | | | | | | | | | | | |5
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 7| | | | | | | | | | | | | | | |6
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 8| | | | | | | | | | | | | | | |7
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 9| | | | | | | | | | | | | | | |8
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-10| | | | | | | | | | | | | | | |9
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-11| | | | | | | | | | | | | | | |10
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-12| | | | | | | | | | | | | | | |11
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-13| | | | | | | | | | | | | | | |12
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-14| | | | | | | | | | | | | | | |13
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-15| | | | | | | | | | | | | | | |14
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4
-            `;
-
-            let board = parseBoard(boardString);
+            let board = createNewBoard();
             const commands: string[] = [
                 "FIRST h8 h",
                 "SECOND k8 v",
@@ -794,6 +725,34 @@ describe("Logic", () => {
             });
 
             console.assert(total === 144);
+        });
+    });
+    describe("#createRackFromActions", () => {
+        it("works for action list - 1", () => {
+            const teams = 2;
+            const actions: string[] = [
+                "NEW GAME",
+                "DRAW ABCDEFG",
+                "PLAY ABCD h8 v",
+                "DRAW HIJKLMN",
+                "PLAY HIJK h7 h",
+                "SKIP", // Skip Team 1
+                "DRAW OPQR", // Team 2
+                // TODO: Add SWAP
+            ];
+            const rack = createRackFromActions(actions, teams);
+            console.assert(rack.print() === "[LMNOPQR]");
+        });
+
+        it("works for action list - 2", () => {
+            const teams = 3;
+            const actions: string[] = [
+                "NEW GAME",
+                "DRAW IDVUOSE",
+                "play DEVIOUS h8 v",
+            ];
+            const rack = createRackFromActions(actions, teams);
+            console.assert(rack.print() === "[]");
         });
     });
 });
