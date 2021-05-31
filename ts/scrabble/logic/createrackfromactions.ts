@@ -26,6 +26,13 @@ export function createRackFromActions(
                 board = result.board;
                 rack.remove(result.usedLetters);
                 break;
+            case ActionType.Swap:
+                const [sExchanged, sDrawn] = commandPart.split(" ");
+                const exchanged = sExchanged.split("").map(parseLetter);
+                const drawn = sDrawn.split("").map(parseLetter);
+                rack.remove(exchanged);
+                rack.add(drawn);
+                break;
             case ActionType.Draw:
                 rack.add(commandPart.split("").map(parseLetter));
                 break;

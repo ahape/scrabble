@@ -7,6 +7,7 @@ import { parsePlayCommand } from "./logic/parseplaycommand";
 import { createNewBoard } from "./logic/createnewboard";
 import { playMove } from "./logic/playmove";
 import { printBoard } from "./logic/printboard";
+import { parseLetter } from "./logic/parseletter";
 import { ActionType } from "./logic/actiontype";
 import { actionChangesTurn } from "./logic/actionchangesturn";
 import { getNextTurn } from "./logic/getnextturn";
@@ -36,7 +37,6 @@ export class Game {
         this.racks = _.times(teams, () => new Rack());
     }
 
-    // TODO: How many tiles?
     public draw(): void {
         const drawn = this._draw();
         if (drawn.length > 0) {
@@ -51,13 +51,13 @@ export class Game {
         this._handleAction(ActionType.Skip);
     }
 
-    // TODO: How many tiles?
-    public swap(): void {
-        this._handleAction(ActionType.Swap);
+    public swap(actionRaw: string): void {
+        actionRaw = this._swap(actionRaw);
+        this._handleAction(ActionType.Swap, actionRaw);
     }
 
     public play(actionRaw: string): void {
-        const command = actionRaw.substr("PLAY ".length);
+        const command = parseAction(actionRaw)[1];
         const errorMessage = this._play(command);
         if (errorMessage) {
             console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -128,6 +128,16 @@ export class Game {
         const drawn = this.bag.draw(rack.needs());
         rack.add(drawn);
         return drawn;
+    }
+
+    /** @returns raw action containing drawn letters as well as exchanged letters */
+    private _swap(actionRaw: string): string {
+        const letters = parseAction(actionRaw)[1].split("").map(parseLetter);
+        const rack = this._teamTurnRack();
+        rack.remove(letters);
+        const newLetters = this.bag.swap(letters);
+        rack.add(newLetters);
+        return actionRaw + " " + newLetters.join("");
     }
 
     private _play(command: string): string {
