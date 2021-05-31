@@ -31,9 +31,12 @@ export class Game {
     /** Raw action strings */
     public actions: string[] = [];
     public actionIndex: number = -1;
+    public state: KnockoutObservable<IGameState>;
 
     public constructor(teams: number) {
         this.teams = teams;
+        this.state = ko.observable(this.snapshot());
+
         this._handleAction(ActionType.NewGame);
     }
 
@@ -137,6 +140,8 @@ export class Game {
             case ActionType.EndGame:
                 break;
         }
+
+        this.state(this.snapshot());
     }
 
     private _nonFutureActions(): string[] {

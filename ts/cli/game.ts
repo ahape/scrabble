@@ -1,3 +1,4 @@
+import * as http from "http";
 import * as readline from "readline";
 import { parseBoard } from "../scrabble/logic/parseboard";
 import { printBoard } from "../scrabble/logic/printboard";
@@ -5,24 +6,9 @@ import { parsePlayCommand } from "../scrabble/logic/parseplaycommand";
 import { createNewBoard } from "../scrabble/logic/createnewboard";
 import { playMove } from "../scrabble/logic/playmove";
 import { Game } from "../scrabble/game";
+import { IGameState } from "../scrabble/igamestate";
 
-const game = Game.fromSnapshot({
-    id: "kpbxox3h",
-    teams: 3,
-    actions: [
-        "NEW GAME",
-        "DRAW GELPINB",
-        "play BLING h8 h",
-        "DRAW XOISAMR",
-        "swap XMS TBF",
-        "DRAW F?DORIN",
-        "swap ? O",
-        "DRAW ?AAAR",
-        "SKIP",
-        "play FART e9 h",
-    ],
-    actionIndex: 9,
-});
+const game = new Game(2);
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -42,6 +28,62 @@ console.log(
 );
 
 game.print();
+
+const request = http.request(
+    {
+        host: "localhost",
+        port: "5000",
+        path: "/games",
+        method: "POST",
+    },
+    (response) => {
+        let str = "";
+        response.on("data", (chunk) => {
+            str += chunk;
+        });
+        response.on("end", () => {
+            const data = JSON.parse(str);
+            game.id = data.id;
+
+            loop();
+        });
+    }
+);
+request.write("foo=1");
+request.end();
+
+game.state.subscribe((_state) => {
+    var formData = "";
+    Object.keys(_state).forEach((k, i, arr) => {
+        const key = k as keyof IGameState;
+        if (typeof _state[key] == "number") formData += key + "=" + _state[key];
+        else formData += key + "=" + String(_state[key]);
+
+        if (i < arr.length - 1) formData += "&";
+    });
+    const update = http.request(
+        {
+            host: "localhost",
+            port: "5000",
+            path: "/games/" + _state.id,
+            method: "POST",
+        },
+        (response) => {
+            let str = "";
+            response.on("data", (chunk) => {
+                str += chunk;
+            });
+            response.on("end", () => {
+                const data = JSON.parse(str);
+                game.id = data.id;
+
+                loop();
+            });
+        }
+    );
+    update.write(formData);
+    update.end();
+});
 
 function loop() {
     rl.question("What's next? ", (answer) => {
@@ -74,5 +116,3 @@ function loop() {
         loop();
     });
 }
-
-loop();
