@@ -6,7 +6,23 @@ import { createNewBoard } from "../scrabble/logic/createnewboard";
 import { playMove } from "../scrabble/logic/playmove";
 import { Game } from "../scrabble/game";
 
-const game = new Game(3);
+const game = Game.fromSnapshot({
+    id: "kpbxox3h",
+    teams: 3,
+    actions: [
+        "NEW GAME",
+        "DRAW GELPINB",
+        "play BLING h8 h",
+        "DRAW XOISAMR",
+        "swap XMS TBF",
+        "DRAW F?DORIN",
+        "swap ? O",
+        "DRAW ?AAAR",
+        "SKIP",
+        "play FART e9 h",
+    ],
+    actionIndex: 9,
+});
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -21,6 +37,7 @@ console.log(
         "\t\n'redo'\tredoes action" +
         "\t\n'skip'\tskips turn" +
         "\t\n'draw'\tdraws tiles from bag onto rack" +
+        "\t\n'snapshot'\tgrab snapshot object for game" +
         "\t\n'print'\tprints all game information"
 );
 
@@ -33,6 +50,8 @@ function loop() {
             game.print();
         } else if (answer.search(/print/i) === 0) {
             game.print();
+        } else if (answer.search(/snapshot/i) === 0) {
+            console.log(game.snapshot());
         } else if (answer.search(/undo/i) === 0) {
             game.undo();
             game.print();

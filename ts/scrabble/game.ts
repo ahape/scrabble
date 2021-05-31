@@ -1,4 +1,5 @@
 import * as _ from "underscore";
+import * as ko from "knockout";
 import { ISquare } from "./logic/isquare";
 import { IPlayResult } from "./logic/iplayresult";
 import { IMove } from "./logic/imove";
@@ -11,6 +12,7 @@ import { parseLetter } from "./logic/parseletter";
 import { ActionType } from "./logic/actiontype";
 import { actionChangesTurn } from "./logic/actionchangesturn";
 import { getNextTurn } from "./logic/getnextturn";
+import { getTurnFromActions } from "./logic/getturnfromactions";
 import { parseAction } from "./logic/parseaction";
 import { createBoardFromActions } from "./logic/createboardfromactions";
 import { createBagFromActions } from "./logic/createbagfromactions";
@@ -20,6 +22,7 @@ import { BOARD_X_LENGTH, BOARD_Y_LENGTH } from "./logic/constants";
 import { Bag } from "./bag";
 import { Rack } from "./rack";
 import { IGameState } from "./igamestate";
+import { IGameStatus } from "./igamestatus";
 
 // Note: a state change is simply a change in turn
 export class Game {
@@ -28,7 +31,6 @@ export class Game {
     /** Raw action strings */
     public actions: string[] = [];
     public actionIndex: number = -1;
-    public teamTurn: number = 1;
 
     public constructor(teams: number) {
         this.teams = teams;
@@ -41,6 +43,14 @@ export class Game {
             teams: this.teams,
             actions: this.actions,
             actionIndex: this.actionIndex,
+        };
+    }
+
+    public status(): IGameStatus {
+        return {
+            racks: [],
+            scores: [],
+            teamTurn: this._teamTurn(), // TODO
         };
     }
 
@@ -88,7 +98,7 @@ export class Game {
             if (i === this.actionIndex) action += " <<<";
             console.log(i + 1 + ". " + action);
         });
-        console.log(`It's team ${this.teamTurn}'s turn`);
+        console.log(`It's team ${this._teamTurn()}'s turn`);
         console.log(`Current letters: ` + this._teamTurnRack().print());
     }
 
@@ -127,8 +137,6 @@ export class Game {
             case ActionType.EndGame:
                 break;
         }
-
-        this._handleTurn(actionType);
     }
 
     private _nonFutureActions(): string[] {
@@ -141,6 +149,10 @@ export class Game {
 
     private _board(): ISquare[][] {
         return createBoardFromActions(this._nonFutureActions());
+    }
+
+    private _teamTurn(): number {
+        return getTurnFromActions(this._nonFutureActions(), this.teams);
     }
 
     private _teamTurnRack(): Rack {
@@ -193,22 +205,6 @@ export class Game {
         } catch (err) {
             throw err;
             //return err.message;
-        }
-    }
-
-    private _handleTurn(actionType: ActionType): void {
-        const isUndo = actionType === ActionType.Undo;
-
-        if (isUndo || actionType === ActionType.Redo) {
-            // Get new previous state's action type.
-            const index = isUndo
-                ? Math.min(this.actions.length - 1, this.actionIndex + 1)
-                : Math.max(0, this.actionIndex - 1);
-            actionType = parseAction(this.actions[index])[0];
-        }
-
-        if (actionChangesTurn(actionType)) {
-            this.teamTurn = getNextTurn(this.teams, this.teamTurn, isUndo);
         }
     }
 }
