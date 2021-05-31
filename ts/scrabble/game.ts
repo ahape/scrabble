@@ -13,29 +13,32 @@ import { ActionType } from "./logic/actiontype";
 import { actionChangesTurn } from "./logic/actionchangesturn";
 import { getNextTurn } from "./logic/getnextturn";
 import { getTurnFromActions } from "./logic/getturnfromactions";
+import { getScoresFromActions } from "./logic/getscoresfromactions";
 import { parseAction } from "./logic/parseaction";
 import { createBoardFromActions } from "./logic/createboardfromactions";
 import { createBagFromActions } from "./logic/createbagfromactions";
 import { playCommandHasLettersFromRack } from "./logic/playcommandhaslettersfromrack";
 import { createRackFromActions } from "./logic/createrackfromactions";
+import { createRacksFromActions } from "./logic/createracksfromactions";
 import { BOARD_X_LENGTH, BOARD_Y_LENGTH } from "./logic/constants";
 import { Bag } from "./bag";
 import { Rack } from "./rack";
 import { IGameState } from "./igamestate";
 import { IGameStatus } from "./igamestatus";
 
-// Note: a state change is simply a change in turn
 export class Game {
     public id: string = _.now().toString(36);
     public teams: number;
     /** Raw action strings */
     public actions: string[] = [];
     public actionIndex: number = -1;
-    public state: KnockoutObservable<IGameState>;
+    public currentState: KnockoutObservable<IGameState>;
+    public currentStatus: KnockoutObservable<IGameStatus>;
 
     public constructor(teams: number) {
         this.teams = teams;
-        this.state = ko.observable(this.snapshot());
+        this.currentState = ko.observable(this.snapshot());
+        this.currentStatus = ko.observable(this.status());
 
         this._handleAction(ActionType.NewGame);
     }
@@ -51,9 +54,16 @@ export class Game {
 
     public status(): IGameStatus {
         return {
-            racks: [],
-            scores: [],
-            teamTurn: this._teamTurn(), // TODO
+            bag: this._bag().toJSON(),
+            board: this._board().map((row) =>
+                row.map((sq) => sq.blankLetter || sq.letter)
+            ),
+            racks: createRacksFromActions(
+                this._nonFutureActions(),
+                this.teams
+            ).map((r) => r.toJSON()),
+            scores: getScoresFromActions(this._nonFutureActions(), this.teams),
+            teamTurn: this._teamTurn(),
         };
     }
 
@@ -141,7 +151,8 @@ export class Game {
                 break;
         }
 
-        this.state(this.snapshot());
+        this.currentState(this.snapshot());
+        this.currentStatus(this.status());
     }
 
     private _nonFutureActions(): string[] {

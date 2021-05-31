@@ -31,4 +31,8 @@ export class Rack {
     public print(): string {
         return "[" + this.letters.join("") + "]";
     }
+
+    public toJSON(): string[] {
+        return this.letters.slice();
+    }
 }

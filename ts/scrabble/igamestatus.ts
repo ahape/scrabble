@@ -1,5 +1,10 @@
+import { ISquare } from "./logic/isquare";
+import { Letter } from "./logic/letter";
+
 export interface IGameStatus {
-    racks: string[];
+    bag: string[];
+    board: string[][];
+    racks: string[][];
     teamTurn: number;
     scores: number[];
 }

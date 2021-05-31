@@ -29,60 +29,8 @@ console.log(
 
 game.print();
 
-const request = http.request(
-    {
-        host: "localhost",
-        port: "5000",
-        path: "/games",
-        method: "POST",
-    },
-    (response) => {
-        let str = "";
-        response.on("data", (chunk) => {
-            str += chunk;
-        });
-        response.on("end", () => {
-            const data = JSON.parse(str);
-            game.id = data.id;
-
-            loop();
-        });
-    }
-);
-request.write("foo=1");
-request.end();
-
-game.state.subscribe((_state) => {
-    var formData = "";
-    Object.keys(_state).forEach((k, i, arr) => {
-        const key = k as keyof IGameState;
-        if (typeof _state[key] == "number") formData += key + "=" + _state[key];
-        else formData += key + "=" + String(_state[key]);
-
-        if (i < arr.length - 1) formData += "&";
-    });
-    const update = http.request(
-        {
-            host: "localhost",
-            port: "5000",
-            path: "/games/" + _state.id,
-            method: "POST",
-        },
-        (response) => {
-            let str = "";
-            response.on("data", (chunk) => {
-                str += chunk;
-            });
-            response.on("end", () => {
-                const data = JSON.parse(str);
-                game.id = data.id;
-
-                loop();
-            });
-        }
-    );
-    update.write(formData);
-    update.end();
+game.currentStatus.subscribe((status) => {
+    console.log("===============STATUS===============", status);
 });
 
 function loop() {
@@ -116,3 +64,5 @@ function loop() {
         loop();
     });
 }
+
+loop();

@@ -2,10 +2,10 @@ import * as _ from "underscore";
 import { Letter } from "./logic/letter";
 
 export class Bag {
-    private _letters: Letter[];
+    public letters: Letter[];
 
     public constructor() {
-        this._letters = _.flatten([
+        this.letters = _.flatten([
             _.times(2, () => Letter.BLANK),
             _.times(9, () => Letter.A),
             _.times(2, () => Letter.B),
@@ -37,12 +37,12 @@ export class Bag {
     }
 
     public count(): number {
-        return this._letters.length;
+        return this.letters.length;
     }
 
     public draw(count: number): Letter[] {
-        this._letters = _.shuffle(this._letters);
-        return this._letters.splice(0, count);
+        this.letters = _.shuffle(this.letters);
+        return this.letters.splice(0, count);
     }
 
     public swap(letters: Letter[]): Letter[] {
@@ -53,19 +53,23 @@ export class Bag {
 
     public remove(letters: Letter[]): void {
         letters.forEach((letter) => {
-            const index = this._letters.indexOf(letter);
-            if (index > -1) this._letters.splice(index, 1);
+            const index = this.letters.indexOf(letter);
+            if (index > -1) this.letters.splice(index, 1);
         });
     }
 
     public add(letters: Letter[]): void {
-        this._letters.push(...letters);
+        this.letters.push(...letters);
     }
 
     public print(): string {
         return (
             `(${this.count()}) ` +
-            JSON.stringify(_.countBy(this._letters.sort())).slice(1, -1)
+            JSON.stringify(_.countBy(this.letters.sort())).slice(1, -1)
         );
+    }
+
+    public toJSON(): string[] {
+        return this.letters.slice();
     }
 }
