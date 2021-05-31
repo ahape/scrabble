@@ -4,9 +4,7 @@ import { Letter } from "./logic/letter";
 export class Bag {
     private _letters: Letter[];
 
-    public constructor(without?: Letter[]) {
-        // TODO: Handle "without"
-
+    public constructor() {
         this._letters = _.flatten([
             _.times(2, () => Letter.BLANK),
             _.times(9, () => Letter.A),
@@ -49,11 +47,25 @@ export class Bag {
 
     public swap(letters: Letter[]): Letter[] {
         const drawn = this.draw(letters.length);
-        this._letters.push(...letters);
+        this.add(letters);
         return drawn;
     }
 
+    public remove(letters: Letter[]): void {
+        letters.forEach((letter) => {
+            const index = this._letters.indexOf(letter);
+            if (index > -1) this._letters.splice(index, 1);
+        });
+    }
+
+    public add(letters: Letter[]): void {
+        this._letters.push(...letters);
+    }
+
     public print(): string {
-        return JSON.stringify(_.countBy(this._letters.sort()));
+        return (
+            `(${this.count()}) ` +
+            JSON.stringify(_.countBy(this._letters.sort())).slice(1, -1)
+        );
     }
 }

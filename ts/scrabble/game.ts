@@ -13,28 +13,35 @@ import { actionChangesTurn } from "./logic/actionchangesturn";
 import { getNextTurn } from "./logic/getnextturn";
 import { parseAction } from "./logic/parseaction";
 import { createBoardFromActions } from "./logic/createboardfromactions";
+import { createBagFromActions } from "./logic/createbagfromactions";
 import { playCommandHasLettersFromRack } from "./logic/playcommandhaslettersfromrack";
 import { createRackFromActions } from "./logic/createrackfromactions";
 import { BOARD_X_LENGTH, BOARD_Y_LENGTH } from "./logic/constants";
 import { Bag } from "./bag";
 import { Rack } from "./rack";
+import { IGameState } from "./igamestate";
 
 // Note: a state change is simply a change in turn
 export class Game {
-    public id: number = _.random(999_999_999);
+    public id: string = _.now().toString(36);
     public teams: number;
-    /** Includes raw action strings */
+    /** Raw action strings */
     public actions: string[] = [];
     public actionIndex: number = -1;
     public teamTurn: number = 1;
-    public bag: Bag;
-    public racks: Rack[];
 
     public constructor(teams: number) {
         this.teams = teams;
         this._handleAction(ActionType.NewGame);
-        this.bag = new Bag();
-        this.racks = _.times(teams, () => new Rack());
+    }
+
+    public snapshot(): IGameState {
+        return {
+            id: this.id,
+            teams: this.teams,
+            actions: this.actions,
+            actionIndex: this.actionIndex,
+        };
     }
 
     public draw(): void {
@@ -75,17 +82,25 @@ export class Game {
     }
 
     public print(): void {
-        console.log(`Tiles remaining in bag ` + this.bag.print());
-        const board = createBoardFromActions(
-            this.actions.slice(0, this.actionIndex + 1)
-        );
-        console.log(printBoard(board));
+        console.log(`Tiles remaining in bag ` + this._bag().print());
+        console.log(printBoard(this._board()));
         this.actions.forEach((action, i) => {
             if (i === this.actionIndex) action += " <<<";
             console.log(i + 1 + ". " + action);
         });
         console.log(`It's team ${this.teamTurn}'s turn`);
         console.log(`Current letters: ` + this._teamTurnRack().print());
+    }
+
+    public static fromSnapshot(snapshot: IGameState): Game {
+        // Clone in case snapshot is used for other things.
+        snapshot = ko.toJS(snapshot);
+        const game = new Game(1);
+        game.id = snapshot.id;
+        game.teams = snapshot.teams;
+        game.actionIndex = snapshot.actionIndex;
+        game.actions = snapshot.actions;
+        return game;
     }
 
     private _handleAction(actionType: ActionType, actionRaw?: string): void {
@@ -116,16 +131,25 @@ export class Game {
         this._handleTurn(actionType);
     }
 
+    private _nonFutureActions(): string[] {
+        return this.actions.slice(0, this.actionIndex + 1);
+    }
+
+    private _bag(): Bag {
+        return createBagFromActions(this._nonFutureActions());
+    }
+
+    private _board(): ISquare[][] {
+        return createBoardFromActions(this._nonFutureActions());
+    }
+
     private _teamTurnRack(): Rack {
-        return createRackFromActions(
-            this.actions.slice(0, this.actionIndex + 1),
-            this.teams
-        );
+        return createRackFromActions(this._nonFutureActions(), this.teams);
     }
 
     private _draw(): Letter[] {
         const rack = this._teamTurnRack();
-        const drawn = this.bag.draw(rack.needs());
+        const drawn = this._bag().draw(rack.needs());
         rack.add(drawn);
         return drawn;
     }
@@ -135,7 +159,7 @@ export class Game {
         const letters = parseAction(actionRaw)[1].split("").map(parseLetter);
         const rack = this._teamTurnRack();
         rack.remove(letters);
-        const newLetters = this.bag.swap(letters);
+        const newLetters = this._bag().swap(letters);
         rack.add(newLetters);
         return actionRaw + " " + newLetters.join("");
     }
@@ -150,14 +174,11 @@ export class Game {
         const rack = this._teamTurnRack();
         // Simple check
         const isValid = playCommandHasLettersFromRack(move, rack.letters);
-        const board = createBoardFromActions(
-            this.actions.slice(0, this.actionIndex + 1)
-        );
 
         if (!isValid) return "Word doesn't use letters from rack (1)";
 
         try {
-            const result = playMove(move, board);
+            const result = playMove(move, this._board());
             const owned = rack.letters.slice();
             const used = result.usedLetters.slice();
 
