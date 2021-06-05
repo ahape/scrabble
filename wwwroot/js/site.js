@@ -9,4 +9,4 @@
 });
 
 // Set RequireJS entry point.
-requirejs(["viewmodels/app"]);
+requirejs(["init"]);

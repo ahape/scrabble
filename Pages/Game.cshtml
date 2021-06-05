@@ -5,19 +5,15 @@
 }
 <h1>@ViewData["Title"]</h1>
 
-<div class="board">
-@for (int i = 0; i < 15; i++)
-{
-    for (int j = 0; j < 15; j++)
-    {
-        <div class="square">L</div>
-    }
-}
+<div class="board" data-bind="foreach: { data: board.board, as: 'row' }">
+    <!-- ko foreach: row -->
+        <div class="square"></div>
+    <!-- /ko -->
 </div>
 
-<div class="rack">
-@for (int i = 0; i < 7; i++)
-{
-    <div class="letter">R</div>
-}
+<div class="rack" data-bind="foreach: racks[0].rack">
+    <div class="letter" 
+        draggable="true" 
+        ondragstart="event.dataTransfer.setData('text/plain',null)"
+        data-bind="text: $data"></div>
 </div>

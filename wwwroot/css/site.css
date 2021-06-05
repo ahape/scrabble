@@ -75,14 +75,15 @@ body {
 -------------------------------------------------- */
 .square,
 .letter {
+    box-sizing: border-box;
     width: 35px;
     height: 35px;
     border: 1px solid pink;
-    line-height: 33px;
     text-align: center;
 }
 .letter {
     background-color: beige;
+    line-height: 33px;
 }
 
 .board {
@@ -95,4 +96,7 @@ body {
     display: flex;
     margin-top: 20px;
     justify-content: center;
+}
+.purple {
+    background-color: purple;
 }
