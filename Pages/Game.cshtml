@@ -7,7 +7,7 @@
 
 <div class="board" data-bind="foreach: { data: board.board, as: 'row' }">
     <!-- ko foreach: row -->
-        <div class="square"></div>
+        <div class="square" data-bind="text: blankLetter || letter"></div>
     <!-- /ko -->
 </div>
 
@@ -17,3 +17,11 @@
         ondragstart="event.dataTransfer.setData('text/plain',null)"
         data-bind="text: $data"></div>
 </div>
+
+<div class"buttons" data-bind="with: buttons">
+    <button data-bind="click: onPlayClick">Play</button>
+</div>
+
+<p>debug</p>
+<button onclick="ko.applyBindings(_app)">APPLY BINDINGS</button>
+<button onclick="_app._game.draw()">DRAW</button>

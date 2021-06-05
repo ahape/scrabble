@@ -1,12 +1,15 @@
-define(["require", "exports", "../scrabble/game", "../scrabble/logic/createnewboard", "../scrabble/logic/letter"], function (require, exports, game_1, createnewboard_1, letter_1) {
+define(["require", "exports", "../scrabble/game", "../scrabble/logic/createnewboard", "../scrabble/logic/createcommandfrommove", "../scrabble/logic/parsesquarecoordinates", "../scrabble/logic/letter"], function (require, exports, game_1, createnewboard_1, createcommandfrommove_1, parsesquarecoordinates_1, letter_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.App = void 0;
     var Board = /** @class */ (function () {
         function Board(game) {
             var _this = this;
-            this.board = ko.observableArray(this._getBoard(game.status().board));
+            this.board = ko
+                .observable(this._getBoard(game.status().board))
+                .extend({ notify: "always" });
             game.currentStatus.subscribe(function (status) {
+                //console.log("updated");
                 return _this.board(_this._getBoard(status.board));
             });
         }
@@ -41,12 +44,39 @@ define(["require", "exports", "../scrabble/game", "../scrabble/logic/createnewbo
         }
         return Rack;
     }());
+    var Buttons = /** @class */ (function () {
+        function Buttons(game, board) {
+            var _this = this;
+            this.onPlayClick = function (event) {
+                var $placed = $(".board .letter");
+                var move = [];
+                var board = ko.toJS(_this._board.board()); // Copy since we're mutating
+                $placed.each(function () {
+                    var letter = ko.dataFor(this);
+                    var square = ko.toJS(ko.dataFor(this.parentNode)); // Copy since we're mutating
+                    var isBlank = /[a-z]/.test(letter);
+                    square.letter = isBlank ? letter_1.Letter.BLANK : letter;
+                    if (isBlank)
+                        square.blankLetter = letter;
+                    move.push(square);
+                    var _a = parsesquarecoordinates_1.parseSquareCoordinates(square), x = _a[0], y = _a[1];
+                    board[y][x] = square;
+                });
+                var playCommand = createcommandfrommove_1.createCommandFromMove(move, board);
+                _this._game.play("PLAY " + playCommand);
+            };
+            this._game = game;
+            this._board = board;
+        }
+        return Buttons;
+    }());
     var App = /** @class */ (function () {
         function App() {
             var game = new game_1.Game(1);
             this._game = game;
             this.board = new Board(game);
             this.racks = game.status().racks.map(function (_, i) { return new Rack(game, i); });
+            this.buttons = new Buttons(game, this.board);
         }
         return App;
     }());

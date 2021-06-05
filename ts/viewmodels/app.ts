@@ -1,14 +1,19 @@
 import { ISquare } from "../scrabble/logic/isquare";
 import { Game } from "../scrabble/game";
 import { createNewBoard } from "../scrabble/logic/createnewboard";
+import { createCommandFromMove } from "../scrabble/logic/createcommandfrommove";
+import { parseSquareCoordinates } from "../scrabble/logic/parsesquarecoordinates";
 import { Letter } from "../scrabble/logic/letter";
 
 class Board {
-    public board: KnockoutObservableArray<ISquare[]>;
+    public board: KnockoutObservable<ISquare[][]>;
 
     public constructor(game: Game) {
-        this.board = ko.observableArray(this._getBoard(game.status().board));
+        this.board = ko
+            .observable(this._getBoard(game.status().board))
+            .extend({ notify: "always" });
         game.currentStatus.subscribe((status) =>
+            //console.log("updated");
             this.board(this._getBoard(status.board))
         );
     }
@@ -46,10 +51,41 @@ class Rack {
     }
 }
 
+class Buttons {
+    private _game: Game;
+    private _board: Board;
+
+    public constructor(game: Game, board: Board) {
+        this._game = game;
+        this._board = board;
+    }
+
+    public onPlayClick = (event: JQueryEventObject) => {
+        const $placed = $(`.board .letter`);
+        const move: ISquare[] = [];
+        const board = ko.toJS(this._board.board()); // Copy since we're mutating
+        $placed.each(function (this: HTMLElement) {
+            const letter = ko.dataFor(this);
+            const square = ko.toJS(ko.dataFor(this.parentNode!)); // Copy since we're mutating
+            const isBlank = /[a-z]/.test(letter);
+            square.letter = isBlank ? Letter.BLANK : (letter as Letter);
+            if (isBlank) square.blankLetter = letter;
+            move.push(square);
+            const [x, y] = parseSquareCoordinates(square);
+            board[y][x] = square;
+        });
+
+        const playCommand = createCommandFromMove(move, board);
+
+        this._game.play("PLAY " + playCommand);
+    };
+}
+
 export class App {
     private _game: Game;
     public board: Board;
     public racks: Rack[];
+    public buttons: Buttons;
 
     public constructor() {
         const game = new Game(1);
@@ -57,6 +93,7 @@ export class App {
         this._game = game;
         this.board = new Board(game);
         this.racks = game.status().racks.map((_, i) => new Rack(game, i));
+        this.buttons = new Buttons(game, this.board);
     }
 }
 
