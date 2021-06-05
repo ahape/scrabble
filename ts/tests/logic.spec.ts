@@ -11,7 +11,7 @@ import { Letter } from "../scrabble/logic/letter";
 import { letterValueMap } from "../scrabble/logic/lettervaluemap";
 import { Multiplier } from "../scrabble/logic/multiplier";
 import { MultiplierType } from "../scrabble/logic/multipliertype";
-import { validateMove } from "../scrabble/logic/validatemove";
+import { createCommandFromMove } from "../scrabble/logic/createcommandfrommove";
 
 describe("Logic", () => {
     describe("#getPointsFromSquare", () => {
@@ -756,33 +756,135 @@ describe("Logic", () => {
             console.assert(rack.print() === "[]");
         });
     });
-    // TODO: This logic isn't really necessary, we should have another
-    // function whose job it is to gather the correct "word".
-    xdescribe("#validateMove", () => {
-        const createSquares = (ids: string[]): ISquare[] => {
-            return ids.map((id) => ({
-                id,
-                played: false,
-                letter: "X",
-                blankLetter: "",
-                multiplier: Multiplier.None,
-                multiplierType: MultiplierType.None,
-            }));
-        };
-        it("works for action list - 1", () => {
-            const teams = 2;
-            const actions: string[] = [
-                "NEW GAME",
-                "DRAW ABCDEFG",
-                "PLAY ABCD h8 v",
-                "DRAW HIJKLMN",
-                "PLAY HIJK h7 h",
-                "SKIP", // Skip Team 1
-                "DRAW OPQR", // Team 2
-                // TODO: Add SWAP
-            ];
-            const rack = createRackFromActions(actions, teams);
-            console.assert(rack.print() === "[LMNOPQR]");
+
+    describe("#createCommandFromMove", () => {
+        it("throws error if played letters on not in same row/col", () => {
+            const board = createNewBoard();
+            const move = [board[1][1], board[2][2]];
+
+            for (let i = 0; i < move.length; i++) move[i].letter = Letter.A;
+
+            let errorMessage = "";
+            try {
+                createCommandFromMove(move, board);
+            } catch (err) {
+                errorMessage = err.message;
+            }
+
+            console.assert(errorMessage !== "");
+        });
+
+        it("throws error if there are empty squares in between played letters - x", () => {
+            const board = createNewBoard();
+            const move = [board[1][1], board[1][3]];
+
+            for (let i = 0; i < move.length; i++) move[i].letter = Letter.A;
+
+            let errorMessage = "";
+            try {
+                createCommandFromMove(move, board);
+            } catch (err) {
+                errorMessage = err.message;
+            }
+
+            console.assert(errorMessage !== "");
+        });
+
+        it("throws error if there are empty squares in between played letters - y", () => {
+            const board = createNewBoard();
+            const move = [board[1][1], board[3][1]];
+
+            for (let i = 0; i < move.length; i++) move[i].letter = Letter.A;
+
+            let errorMessage = "";
+            try {
+                createCommandFromMove(move, board);
+            } catch (err) {
+                errorMessage = err.message;
+            }
+
+            console.assert(errorMessage !== "");
+        });
+
+        it("throws error if there are empty squares in between played letters and letters on board - y", () => {
+            const board = createNewBoard();
+            const played = board[2][1];
+            played.played = true;
+            played.letter = Letter.B;
+            const move = [board[1][1], board[4][1]];
+
+            for (let i = 0; i < move.length; i++) move[i].letter = Letter.A;
+
+            let errorMessage = "";
+            try {
+                createCommandFromMove(move, board);
+            } catch (err) {
+                errorMessage = err.message;
+            }
+
+            console.assert(errorMessage !== "");
+        });
+
+        it("returns the correct command - x", () => {
+            const board = createNewBoard();
+            const move = [board[1][1], board[1][2]];
+            const letters = [Letter.A, Letter.B];
+            for (let i = 0; i < move.length; i++) move[i].letter = letters[i];
+
+            const cmd = createCommandFromMove(move, board);
+
+            console.assert(cmd == "AB B2 H");
+        });
+
+        it("returns the correct command - y", () => {
+            const board = createNewBoard();
+            const move = [board[1][1], board[2][1]];
+            const letters = [Letter.A, Letter.B];
+            for (let i = 0; i < move.length; i++) move[i].letter = letters[i];
+
+            const cmd = createCommandFromMove(move, board);
+
+            console.assert(cmd == "AB B2 V");
+        });
+
+        it("returns the correct command (interlaced) - x", () => {
+            const board = createNewBoard();
+            const played1 = board[1][2];
+            played1.played = true;
+            played1.letter = Letter.B;
+            const played2 = board[1][4];
+            played2.played = true;
+            played2.letter = Letter.D;
+            const decoy = board[1][6];
+            decoy.played = true;
+            decoy.letter = Letter.B;
+            const move = [board[1][1], board[1][3]];
+            const letters = [Letter.A, Letter.C];
+            for (let i = 0; i < move.length; i++) move[i].letter = letters[i];
+
+            const cmd = createCommandFromMove(move, board);
+
+            console.assert(cmd == "ABCD B2 H");
+        });
+
+        it("returns the correct command (interlaced) - y", () => {
+            const board = createNewBoard();
+            const played1 = board[2][1];
+            played1.played = true;
+            played1.letter = Letter.B;
+            const played2 = board[4][1];
+            played2.played = true;
+            played2.letter = Letter.D;
+            const decoy = board[6][1];
+            decoy.played = true;
+            decoy.letter = Letter.B;
+            const move = [board[1][1], board[3][1]];
+            const letters = [Letter.A, Letter.C];
+            for (let i = 0; i < move.length; i++) move[i].letter = letters[i];
+
+            const cmd = createCommandFromMove(move, board);
+
+            console.assert(cmd == "ABCD B2 V");
         });
     });
 });
