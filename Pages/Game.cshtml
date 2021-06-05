@@ -11,17 +11,15 @@
     <!-- /ko -->
 </div>
 
-<div class="rack" data-bind="foreach: racks[0].rack">
+<div class="rack" data-bind="foreach: { data: rack.rack, as: 'letter' }">
     <div class="letter" 
         draggable="true" 
         ondragstart="event.dataTransfer.setData('text/plain',null)"
-        data-bind="text: $data"></div>
+        data-bind="text: letter"></div>
 </div>
-
+<br />
 <div class"buttons" data-bind="with: buttons">
     <button data-bind="click: onPlayClick">Play</button>
+    <button data-bind="click: onRecallClick">Recall</button>
+    <button data-bind="click: onDrawClick">Draw</button>
 </div>
-
-<p>debug</p>
-<button onclick="ko.applyBindings(_app)">APPLY BINDINGS</button>
-<button onclick="_app._game.draw()">DRAW</button>

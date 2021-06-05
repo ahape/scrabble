@@ -1,7 +1,27 @@
-define(["require", "exports", "../scrabble/game", "../scrabble/logic/createnewboard", "../scrabble/logic/createcommandfrommove", "../scrabble/logic/parsesquarecoordinates", "../scrabble/logic/letter"], function (require, exports, game_1, createnewboard_1, createcommandfrommove_1, parsesquarecoordinates_1, letter_1) {
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+define(["require", "exports", "knockout", "../scrabble/game", "../scrabble/logic/createnewboard", "../scrabble/logic/createcommandfrommove", "../scrabble/logic/parsesquarecoordinates", "../scrabble/logic/letter"], function (require, exports, ko, game_1, createnewboard_1, createcommandfrommove_1, parsesquarecoordinates_1, letter_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.App = void 0;
+    ko = __importStar(ko);
     var Board = /** @class */ (function () {
         function Board(game) {
             var _this = this;
@@ -37,6 +57,7 @@ define(["require", "exports", "../scrabble/game", "../scrabble/logic/createnewbo
     var Rack = /** @class */ (function () {
         function Rack(game, rackIndex) {
             var _this = this;
+            this.index = rackIndex;
             this.rack = ko.observableArray(game.status().racks[rackIndex]);
             game.currentStatus.subscribe(function (status) {
                 return _this.rack(status.racks[rackIndex]);
@@ -45,8 +66,17 @@ define(["require", "exports", "../scrabble/game", "../scrabble/logic/createnewbo
         return Rack;
     }());
     var Buttons = /** @class */ (function () {
-        function Buttons(game, board) {
+        function Buttons(game, board, rack) {
             var _this = this;
+            this.onDrawClick = function (event) {
+                _this._game.draw();
+            };
+            this.onRecallClick = function (event) {
+                var status = _this._game.currentStatus();
+                _this._game.currentStatus.notifySubscribers(status);
+                _this._rack.rack([]);
+                _this._rack.rack(status.racks[_this._rack.index]); // TODO Why tf has it come down to doing THIS?
+            };
             this.onPlayClick = function (event) {
                 var $placed = $(".board .letter");
                 var move = [];
@@ -66,21 +96,28 @@ define(["require", "exports", "../scrabble/game", "../scrabble/logic/createnewbo
                     var _a = parsesquarecoordinates_1.parseSquareCoordinates(square), x = _a[0], y = _a[1];
                     board[y][x] = square;
                 });
-                var playCommand = createcommandfrommove_1.createCommandFromMove(move, board);
-                _this._game.play("PLAY " + playCommand);
+                try {
+                    var playCommand = createcommandfrommove_1.createCommandFromMove(move, board);
+                    _this._game.play("PLAY " + playCommand);
+                }
+                catch (err) {
+                    alert(err.message);
+                }
             };
             this._game = game;
             this._board = board;
+            this._rack = rack;
         }
         return Buttons;
     }());
     var App = /** @class */ (function () {
-        function App() {
+        function App(teamNumber) {
             var game = new game_1.Game(1);
             this._game = game;
+            this.teamNumber = teamNumber;
             this.board = new Board(game);
-            this.racks = game.status().racks.map(function (_, i) { return new Rack(game, i); });
-            this.buttons = new Buttons(game, this.board);
+            this.rack = new Rack(game, teamNumber - 1);
+            this.buttons = new Buttons(game, this.board, this.rack);
         }
         return App;
     }());
@@ -124,6 +161,11 @@ define(["require", "exports", "../scrabble/game", "../scrabble/logic/createnewbo
             !sq.played) {
             dragged.parentNode.removeChild(dragged);
             $target.append(dragged);
+            /*
+            const letter = ko.dataFor(dragged);
+            const rack = ko.contextFor(dragged).$parent;
+            rack.rack.remove(letter);
+            */
         }
         $target.removeClass("purple");
     }, false);

@@ -90,9 +90,14 @@ export class Game {
         const command = parseAction(actionRaw)[1];
         const errorMessage = this._play(command);
         if (errorMessage) {
-            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            console.log("!!!! Error: " + errorMessage);
-            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            // Check for if we are in the browser v. node
+            if (typeof process !== "undefined") {
+                alert(errorMessage);
+            } else {
+                console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                console.log("!!!! Error: " + errorMessage);
+                console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
         } else this._handleAction(ActionType.Play, actionRaw);
     }
 

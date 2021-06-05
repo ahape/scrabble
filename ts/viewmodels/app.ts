@@ -1,3 +1,4 @@
+import * as ko from "knockout";
 import { ISquare } from "../scrabble/logic/isquare";
 import { Game } from "../scrabble/game";
 import { createNewBoard } from "../scrabble/logic/createnewboard";
@@ -41,10 +42,13 @@ class Board {
 }
 
 class Rack {
+    public index: number;
     public rack: KnockoutObservableArray<string>;
 
     public constructor(game: Game, rackIndex: number) {
+        this.index = rackIndex;
         this.rack = ko.observableArray(game.status().racks[rackIndex]);
+
         game.currentStatus.subscribe((status) =>
             this.rack(status.racks[rackIndex])
         );
@@ -54,11 +58,25 @@ class Rack {
 class Buttons {
     private _game: Game;
     private _board: Board;
+    private _rack: Rack;
 
-    public constructor(game: Game, board: Board) {
+    public constructor(game: Game, board: Board, rack: Rack) {
         this._game = game;
         this._board = board;
+        this._rack = rack;
     }
+
+    public onDrawClick = (event: JQueryEventObject): void => {
+        this._game.draw();
+    };
+
+    public onRecallClick = (event: JQueryEventObject): void => {
+        const status = this._game.currentStatus();
+
+        this._game.currentStatus.notifySubscribers(status);
+        this._rack.rack([]);
+        this._rack.rack(status.racks[this._rack.index]); // TODO Why tf has it come down to doing THIS?
+    };
 
     public onPlayClick = (event: JQueryEventObject): void => {
         const $placed = $(`.board .letter`);
@@ -81,25 +99,32 @@ class Buttons {
             board[y][x] = square;
         });
 
-        const playCommand = createCommandFromMove(move, board);
+        try {
+            const playCommand = createCommandFromMove(move, board);
 
-        this._game.play("PLAY " + playCommand);
+            this._game.play("PLAY " + playCommand);
+        } catch (err) {
+            alert(err.message);
+        }
     };
 }
 
 export class App {
     private _game: Game;
+    public teamNumber: number;
     public board: Board;
-    public racks: Rack[];
+    public rack: Rack;
     public buttons: Buttons;
 
-    public constructor() {
+    public constructor(teamNumber: number) {
         const game = new Game(1);
 
         this._game = game;
+
+        this.teamNumber = teamNumber;
         this.board = new Board(game);
-        this.racks = game.status().racks.map((_, i) => new Rack(game, i));
-        this.buttons = new Buttons(game, this.board);
+        this.rack = new Rack(game, teamNumber - 1);
+        this.buttons = new Buttons(game, this.board, this.rack);
     }
 }
 
@@ -169,6 +194,11 @@ document.addEventListener(
         ) {
             dragged.parentNode!.removeChild(dragged);
             $target.append(dragged);
+            /*
+            const letter = ko.dataFor(dragged);
+            const rack = ko.contextFor(dragged).$parent;
+            rack.rack.remove(letter);
+            */
         }
 
         $target.removeClass("purple");
