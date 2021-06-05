@@ -64,7 +64,7 @@ namespace scrabble
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapPost("/games", async context =>
+                endpoints.MapPost("/rest/games", async context =>
                 {
                     var formData = await context.Request.ReadFormAsync();
 
@@ -81,8 +81,6 @@ namespace scrabble
                     using var dbContext = new ApplicationDbContext(options);
 
                     var game = new GameState();
-                    game.Id = Guid.NewGuid().ToString();
-                    game.Teams = teams;
 
                     dbContext.Add(game);
                     await dbContext.SaveChangesAsync();
@@ -94,7 +92,7 @@ namespace scrabble
                     await context.Response.WriteAsync(responseData.ToString());
                 });
 
-                endpoints.MapGet("/games/{id}", async context =>
+                endpoints.MapGet("/rest/games/{id}", async context =>
                 {
                     var gameId = (string)context.Request.RouteValues["id"];
                     var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -128,7 +126,7 @@ namespace scrabble
                     await context.Response.WriteAsync(responseData.ToString());
                 });
 
-                endpoints.MapPost("/games/{id}", async context =>
+                endpoints.MapPost("/rest/games/{id}", async context =>
                 {
                     var gameId = (string)context.Request.RouteValues["id"];
                     var formData = await context.Request.ReadFormAsync();

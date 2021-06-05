@@ -12,6 +12,17 @@ namespace scrabble.Data
         public string Actions { get; set; }
         public int ActionIndex { get; set; }
         public int Teams { get; set; }
+
+        public GameState() 
+        { 
+            Id = Guid.NewGuid().ToString();
+        }
+
+        public GameState(int teams) : base()
+        {
+            Teams = teams;
+            Actions = string.Join(",", new[] { "NEW GAME" });
+        }
     }
 
     public class ApplicationDbContext : DbContext

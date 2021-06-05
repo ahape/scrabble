@@ -1,8 +1,15 @@
 @page
 @model GamesModel
 @{
-    ViewData["Title"] = "Scrabble Game";
+    ViewData["Title"] = "Games";
 }
 <h1>@ViewData["Title"]</h1>
 
-<p>This is where your game will be played</p>
+<form method="POST">
+<fieldset>
+    <label for="players">How many teams would you like there to be?</label>
+    <br />
+    <input type="number" name="teams" min="1" max="10" value="2" />
+    <input type="submit" value="Create New Game" />
+</fieldset>
+</form>
