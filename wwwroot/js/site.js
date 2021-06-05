@@ -1,11 +1,12 @@
 ﻿requirejs.config({
     baseUrl: "js/",
+    paths: {
+        jquery: "../lib/jquery/dist/jquery",
+        "jquery-ui": "../lib/jquery-ui",
+        underscore: "../lib/underscore",
+        knockout: "../lib/knockout",
+    },
 });
 
 // Set RequireJS entry point.
-/*
-requirejs(["viewmodels/app"], function (app) {
-    // Kick off app.
-    ko.applyBindings(new app.App);
-});
-*/
+requirejs(["viewmodels/app"]);

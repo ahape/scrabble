@@ -1,0 +1,23 @@
+@page
+@model GameModel
+@{
+    ViewData["Title"] = "Scrabble Game";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="board">
+@for (int i = 0; i < 15; i++)
+{
+    for (int j = 0; j < 15; j++)
+    {
+        <div class="square">L</div>
+    }
+}
+</div>
+
+<div class="rack">
+@for (int i = 0; i < 7; i++)
+{
+    <div class="letter">R</div>
+}
+</div>

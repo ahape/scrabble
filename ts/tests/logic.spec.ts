@@ -11,6 +11,7 @@ import { Letter } from "../scrabble/logic/letter";
 import { letterValueMap } from "../scrabble/logic/lettervaluemap";
 import { Multiplier } from "../scrabble/logic/multiplier";
 import { MultiplierType } from "../scrabble/logic/multipliertype";
+import { validateMove } from "../scrabble/logic/validatemove";
 
 describe("Logic", () => {
     describe("#getPointsFromSquare", () => {
@@ -753,6 +754,35 @@ describe("Logic", () => {
             ];
             const rack = createRackFromActions(actions, teams);
             console.assert(rack.print() === "[]");
+        });
+    });
+    // TODO: This logic isn't really necessary, we should have another
+    // function whose job it is to gather the correct "word".
+    xdescribe("#validateMove", () => {
+        const createSquares = (ids: string[]): ISquare[] => {
+            return ids.map((id) => ({
+                id,
+                played: false,
+                letter: "X",
+                blankLetter: "",
+                multiplier: Multiplier.None,
+                multiplierType: MultiplierType.None,
+            }));
+        };
+        it("works for action list - 1", () => {
+            const teams = 2;
+            const actions: string[] = [
+                "NEW GAME",
+                "DRAW ABCDEFG",
+                "PLAY ABCD h8 v",
+                "DRAW HIJKLMN",
+                "PLAY HIJK h7 h",
+                "SKIP", // Skip Team 1
+                "DRAW OPQR", // Team 2
+                // TODO: Add SWAP
+            ];
+            const rack = createRackFromActions(actions, teams);
+            console.assert(rack.print() === "[LMNOPQR]");
         });
     });
 });
