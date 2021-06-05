@@ -54,10 +54,14 @@ define(["require", "exports", "../scrabble/game", "../scrabble/logic/createnewbo
                 $placed.each(function () {
                     var letter = ko.dataFor(this);
                     var square = ko.toJS(ko.dataFor(this.parentNode)); // Copy since we're mutating
-                    var isBlank = /[a-z]/.test(letter);
+                    var isBlank = letter == "?";
                     square.letter = isBlank ? letter_1.Letter.BLANK : letter;
-                    if (isBlank)
-                        square.blankLetter = letter;
+                    if (isBlank) {
+                        letter = prompt("What letter is the blank?");
+                        if (!letter || typeof letter !== "string")
+                            return alert("Invalid letter");
+                        square.letter = letter.toLowerCase();
+                    }
                     move.push(square);
                     var _a = parsesquarecoordinates_1.parseSquareCoordinates(square), x = _a[0], y = _a[1];
                     board[y][x] = square;

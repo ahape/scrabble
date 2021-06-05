@@ -60,16 +60,22 @@ class Buttons {
         this._board = board;
     }
 
-    public onPlayClick = (event: JQueryEventObject) => {
+    public onPlayClick = (event: JQueryEventObject): void => {
         const $placed = $(`.board .letter`);
         const move: ISquare[] = [];
         const board = ko.toJS(this._board.board()); // Copy since we're mutating
         $placed.each(function (this: HTMLElement) {
-            const letter = ko.dataFor(this);
+            let letter = ko.dataFor(this);
             const square = ko.toJS(ko.dataFor(this.parentNode!)); // Copy since we're mutating
-            const isBlank = /[a-z]/.test(letter);
+            const isBlank = letter == "?";
             square.letter = isBlank ? Letter.BLANK : (letter as Letter);
-            if (isBlank) square.blankLetter = letter;
+            if (isBlank) {
+                letter = prompt("What letter is the blank?");
+
+                if (!letter || typeof letter !== "string")
+                    return alert("Invalid letter");
+                square.letter = letter.toLowerCase();
+            }
             move.push(square);
             const [x, y] = parseSquareCoordinates(square);
             board[y][x] = square;

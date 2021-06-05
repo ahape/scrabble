@@ -32,7 +32,11 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
         move.letters.forEach((letter) => {
             const sq = result.board[moveY][move.x];
 
-            if (sq.played && sq.letter !== letter) {
+            if (
+                sq.played &&
+                sq.letter !== letter &&
+                sq.blankLetter !== letter
+            ) {
                 throw new Error("Invalid move");
             }
 
@@ -120,7 +124,11 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
         move.letters.forEach((letter) => {
             const sq = result.board[move.y][moveX];
 
-            if (sq.played && sq.letter !== letter) {
+            if (
+                sq.played &&
+                sq.letter !== letter &&
+                sq.blankLetter !== letter
+            ) {
                 throw new Error("Invalid move");
             }
 
