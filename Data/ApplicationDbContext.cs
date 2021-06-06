@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace scrabble.Data
@@ -25,9 +26,18 @@ namespace scrabble.Data
         }
     }
 
-    public class ApplicationDbContext : DbContext
+    public class GamePlayer
+    {
+        public int Id { get; set; }
+        public string GameId { get; set; }
+        public string UserName { get; set; }
+        public int Team { get; set; }
+    }
+
+    public class ApplicationDbContext : IdentityDbContext
     {
         public DbSet<GameState> Games { get; set; }
+        public DbSet<GamePlayer> Players { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

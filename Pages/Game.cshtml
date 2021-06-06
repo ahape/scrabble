@@ -3,6 +3,20 @@
 @{
     ViewData["Title"] = "Scrabble Game";
 }
+@section Scripts {
+    <script>
+        requirejs.config({
+            baseUrl: "../js/",
+            paths: {
+                jquery: "../lib/jquery/dist/jquery",
+                "jquery-ui": "../lib/jquery-ui",
+                underscore: "../lib/underscore",
+                knockout: "../lib/knockout",
+            },
+        });
+        requirejs(["init"]);
+    </script>
+}
 <h1>@ViewData["Title"]</h1>
 
 <div class="board" data-bind="foreach: { data: board.board, as: 'row' }">

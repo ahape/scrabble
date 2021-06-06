@@ -22,11 +22,11 @@ namespace scrabble.Pages
 
         public void OnGet()
         {
+            Console.WriteLine(User.Identity.Name);
         }
 
         async public void OnPostAsync(int teams)
         {
-            Console.WriteLine("Makes it to here");
             using var httpClient = new HttpClient();
             var result = await httpClient.PostAsync(
                 $"{Request.Scheme}://{Request.Host}/rest/games",
@@ -36,6 +36,7 @@ namespace scrabble.Pages
                 }));
             var responseData = JObject.Parse(await result.Content.ReadAsStringAsync());
             var gameId = responseData["id"];
+            Console.WriteLine(responseData);
         }
     }
 }
