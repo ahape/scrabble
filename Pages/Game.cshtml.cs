@@ -28,18 +28,8 @@ namespace scrabble.Pages
             var entry = await dbContext.Players.FirstOrDefaultAsync(p => p.GameId == id && p.UserName == userName);
             if (entry == null)
             {
-                dbContext.Add(new GamePlayer()
-                {
-                    UserName = userName,
-                    GameId = id,
-                    Team = 1,
-                });
-                dbContext.SaveChanges();
+                Response.Redirect($"/game/{id}/choice");
             } 
-            else 
-            {
-                Console.WriteLine("Already participating");
-            }
         }
     }
 }

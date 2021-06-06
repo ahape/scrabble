@@ -1,0 +1,21 @@
+@page
+@model ChooseTeamModel
+@{
+    ViewData["Title"] = "Choose Team";
+}
+<h1>@ViewData["Title"]</h1>
+
+<form method="POST">
+<fieldset>
+    <label for="team-choice">What team would you like to be on?</label>
+    <br />
+    <select id="team-choice" name="team">
+    @for (var i = 1; i <= Model.Teams; i++)
+    {
+        <option value="@i">@i</option>
+    }
+    </select>
+    <input type="submit" value="Submit" />
+</fieldset>
+</form>
+

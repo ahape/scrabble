@@ -8,25 +8,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Microsoft.EntityFrameworkCore;
+using scrabble.Data;
 
 namespace scrabble.Pages
 {
     public class GamesModel : PageModel
     {
-        private readonly ILogger<GamesModel> _logger;
+        private readonly ILogger<GamesModel> logger;
+        private readonly ApplicationDbContext dbContext;
 
-        public GamesModel(ILogger<GamesModel> logger)
+        public GamesModel(ILogger<GamesModel> logger, ApplicationDbContext dbContext)
         {
-            _logger = logger;
+            this.logger = logger;
+            this.dbContext = dbContext;
         }
 
         public void OnGet()
         {
-            Console.WriteLine(User.Identity.Name);
         }
 
         async public void OnPostAsync(int teams)
         {
+            var game = new GameState(teams);
+
+            dbContext.Add(game);
+            await dbContext.SaveChangesAsync();
+            Response.Redirect("/game/" + game.Id);
+            /*
             using var httpClient = new HttpClient();
             var result = await httpClient.PostAsync(
                 $"{Request.Scheme}://{Request.Host}/rest/games",
@@ -36,7 +45,7 @@ namespace scrabble.Pages
                 }));
             var responseData = JObject.Parse(await result.Content.ReadAsStringAsync());
             var gameId = responseData["id"];
-            Console.WriteLine(responseData);
+            */
         }
     }
 }

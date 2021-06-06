@@ -30,4 +30,3 @@ export const letterValueMap: { [key in Letter]: number } = {
     [Letter.Y]: 4,
     [Letter.Z]: 10,
 };
-

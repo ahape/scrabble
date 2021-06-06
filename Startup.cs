@@ -40,7 +40,9 @@ namespace scrabble
             {
                 options.Conventions.AuthorizePage("/Games");
                 options.Conventions.AuthorizePage("/Game");
+                options.Conventions.AuthorizePage("/ChooseTeam");
                 options.Conventions.AddPageRoute("/Game", "/Game/{id}");
+                options.Conventions.AddPageRoute("/ChooseTeam", "/Game/{id}/choice");
             });
         }
 

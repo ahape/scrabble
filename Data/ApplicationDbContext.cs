@@ -19,8 +19,9 @@ namespace scrabble.Data
             Id = Guid.NewGuid().ToString();
         }
 
-        public GameState(int teams) : base()
+        public GameState(int teams)
         {
+            Id = Guid.NewGuid().ToString();
             Teams = teams;
             Actions = string.Join(",", new[] { "NEW GAME" });
         }
