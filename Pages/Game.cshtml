@@ -5,6 +5,9 @@
 }
 @section Scripts {
     <script>
+        const teamNumber = @Model.Team;
+        const gameId = "@Model.GameId";
+
         requirejs.config({
             baseUrl: "../js/",
             paths: {

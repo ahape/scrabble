@@ -1,8 +1,10 @@
 import * as ko from "knockout";
 import { App } from "./viewmodels/app";
 
+declare const teamNumber: number;
+
 $(() => {
-    const app = new App(1);
+    const app = new App(teamNumber);
 
     ko.applyBindings(app);
 

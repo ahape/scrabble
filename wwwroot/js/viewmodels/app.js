@@ -112,7 +112,7 @@ define(["require", "exports", "knockout", "../scrabble/game", "../scrabble/logic
     }());
     var App = /** @class */ (function () {
         function App(teamNumber) {
-            var game = new game_1.Game(1);
+            var game = new game_1.Game(teamNumber);
             this._game = game;
             this.teamNumber = teamNumber;
             this.board = new Board(game);

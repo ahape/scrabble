@@ -14,6 +14,11 @@ namespace scrabble.Pages
     {
         private readonly ILogger<GameModel> logger;
         private readonly ApplicationDbContext dbContext;
+        
+        public int Team { get; set; }
+
+        [BindProperty(SupportsGet=true)]
+        public string GameId { get; set; }
 
         public GameModel(ILogger<GameModel> logger, ApplicationDbContext dbContext)
         {
@@ -21,15 +26,24 @@ namespace scrabble.Pages
             this.dbContext = dbContext;
         }
 
-        async public void OnGetAsync(string id)
+        async public void OnGetAsync()
         {
+            if (string.IsNullOrEmpty(GameId))
+            {
+                Response.Redirect("/games");
+                return;
+            }
+
             var userName = User.Identity.Name;
             // TODO Need to also make sure GAME exists
-            var entry = await dbContext.Players.FirstOrDefaultAsync(p => p.GameId == id && p.UserName == userName);
+            var entry = await dbContext.Players.FirstOrDefaultAsync(p => p.GameId == GameId && p.UserName == userName);
             if (entry == null)
             {
-                Response.Redirect($"/game/{id}/choice");
+                Response.Redirect($"/game/{GameId}/choice");
+                return;
             } 
+
+            Team = entry.Team;
         }
     }
 }

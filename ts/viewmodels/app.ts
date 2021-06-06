@@ -117,7 +117,7 @@ export class App {
     public buttons: Buttons;
 
     public constructor(teamNumber: number) {
-        const game = new Game(1);
+        const game = new Game(teamNumber);
 
         this._game = game;
 

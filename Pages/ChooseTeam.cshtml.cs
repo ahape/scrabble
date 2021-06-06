@@ -17,9 +17,11 @@ namespace scrabble.Pages
     {
         private readonly ILogger<ChooseTeamModel> logger;
         private readonly ApplicationDbContext dbContext;
-        private string gameId;
 
         public int Teams { get; set; }
+
+        [BindProperty(SupportsGet=true)]
+        public string GameId { get; set; }
 
         public ChooseTeamModel(ILogger<ChooseTeamModel> logger, ApplicationDbContext dbContext)
         {
@@ -27,11 +29,11 @@ namespace scrabble.Pages
             this.dbContext = dbContext;
         }
 
-        async public void OnGetAsync(string id)
+        async public void OnGetAsync()
         {
-            this.gameId = id;
+            Console.WriteLine("GET: GameId=" + GameId);
 
-            var game = await dbContext.Games.FirstOrDefaultAsync(g => g.Id == id);
+            var game = await dbContext.Games.FirstOrDefaultAsync(g => g.Id == GameId);
             if (game == null)
                 throw new Exception("Game doens't exist");
 
@@ -40,17 +42,19 @@ namespace scrabble.Pages
 
         public void OnPost(int team)
         {
+            Console.WriteLine("POST: GameId=" + GameId);
+
             // TODO Need to make sure that someone can't nav to this
             // page and submit another participation entry
             dbContext.Add(new GamePlayer()
             {
                 UserName = User.Identity.Name,
-                GameId = gameId,
+                GameId = GameId,
                 Team = team,
             });
             dbContext.SaveChanges();
 
-            Response.Redirect("/game/" + gameId);
+            Response.Redirect("/game/" + GameId);
         }
     }
 }
