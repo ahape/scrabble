@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Newtonsoft;
+using scrabble.Hubs;
 
 namespace scrabble
 {
@@ -44,6 +45,7 @@ namespace scrabble
                 options.Conventions.AddPageRoute("/Game", "/Games/{GameId}");
                 options.Conventions.AddPageRoute("/ChooseTeam", "/Games/{GameId}/Choice");
             });
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -215,6 +217,7 @@ namespace scrabble
                 });
 
                 endpoints.MapRazorPages();
+                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }
