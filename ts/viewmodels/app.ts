@@ -1,3 +1,4 @@
+import $ from "jquery";
 import * as ko from "knockout";
 import { ISquare } from "../scrabble/logic/isquare";
 import { Game } from "../scrabble/game";
@@ -5,6 +6,14 @@ import { createNewBoard } from "../scrabble/logic/createnewboard";
 import { createCommandFromMove } from "../scrabble/logic/createcommandfrommove";
 import { parseSquareCoordinates } from "../scrabble/logic/parsesquarecoordinates";
 import { Letter } from "../scrabble/logic/letter";
+import { IGameState } from "../scrabble/igamestate";
+
+interface IUpdateResponse {
+    success: boolean;
+    errorMessage?: string;
+    data?: IGameState;
+    timestamp?: number;
+}
 
 class Board {
     public board: KnockoutObservable<ISquare[][]>;
@@ -60,14 +69,21 @@ class Buttons {
     private _board: Board;
     private _rack: Rack;
 
-    public constructor(game: Game, board: Board, rack: Rack) {
+    public canGo: KnockoutComputed<boolean>;
+    public clicked: KnockoutObservable<string> = ko.observable("");
+
+    public constructor(game: Game, board: Board, rack: Rack, teamNumber: number) {
         this._game = game;
         this._board = board;
         this._rack = rack;
+
+        this.canGo = ko.pureComputed(() => game.currentStatus().teamTurn === teamNumber);
     }
 
     public onDrawClick = (event: JQueryEventObject): void => {
         this._game.draw();
+
+        this.clicked("draw");
     };
 
     public onRecallClick = (event: JQueryEventObject): void => {
@@ -76,6 +92,8 @@ class Buttons {
         this._game.currentStatus.notifySubscribers(status);
         this._rack.rack([]);
         this._rack.rack(status.racks[this._rack.index]); // TODO Why tf has it come down to doing THIS?
+
+        this.clicked("recall");
     };
 
     public onPlayClick = (event: JQueryEventObject): void => {
@@ -105,26 +123,69 @@ class Buttons {
             this._game.play("PLAY " + playCommand);
         } catch (err) {
             alert(err.message);
+            return;
         }
+
+        this.clicked("play");
     };
 }
 
 export class App {
     private _game: Game;
+    private _timestamp: number;
     public teamNumber: number;
     public board: Board;
     public rack: Rack;
     public buttons: Buttons;
 
-    public constructor(teamNumber: number) {
-        const game = new Game(teamNumber);
+    /** 
+     * @param {teamNumber} - Team the current client is on
+     * @param {timestamp} - Essentially an ETag of the current game state
+     */
+    public constructor(gameJson: IGameState, teamNumber: number, timestamp: number) {
+        const game = new Game(gameJson);
 
         this._game = game;
+        this._timestamp = timestamp;
 
         this.teamNumber = teamNumber;
         this.board = new Board(game);
         this.rack = new Rack(game, teamNumber - 1);
-        this.buttons = new Buttons(game, this.board, this.rack);
+        this.buttons = new Buttons(game, this.board, this.rack, teamNumber);
+
+        this.buttons.clicked.subscribe(btn => {
+            if (btn === "draw" || btn === "play") {
+                this._updateGame(game.snapshot())
+                    .then(response => this._handleUpdateResponse(response));
+            }
+        });
+    }
+
+    private _handleUpdateResponse(response: IUpdateResponse): void {
+        if (response.success) {
+            if (!response.data || !response.timestamp) 
+                throw new Error("No data with successful request");
+
+            this._timestamp = response.timestamp;
+        } else {
+            alert(response.errorMessage || 
+                "There was an error updating the game. Please refresh for the latest state");
+        }
+    }
+
+    private async _updateGame(gameState: IGameState): Promise<IUpdateResponse> {
+        const body = $.param({ 
+            timestamp: this._timestamp,
+            ...gameState,
+        });
+
+        const response = await fetch("/rest/games/" + gameState.id, { 
+            method: "POST", 
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body,
+        });
+
+        return response.json();
     }
 }
 

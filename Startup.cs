@@ -41,8 +41,8 @@ namespace scrabble
                 options.Conventions.AuthorizePage("/Games");
                 options.Conventions.AuthorizePage("/Game");
                 options.Conventions.AuthorizePage("/ChooseTeam");
-                options.Conventions.AddPageRoute("/Game", "/Game/{GameId}");
-                options.Conventions.AddPageRoute("/ChooseTeam", "/Game/{GameId}/Choice");
+                options.Conventions.AddPageRoute("/Game", "/Games/{GameId}");
+                options.Conventions.AddPageRoute("/ChooseTeam", "/Games/{GameId}/Choice");
             });
         }
 
@@ -115,16 +115,13 @@ namespace scrabble
                             new JProperty("success", false),
                             new JProperty("errorMessage", "Game not found"));
 
+                        context.Response.StatusCode = 500;
                         await context.Response.WriteAsync(errorData.ToString());
 
                         return;
                     }
 
-                    var gameData = new JObject(
-                        new JProperty("actionIndex", game.ActionIndex),
-                        new JProperty("teams", game.Teams),
-                        new JProperty("id", game.Id),
-                        new JProperty("actions", game.Actions.Split(',')));
+                    var gameData = game.ToJson();
 
                     var responseData = new JObject(
                         new JProperty("success", true),
@@ -137,9 +134,10 @@ namespace scrabble
                 {
                     var gameId = (string)context.Request.RouteValues["id"];
                     var formData = await context.Request.ReadFormAsync();
-                    var actions = (string)formData["actions"] ?? "";
+                    var actions = (string)formData["actions[]"] ?? "";
                     var actionIndex = int.Parse((string)formData["actionIndex"]);
                     var teams = int.Parse((string)formData["teams"]);
+                    var timestamp = long.Parse((string)formData["timestamp"]);
 
                     if (string.IsNullOrWhiteSpace(actions))
                     {
@@ -147,24 +145,49 @@ namespace scrabble
                             new JProperty("success", false),
                             new JProperty("errorMessage", "'actions' list must contain at least one item"));
 
+                        context.Response.StatusCode = 500;
                         await context.Response.WriteAsync(errorData.ToString());
 
                         return;
                     }
-
-                    var game = new GameState()
-                    {
-                        Id = gameId,
-                        Actions = actions,
-                        ActionIndex = actionIndex,
-                        Teams = teams,
-                    };
 
                     var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                         .UseSqlite(Configuration.GetConnectionString("DefaultConnection"))
                         .Options;
 
                     using var dbContext = new ApplicationDbContext(options);
+
+                    var game = await dbContext.Games.FirstOrDefaultAsync(x => x.Id == gameId);
+
+                    if (game == null)
+                    {
+                        var errorData = new JObject(
+                            new JProperty("success", false),
+                            new JProperty("errorMessage", "Game doesn't exist"));
+
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync(errorData.ToString());
+
+                        return;
+                    }
+
+                    if (game.Timestamp != timestamp)
+                    {
+                        var errorData = new JObject(
+                            new JProperty("success", false),
+                            new JProperty("errorMessage", "You do not have the current version of this object"));
+
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync(errorData.ToString());
+
+                        return;
+                    }
+
+                    var newTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+                    game.Actions = actions;
+                    game.ActionIndex = actionIndex;
+                    game.Timestamp = newTimestamp;
 
                     try
                     {
@@ -177,12 +200,18 @@ namespace scrabble
                             new JProperty("success", false),
                             new JProperty("errorMessage", "Game not found"));
 
+                        context.Response.StatusCode = 500;
                         await context.Response.WriteAsync(errorData.ToString());
 
                         return;
                     }
 
-                    await context.Response.WriteAsync(@"{""success"":true}");
+                    var response = new JObject();
+                    response["success"] = true;
+                    response["data"] = game.ToJson();
+                    response["timestamp"] = newTimestamp;
+
+                    await context.Response.WriteAsync(response.ToString());
                 });
 
                 endpoints.MapRazorPages();

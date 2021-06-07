@@ -28,19 +28,27 @@ import { IGameStatus } from "./igamestatus";
 
 export class Game {
     public id: string = _.now().toString(36);
-    public teams: number;
+    public teams: number = 2;
     /** Raw action strings */
     public actions: string[] = [];
     public actionIndex: number = -1;
     public currentState: KnockoutObservable<IGameState>;
     public currentStatus: KnockoutObservable<IGameStatus>;
 
-    public constructor(teams: number) {
-        this.teams = teams;
+    public constructor(gameJson?: IGameState) {
+        if (gameJson) {
+            this.id = gameJson.id;
+            this.teams = gameJson.teams;
+            this.actions = gameJson.actions;
+            this.actionIndex = gameJson.actionIndex;
+        }
+
         this.currentState = ko.observable(this.snapshot());
         this.currentStatus = ko.observable(this.status());
 
-        this._handleAction(ActionType.NewGame);
+        if (!gameJson) {
+            this._handleAction(ActionType.NewGame);
+        }
     }
 
     public snapshot(): IGameState {
@@ -120,15 +128,14 @@ export class Game {
         console.log(`Current letters: ` + this._teamTurnRack().print());
     }
 
-    public static fromSnapshot(snapshot: IGameState): Game {
-        // Clone in case snapshot is used for other things.
-        snapshot = ko.toJS(snapshot);
-        const game = new Game(1);
-        game.id = snapshot.id;
-        game.teams = snapshot.teams;
-        game.actionIndex = snapshot.actionIndex;
-        game.actions = snapshot.actions;
-        return game;
+    public load(gameJson: IGameState): void {
+        this.id = gameJson.id;
+        this.teams = gameJson.teams;
+        this.actions = gameJson.actions;
+        this.actionIndex = gameJson.actionIndex;
+
+        this.currentState(this.snapshot());
+        this.currentStatus(this.status());
     }
 
     private _handleAction(actionType: ActionType, actionRaw?: string): void {

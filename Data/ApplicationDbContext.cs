@@ -4,6 +4,8 @@ using System.Text;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json.Linq;
 
 namespace scrabble.Data
 {
@@ -13,10 +15,11 @@ namespace scrabble.Data
         public string Actions { get; set; }
         public int ActionIndex { get; set; }
         public int Teams { get; set; }
+        //[Timestamp]
+        public long Timestamp { get; set; }
 
         public GameState() 
         { 
-            Id = Guid.NewGuid().ToString();
         }
 
         public GameState(int teams)
@@ -24,6 +27,18 @@ namespace scrabble.Data
             Id = Guid.NewGuid().ToString();
             Teams = teams;
             Actions = string.Join(",", new[] { "NEW GAME" });
+            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        }
+
+        public JObject ToJson()
+        {
+            var json = new JObject();
+            json["id"] = this.Id;
+            json["teams"] = this.Teams;
+            json["actionIndex"] = this.ActionIndex;
+            json["actions"] = JArray.FromObject(this.Actions.Split(','));
+            json["_timestamp"] = this.Timestamp;
+            return json;
         }
     }
 

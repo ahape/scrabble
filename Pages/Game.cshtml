@@ -6,7 +6,8 @@
 @section Scripts {
     <script>
         const teamNumber = @Model.Team;
-        const gameId = "@Model.GameId";
+        const timestamp = @Model.Timestamp;
+        const gameJson = @Html.Raw(Model.GameJson?.ToString() ?? "null");
 
         requirejs.config({
             baseUrl: "../js/",
@@ -17,6 +18,7 @@
                 knockout: "../lib/knockout",
             },
         });
+
         requirejs(["init"]);
     </script>
 }
@@ -36,7 +38,15 @@
 </div>
 <br />
 <div class"buttons" data-bind="with: buttons">
+    <!-- ko if: canGo -->
     <button data-bind="click: onPlayClick">Play</button>
     <button data-bind="click: onRecallClick">Recall</button>
     <button data-bind="click: onDrawClick">Draw</button>
+    <!-- /ko -->
+
+    <!-- ko ifnot: canGo -->
+    <span>[Play]</span>
+    <span>[Recall]</span>
+    <span>[Draw]</span>
+    <!-- /ko -->
 </div>

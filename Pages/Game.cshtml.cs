@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using scrabble.Data;
 
 namespace scrabble.Pages
@@ -16,6 +17,8 @@ namespace scrabble.Pages
         private readonly ApplicationDbContext dbContext;
         
         public int Team { get; set; }
+        public long Timestamp { get; set; }
+        public JObject GameJson { get; set; }
 
         [BindProperty(SupportsGet=true)]
         public string GameId { get; set; }
@@ -30,20 +33,32 @@ namespace scrabble.Pages
         {
             if (string.IsNullOrEmpty(GameId))
             {
+                logger.LogWarning("GameId did not populate", null);
                 Response.Redirect("/games");
                 return;
             }
 
             var userName = User.Identity.Name;
             // TODO Need to also make sure GAME exists
-            var entry = await dbContext.Players.FirstOrDefaultAsync(p => p.GameId == GameId && p.UserName == userName);
+            var entry = await dbContext.Players.FirstOrDefaultAsync(p => 
+                p.GameId == GameId && p.UserName == userName);
             if (entry == null)
             {
-                Response.Redirect($"/game/{GameId}/choice");
+                Response.Redirect($"/games/{GameId}/choice");
                 return;
             } 
 
+            var game = await dbContext.Games.FirstOrDefaultAsync(g => g.Id == GameId);
+            if (game == null)
+            {
+                logger.LogWarning($"Couldn't find game for ID of {GameId}", null);
+                Response.Redirect("/games");
+                return;
+            }
+
             Team = entry.Team;
+            Timestamp = game.Timestamp;
+            GameJson = game.ToJson();
         }
     }
 }

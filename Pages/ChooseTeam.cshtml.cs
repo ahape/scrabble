@@ -54,7 +54,7 @@ namespace scrabble.Pages
             });
             dbContext.SaveChanges();
 
-            Response.Redirect("/game/" + GameId);
+            Response.Redirect("/games/" + GameId);
         }
     }
 }

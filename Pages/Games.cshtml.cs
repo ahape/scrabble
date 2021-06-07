@@ -34,18 +34,7 @@ namespace scrabble.Pages
 
             dbContext.Add(game);
             await dbContext.SaveChangesAsync();
-            Response.Redirect("/game/" + game.Id);
-            /*
-            using var httpClient = new HttpClient();
-            var result = await httpClient.PostAsync(
-                $"{Request.Scheme}://{Request.Host}/rest/games",
-                new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string, string>("teams", teams.ToString()),
-                }));
-            var responseData = JObject.Parse(await result.Content.ReadAsStringAsync());
-            var gameId = responseData["id"];
-            */
+            Response.Redirect("/games/" + game.Id);
         }
     }
 }

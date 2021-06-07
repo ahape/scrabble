@@ -8,7 +8,7 @@ import { playMove } from "../scrabble/logic/playmove";
 import { Game } from "../scrabble/game";
 import { IGameState } from "../scrabble/igamestate";
 
-const game = new Game(2);
+const game = new Game();
 
 const rl = readline.createInterface({
     input: process.stdin,

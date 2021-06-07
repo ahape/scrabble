@@ -22,7 +22,7 @@ define(["require", "exports", "knockout", "./viewmodels/app"], function (require
     Object.defineProperty(exports, "__esModule", { value: true });
     ko = __importStar(ko);
     $(function () {
-        var app = new app_1.App(teamNumber);
+        var app = new app_1.App(gameJson, teamNumber, timestamp);
         ko.applyBindings(app);
         // For debugging
         window._app = app;
