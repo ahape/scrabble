@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Newtonsoft;
+using Microsoft.AspNetCore.SignalR;
 using scrabble.Hubs;
 
 namespace scrabble
@@ -49,7 +50,11 @@ namespace scrabble
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApplicationDbContext dbContext)
+        public void Configure(
+            IApplicationBuilder app, 
+            IWebHostEnvironment env, 
+            ApplicationDbContext dbContext,
+            IHubContext<ChatHub> hubContext)
         {
             if (env.IsDevelopment())
             {
@@ -214,6 +219,8 @@ namespace scrabble
                     response["timestamp"] = newTimestamp;
 
                     await context.Response.WriteAsync(response.ToString());
+
+                    await hubContext.Clients.All.SendAsync("ReceiveMessage", game);
                 });
 
                 endpoints.MapRazorPages();

@@ -1,3 +1,4 @@
+//import * as signalR from "@aspnet/signalr";
 import $ from "jquery";
 import * as ko from "knockout";
 import { ISquare } from "../scrabble/logic/isquare";
@@ -7,6 +8,28 @@ import { createCommandFromMove } from "../scrabble/logic/createcommandfrommove";
 import { parseSquareCoordinates } from "../scrabble/logic/parsesquarecoordinates";
 import { Letter } from "../scrabble/logic/letter";
 import { IGameState } from "../scrabble/igamestate";
+
+interface SignalR {
+    HubConnectionBuilder: SignalRConnectionBuilderConstructor;
+};
+
+interface SignalRConnectionBuilderConstructor {
+    new(): SignalRConnectionBuilder;
+}
+
+interface SignalRConnectionBuilder {
+    withUrl(endpoint: string): { 
+        build(): SignalRConnection; 
+    };
+}
+
+interface SignalRConnection {
+    on(event: string, cb: (...args: string[]) => void): void;
+    start(): Promise<unknown>;
+    invoke(event: string, ...args: string[]): Promise<unknown>;
+}
+
+declare const signalR: SignalR;
 
 interface IUpdateResponse {
     success: boolean;
@@ -131,6 +154,7 @@ class Buttons {
 }
 
 export class App {
+    private _socketConnection: SignalRConnection;
     private _game: Game;
     private _timestamp: number;
     public teamNumber: number;
@@ -145,6 +169,7 @@ export class App {
     public constructor(gameJson: IGameState, teamNumber: number, timestamp: number) {
         const game = new Game(gameJson);
 
+        this._socketConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
         this._game = game;
         this._timestamp = timestamp;
 
@@ -159,6 +184,19 @@ export class App {
                     .then(response => this._handleUpdateResponse(response));
             }
         });
+
+        // TODO Make receiving object be better
+        this._socketConnection.on("ReceiveMessage", (...args: any[]) => {
+            const state = args[0];
+            state.actions = state.actions.split(",");
+
+            this._timestamp = state.timestamp;
+            delete state.timestamp;
+
+            this._game.load(state);
+        });
+
+        this._socketConnection.start().catch(err => console.log(err));
     }
 
     private _handleUpdateResponse(response: IUpdateResponse): void {

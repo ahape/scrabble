@@ -73,6 +73,7 @@ define(["require", "exports", "jquery", "knockout", "../scrabble/game", "../scra
     exports.App = void 0;
     jquery_1 = __importDefault(jquery_1);
     ko = __importStar(ko);
+    ;
     var Board = /** @class */ (function () {
         function Board(game) {
             var _this = this;
@@ -175,6 +176,7 @@ define(["require", "exports", "jquery", "knockout", "../scrabble/game", "../scra
         function App(gameJson, teamNumber, timestamp) {
             var _this = this;
             var game = new game_1.Game(gameJson);
+            this._socketConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
             this._game = game;
             this._timestamp = timestamp;
             this.teamNumber = teamNumber;
@@ -187,6 +189,19 @@ define(["require", "exports", "jquery", "knockout", "../scrabble/game", "../scra
                         .then(function (response) { return _this._handleUpdateResponse(response); });
                 }
             });
+            // TODO Make receiving object be better
+            this._socketConnection.on("ReceiveMessage", function () {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                var state = args[0];
+                state.actions = state.actions.split(",");
+                _this._timestamp = state.timestamp;
+                delete state.timestamp;
+                _this._game.load(state);
+            });
+            this._socketConnection.start().catch(function (err) { return console.log(err); });
         }
         App.prototype._handleUpdateResponse = function (response) {
             if (response.success) {
