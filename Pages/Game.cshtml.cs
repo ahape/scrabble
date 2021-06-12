@@ -56,6 +56,8 @@ namespace scrabble.Pages
                 return;
             }
 
+            Console.WriteLine($"{User.Identity.Name} loaded game " + game.Id);
+
             Team = entry.Team;
             Timestamp = game.Timestamp;
             GameJson = game.ToJson();

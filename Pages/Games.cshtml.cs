@@ -34,6 +34,9 @@ namespace scrabble.Pages
 
             dbContext.Add(game);
             await dbContext.SaveChangesAsync();
+            
+            Console.WriteLine($"{User.Identity.Name} created game " + game.Id);
+
             Response.Redirect("/games/" + game.Id);
         }
     }

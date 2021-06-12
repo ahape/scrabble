@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using Newtonsoft;
 using Microsoft.AspNetCore.SignalR;
 using scrabble.Hubs;
+using Microsoft.Extensions.Logging;
 
 namespace scrabble
 {
@@ -54,7 +55,8 @@ namespace scrabble
             IApplicationBuilder app, 
             IWebHostEnvironment env, 
             ApplicationDbContext dbContext,
-            IHubContext<ChatHub> hubContext)
+            IHubContext<ChatHub> hubContext,
+            ILogger<Startup> logger)
         {
             if (env.IsDevelopment())
             {
@@ -217,6 +219,8 @@ namespace scrabble
                     response["success"] = true;
                     response["data"] = game.ToJson();
                     response["timestamp"] = newTimestamp;
+
+                    Console.WriteLine($"{context.User.Identity.Name} updated game " + game.Id);
 
                     await context.Response.WriteAsync(response.ToString());
 

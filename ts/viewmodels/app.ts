@@ -1,5 +1,6 @@
 //import * as signalR from "@aspnet/signalr";
 import $ from "jquery";
+import * as _ from "underscore";
 import * as ko from "knockout";
 import { ISquare } from "../scrabble/logic/isquare";
 import { Game } from "../scrabble/game";
@@ -11,15 +12,17 @@ import { IGameState } from "../scrabble/igamestate";
 
 interface SignalR {
     HubConnectionBuilder: SignalRConnectionBuilderConstructor;
-};
+}
 
 interface SignalRConnectionBuilderConstructor {
-    new(): SignalRConnectionBuilder;
+    new (): SignalRConnectionBuilder;
 }
 
 interface SignalRConnectionBuilder {
-    withUrl(endpoint: string): { 
-        build(): SignalRConnection; 
+    withUrl(
+        endpoint: string
+    ): {
+        build(): SignalRConnection;
     };
 }
 
@@ -95,12 +98,19 @@ class Buttons {
     public canGo: KnockoutComputed<boolean>;
     public clicked: KnockoutObservable<string> = ko.observable("");
 
-    public constructor(game: Game, board: Board, rack: Rack, teamNumber: number) {
+    public constructor(
+        game: Game,
+        board: Board,
+        rack: Rack,
+        teamNumber: number
+    ) {
         this._game = game;
         this._board = board;
         this._rack = rack;
 
-        this.canGo = ko.pureComputed(() => game.currentStatus().teamTurn === teamNumber);
+        this.canGo = ko.pureComputed(
+            () => game.currentStatus().teamTurn === teamNumber
+        );
     }
 
     public onDrawClick = (event: JQueryEventObject): void => {
@@ -162,14 +172,20 @@ export class App {
     public rack: Rack;
     public buttons: Buttons;
 
-    /** 
+    /**
      * @param {teamNumber} - Team the current client is on
      * @param {timestamp} - Essentially an ETag of the current game state
      */
-    public constructor(gameJson: IGameState, teamNumber: number, timestamp: number) {
+    public constructor(
+        gameJson: IGameState,
+        teamNumber: number,
+        timestamp: number
+    ) {
         const game = new Game(gameJson);
 
-        this._socketConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+        this._socketConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
         this._game = game;
         this._timestamp = timestamp;
 
@@ -178,47 +194,59 @@ export class App {
         this.rack = new Rack(game, teamNumber - 1);
         this.buttons = new Buttons(game, this.board, this.rack, teamNumber);
 
-        this.buttons.clicked.subscribe(btn => {
+        this.buttons.clicked.subscribe((btn) => {
             if (btn === "draw" || btn === "play") {
-                this._updateGame(game.snapshot())
-                    .then(response => this._handleUpdateResponse(response));
+                this._updateGame(game.snapshot()).then((response) =>
+                    this._handleUpdateResponse(response)
+                );
             }
         });
+
+        // TODO Debug only
+        this._game.currentState.subscribe((s) =>
+            console.log("Game state updated", s)
+        );
 
         // TODO Make receiving object be better
         this._socketConnection.on("ReceiveMessage", (...args: any[]) => {
             const state = args[0];
+
+            console.log("Received state from SignalR ", state);
+
             state.actions = state.actions.split(",");
 
             this._timestamp = state.timestamp;
             delete state.timestamp;
 
-            this._game.load(state);
+            if (!_.isEqual(this._game.currentState(), state))
+                this._game.load(state);
         });
 
-        this._socketConnection.start().catch(err => console.log(err));
+        this._socketConnection.start().catch((err) => console.log(err));
     }
 
     private _handleUpdateResponse(response: IUpdateResponse): void {
         if (response.success) {
-            if (!response.data || !response.timestamp) 
+            if (!response.data || !response.timestamp)
                 throw new Error("No data with successful request");
 
             this._timestamp = response.timestamp;
         } else {
-            alert(response.errorMessage || 
-                "There was an error updating the game. Please refresh for the latest state");
+            alert(
+                response.errorMessage ||
+                    "There was an error updating the game. Please refresh for the latest state"
+            );
         }
     }
 
     private async _updateGame(gameState: IGameState): Promise<IUpdateResponse> {
-        const body = $.param({ 
+        const body = $.param({
             timestamp: this._timestamp,
             ...gameState,
         });
 
-        const response = await fetch("/rest/games/" + gameState.id, { 
-            method: "POST", 
+        const response = await fetch("/rest/games/" + gameState.id, {
+            method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body,
         });

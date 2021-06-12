@@ -31,8 +31,6 @@ namespace scrabble.Pages
 
         async public void OnGetAsync()
         {
-            Console.WriteLine("GET: GameId=" + GameId);
-
             var game = await dbContext.Games.FirstOrDefaultAsync(g => g.Id == GameId);
             if (game == null)
                 throw new Exception("Game doens't exist");
@@ -42,7 +40,7 @@ namespace scrabble.Pages
 
         public void OnPost(int team)
         {
-            Console.WriteLine("POST: GameId=" + GameId);
+            Console.WriteLine($"{User.Identity.Name} chose team {team} for game {GameId}");
 
             // TODO Need to make sure that someone can't nav to this
             // page and submit another participation entry

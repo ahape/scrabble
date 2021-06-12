@@ -67,13 +67,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "jquery", "knockout", "../scrabble/game", "../scrabble/logic/createnewboard", "../scrabble/logic/createcommandfrommove", "../scrabble/logic/parsesquarecoordinates", "../scrabble/logic/letter"], function (require, exports, jquery_1, ko, game_1, createnewboard_1, createcommandfrommove_1, parsesquarecoordinates_1, letter_1) {
+define(["require", "exports", "jquery", "underscore", "knockout", "../scrabble/game", "../scrabble/logic/createnewboard", "../scrabble/logic/createcommandfrommove", "../scrabble/logic/parsesquarecoordinates", "../scrabble/logic/letter"], function (require, exports, jquery_1, _, ko, game_1, createnewboard_1, createcommandfrommove_1, parsesquarecoordinates_1, letter_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.App = void 0;
     jquery_1 = __importDefault(jquery_1);
+    _ = __importStar(_);
     ko = __importStar(ko);
-    ;
     var Board = /** @class */ (function () {
         function Board(game) {
             var _this = this;
@@ -176,7 +176,9 @@ define(["require", "exports", "jquery", "knockout", "../scrabble/game", "../scra
         function App(gameJson, teamNumber, timestamp) {
             var _this = this;
             var game = new game_1.Game(gameJson);
-            this._socketConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+            this._socketConnection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .build();
             this._game = game;
             this._timestamp = timestamp;
             this.teamNumber = teamNumber;
@@ -185,9 +187,14 @@ define(["require", "exports", "jquery", "knockout", "../scrabble/game", "../scra
             this.buttons = new Buttons(game, this.board, this.rack, teamNumber);
             this.buttons.clicked.subscribe(function (btn) {
                 if (btn === "draw" || btn === "play") {
-                    _this._updateGame(game.snapshot())
-                        .then(function (response) { return _this._handleUpdateResponse(response); });
+                    _this._updateGame(game.snapshot()).then(function (response) {
+                        return _this._handleUpdateResponse(response);
+                    });
                 }
+            });
+            // TODO Debug only
+            this._game.currentState.subscribe(function (s) {
+                return console.log("Game state updated", s);
             });
             // TODO Make receiving object be better
             this._socketConnection.on("ReceiveMessage", function () {
@@ -196,10 +203,12 @@ define(["require", "exports", "jquery", "knockout", "../scrabble/game", "../scra
                     args[_i] = arguments[_i];
                 }
                 var state = args[0];
+                console.log("Received state from SignalR ", state);
                 state.actions = state.actions.split(",");
                 _this._timestamp = state.timestamp;
                 delete state.timestamp;
-                _this._game.load(state);
+                if (!_.isEqual(_this._game.currentState(), state))
+                    _this._game.load(state);
             });
             this._socketConnection.start().catch(function (err) { return console.log(err); });
         }
