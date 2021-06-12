@@ -1,5 +1,6 @@
 import { Letter } from "./logic/letter";
 import { MAX_RACK_TILES } from "./logic/constants";
+import { letterValueMap } from "./logic/lettervaluemap";
 
 export class Rack {
     public letters: Letter[] = [];
@@ -26,6 +27,14 @@ export class Rack {
             const existingIndex = this.letters.indexOf(letter);
             if (existingIndex > -1) this.letters.splice(existingIndex, 1);
         }
+    }
+
+    public totalPoints(): number {
+        return this.letters.reduce((sum, c) => sum + letterValueMap[c], 0);
+    }
+
+    public isEmpty(): boolean {
+        return this.letters.length === 0;
     }
 
     public print(): string {

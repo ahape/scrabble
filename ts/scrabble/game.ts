@@ -100,13 +100,20 @@ export class Game {
         if (errorMessage) {
             // Check for if we are in the browser v. node
             if (typeof process !== "undefined") {
-                alert(errorMessage);
-            } else {
                 console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 console.log("!!!! Error: " + errorMessage);
                 console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            } else {
+                alert(errorMessage);
             }
         } else this._handleAction(ActionType.Play, actionRaw);
+
+        if (!this._canGameContinue()) {
+            this._handleAction(
+                ActionType.EndGame,
+                ActionType.EndGame + " " + this._bag().totalPoints()
+            );
+        }
     }
 
     public undo(): void {
@@ -145,6 +152,7 @@ export class Game {
             case ActionType.Skip:
             case ActionType.Swap:
             case ActionType.Play:
+            case ActionType.EndGame:
                 // In order to overwrite any previous states (after undo)
                 this.actions.length = this.actionIndex + 1;
                 this.actions.push(actionRaw || actionType);
@@ -158,8 +166,6 @@ export class Game {
                     this.actionIndex + 1,
                     this.actions.length - 1
                 );
-                break;
-            case ActionType.EndGame:
                 break;
         }
 
@@ -187,6 +193,12 @@ export class Game {
         return createRackFromActions(this._nonFutureActions(), this.teams);
     }
 
+    private _teamPreviousRack(): Rack {
+        return createRacksFromActions(this._nonFutureActions(), this.teams)[
+            getNextTurn(this.teams, this._teamTurn(), true) - 1
+        ];
+    }
+
     private _draw(): Letter[] {
         const rack = this._teamTurnRack();
         const drawn = this._bag().draw(rack.needs());
@@ -196,6 +208,7 @@ export class Game {
 
     /** @returns raw action containing drawn letters as well as exchanged letters */
     private _swap(actionRaw: string): string {
+        // TODO Are we handling errors here?
         const letters = parseAction(actionRaw)[1].split("").map(parseLetter);
         const rack = this._teamTurnRack();
         rack.remove(letters);
@@ -234,5 +247,31 @@ export class Game {
             throw err;
             //return err.message;
         }
+    }
+
+    private _canGameContinue(): boolean {
+        const previousTurnRackIndex =
+            getNextTurn(this.teams, this._teamTurn(), true) - 1;
+        const otherTeamsRacks = createRacksFromActions(
+            this._nonFutureActions(),
+            this.teams
+        );
+
+        otherTeamsRacks.splice(previousTurnRackIndex, 1);
+
+        const otherTeamsRackNeeds = otherTeamsRacks.reduce(
+            (sum, c) => sum + c.needs(),
+            0
+        );
+
+        if (
+            // IF the team who just went played all of their tiles
+            this._teamPreviousRack().isEmpty() &&
+            // AND the bag is empty
+            // OR the team who just went won't get a chance to draw again
+            (this._bag().isEmpty() || this._bag().count() < otherTeamsRackNeeds)
+        )
+            return false;
+        return true;
     }
 }

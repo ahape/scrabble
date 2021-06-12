@@ -5,6 +5,6 @@ export enum ActionType {
     Draw = "DRAW",
     Undo = "UNDO",
     Redo = "REDO",
-    NewGame = "NEW GAME",
-    EndGame = "GAME OVER",
+    NewGame = "NEW_GAME",
+    EndGame = "GAME_OVER",
 }

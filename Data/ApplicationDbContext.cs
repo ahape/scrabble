@@ -26,7 +26,7 @@ namespace scrabble.Data
         {
             Id = Guid.NewGuid().ToString();
             Teams = teams;
-            Actions = string.Join(",", new[] { "NEW GAME" });
+            Actions = string.Join(",", new[] { "NEW_GAME" });
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 

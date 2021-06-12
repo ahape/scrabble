@@ -1,5 +1,6 @@
 import * as _ from "underscore";
 import { Letter } from "./logic/letter";
+import { letterValueMap } from "./logic/lettervaluemap";
 
 export class Bag {
     public letters: Letter[];
@@ -60,6 +61,14 @@ export class Bag {
 
     public add(letters: Letter[]): void {
         this.letters.push(...letters);
+    }
+
+    public isEmpty(): boolean {
+        return this.letters.length === 0;
+    }
+
+    public totalPoints(): number {
+        return this.letters.reduce((sum, c) => sum + letterValueMap[c], 0);
     }
 
     public print(): string {

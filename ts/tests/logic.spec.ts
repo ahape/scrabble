@@ -732,7 +732,7 @@ describe("Logic", () => {
         it("works for action list - 1", () => {
             const teams = 2;
             const actions: string[] = [
-                "NEW GAME",
+                "NEW_GAME",
                 "DRAW ABCDEFG",
                 "PLAY ABCD h8 v",
                 "DRAW HIJKLMN",
@@ -748,7 +748,7 @@ describe("Logic", () => {
         it("works for action list - 2", () => {
             const teams = 3;
             const actions: string[] = [
-                "NEW GAME",
+                "NEW_GAME",
                 "DRAW IDVUOSE",
                 "play DEVIOUS h8 v",
             ];
