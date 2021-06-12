@@ -78,6 +78,7 @@ body {
     box-sizing: border-box;
     width: 35px;
     height: 35px;
+    line-height: 35px;
     border: 1px solid pink;
     text-align: center;
 }
@@ -99,4 +100,16 @@ body {
 }
 .purple {
     background-color: purple;
+}
+.word3 {
+    background-color: orange;
+}
+.word2 {
+    background-color: pink;
+}
+.letter2 {
+    background-color: aliceblue;
+}
+.letter3 {
+    background-color: lightsteelblue;
 }

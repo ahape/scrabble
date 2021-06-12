@@ -163,6 +163,31 @@ class Buttons {
     };
 }
 
+class Scores {
+    public scores: KnockoutComputed<string[]>;
+
+    public constructor(game: Game) {
+        this.scores = ko.pureComputed(() => {
+            var status = game.currentStatus();
+            return status.scores.map((s, i) => `Team ${i + 1}: ${s}`);
+        });
+    }
+}
+
+class Moves {
+    public moves: KnockoutComputed<string[]>;
+    public move: KnockoutComputed<string>;
+
+    public constructor(game: Game) {
+        this.moves = ko.pureComputed(() => game.currentStatus().moveLog);
+        this.move = ko.pureComputed(() => {
+            var state = game.snapshot();
+            var status = game.currentStatus();
+            return status.moveLog[state.actionIndex];
+        });
+    }
+}
+
 export class App {
     private _socketConnection: SignalRConnection;
     private _game: Game;
@@ -171,6 +196,8 @@ export class App {
     public board: Board;
     public rack: Rack;
     public buttons: Buttons;
+    public moves: Moves;
+    public scores: Scores;
 
     /**
      * @param {teamNumber} - Team the current client is on
@@ -193,6 +220,8 @@ export class App {
         this.board = new Board(game);
         this.rack = new Rack(game, teamNumber - 1);
         this.buttons = new Buttons(game, this.board, this.rack, teamNumber);
+        this.moves = new Moves(game);
+        this.scores = new Scores(game);
 
         this.buttons.clicked.subscribe((btn) => {
             if (btn === "draw" || btn === "play") {

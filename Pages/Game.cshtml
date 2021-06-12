@@ -23,11 +23,22 @@
         requirejs(["init"]);
     </script>
 }
-<h1>@ViewData["Title"]</h1>
+<p data-bind="foreach: scores.scores">
+    <span data-bind="text: $data"></span>&nbsp;&nbsp;
+</p>
+<p data-bind="with: moves">
+    <select class="form-control"
+        data-bind="options: moves, value: move">
+    </select>
+</p>
 
 <div class="board" data-bind="foreach: { data: board.board, as: 'row' }">
     <!-- ko foreach: row -->
-        <div class="square" data-bind="text: blankLetter || letter"></div>
+        <div class="square" 
+            data-bind="
+            text: blankLetter || letter,
+            css: multiplierType ? multiplierType + multiplier : '',
+            "></div>
     <!-- /ko -->
 </div>
 

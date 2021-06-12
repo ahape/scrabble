@@ -14,6 +14,7 @@ import { actionChangesTurn } from "./logic/actionchangesturn";
 import { getNextTurn } from "./logic/getnextturn";
 import { getTurnFromActions } from "./logic/getturnfromactions";
 import { getScoresFromActions } from "./logic/getscoresfromactions";
+import { getMoveLogFromActions } from "./logic/getmovelogfromactions";
 import { parseAction } from "./logic/parseaction";
 import { createBoardFromActions } from "./logic/createboardfromactions";
 import { createBagFromActions } from "./logic/createbagfromactions";
@@ -72,6 +73,10 @@ export class Game {
             ).map((r) => r.toJSON()),
             scores: getScoresFromActions(this._nonFutureActions(), this.teams),
             teamTurn: this._teamTurn(),
+            moveLog: getMoveLogFromActions(
+                this._nonFutureActions(),
+                this.teams
+            ),
         };
     }
 
