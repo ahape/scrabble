@@ -10,6 +10,8 @@ import { parseSquareCoordinates } from "../scrabble/logic/parsesquarecoordinates
 import { Letter } from "../scrabble/logic/letter";
 import { IGameState } from "../scrabble/igamestate";
 
+console.log("hey there howya dune");
+
 interface SignalR {
     HubConnectionBuilder: SignalRConnectionBuilderConstructor;
 }

@@ -3,4 +3,6 @@ obj/
 node_modules/
 package-lock.json
 yarn.lock
-wwwroot/js/scrabble/
+wwwroot/js/*
+# This is the only JS file that's not auto-gen'd. Track changes
+!wwwroot/js/site.js

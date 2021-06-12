@@ -74,6 +74,7 @@ define(["require", "exports", "jquery", "underscore", "knockout", "../scrabble/g
     jquery_1 = __importDefault(jquery_1);
     _ = __importStar(_);
     ko = __importStar(ko);
+    console.log("hey there howya dune");
     var Board = /** @class */ (function () {
         function Board(game) {
             var _this = this;
