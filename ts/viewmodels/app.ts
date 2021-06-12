@@ -208,7 +208,7 @@ export class App {
         );
 
         // TODO Make receiving object be better
-        this._socketConnection.on("ReceiveMessage", (...args: any[]) => {
+        this._socketConnection.on("GameUpdate", (...args: any[]) => {
             const state = args[0];
 
             console.log("Received state from SignalR ", state);
@@ -222,7 +222,16 @@ export class App {
                 this._game.load(state);
         });
 
-        this._socketConnection.start().catch((err) => console.log(err));
+        this._socketConnection.on("GroupUpdate", (...args: any[]) => {
+            console.log(...args);
+        });
+
+        this._socketConnection
+            .start()
+            .then(() =>
+                this._socketConnection.invoke("AddToGroup", this._game.id)
+            )
+            .catch((err) => console.log(err));
     }
 
     private _handleUpdateResponse(response: IUpdateResponse): void {

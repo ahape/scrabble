@@ -224,7 +224,7 @@ namespace scrabble
 
                     await context.Response.WriteAsync(response.ToString());
 
-                    await hubContext.Clients.All.SendAsync("ReceiveMessage", game);
+                    await hubContext.Clients.Group(game.Id).SendAsync("GameUpdate", game);
                 });
 
                 endpoints.MapRazorPages();
