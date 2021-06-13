@@ -8,6 +8,7 @@ import { createNewBoard } from "../scrabble/logic/createnewboard";
 import { createCommandFromMove } from "../scrabble/logic/createcommandfrommove";
 import { parseSquareCoordinates } from "../scrabble/logic/parsesquarecoordinates";
 import { Letter } from "../scrabble/logic/letter";
+import { ActionType } from "../scrabble/logic/actiontype";
 import { IGameState } from "../scrabble/igamestate";
 import { freebies } from "../scrabble/freebies";
 
@@ -146,6 +147,14 @@ class Buttons {
         this._game.skip();
 
         this.clicked("skip");
+    };
+
+    public onSwapClick = (event: JQueryEventObject): void => {
+        const letters = prompt("Which letters do you want exchange?");
+        if (letters) {
+            this._game.swap(ActionType.Swap + " " + letters.toUpperCase());
+            this.clicked("swap");
+        }
     };
 
     public onPlayClick = (event: JQueryEventObject): void => {
@@ -289,7 +298,12 @@ export class App {
 
         this.buttons.clicked.subscribe((btn) => {
             // Buttons that actually change the state of the game.
-            if (btn === "draw" || btn === "play" || btn === "skip") {
+            if (
+                btn === "draw" ||
+                btn === "play" ||
+                btn === "skip" ||
+                btn === "swap"
+            ) {
                 this._updateGame(game.snapshot()).then((response) =>
                     this._handleUpdateResponse(response)
                 );

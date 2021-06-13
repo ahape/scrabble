@@ -29,7 +29,9 @@ export function getMoveLogFromActions(
                 move += `Team ${teamTurn} drew ${commandPart.length} tiles`;
                 break;
             case ActionType.Swap:
-                move += `Team ${teamTurn} swapped ${commandPart.length} tiles`;
+                move += `Team ${teamTurn} swapped ${
+                    commandPart.split(" ")[0].length
+                } tiles`;
                 break;
             case ActionType.Play:
                 move += `Team ${teamTurn} played `;
