@@ -37,9 +37,11 @@ interface SignalRConnection {
 
 declare const signalR: SignalR;
 
-interface IUpdateResponse {
+interface IResponse {
     success: boolean;
     errorMessage?: string;
+}
+interface IUpdateResponse extends IResponse {
     data?: IGameState;
     timestamp?: number;
 }
@@ -264,12 +266,30 @@ class Freebies {
     }
 }
 
+class Options {
+    public constructor(private _gameId: string) {}
+
+    public onDeleteClick(): void {
+        if (confirm("Are you sure you want to delete this game?"))
+            this._handleDelete();
+    }
+
+    private async _handleDelete(): Promise<void> {
+        var response = await fetch(`/rest/games/${this._gameId}`, {
+            method: "DELETE",
+        });
+        if (((await response.json()) as IResponse).success)
+            location.assign("/games");
+    }
+}
+
 enum MainView {
     Board = "board",
     Moves = "moves",
     Bag = "bag",
     Teams = "teams",
     Freebies = "freebies",
+    Options = "options",
 }
 
 export class App {
@@ -285,6 +305,7 @@ export class App {
     public bag: Bag;
     public teams: Teams;
     public freebies: Freebies;
+    public options: Options;
     public teamTurn: KnockoutComputed<number>;
     public mainView: KnockoutObservable<MainView>;
     public mainViewOptions: string[];
@@ -316,6 +337,7 @@ export class App {
         this.bag = new Bag(game);
         this.teams = new Teams(game.teams, players);
         this.freebies = new Freebies(freebies);
+        this.options = new Options(game.id);
         this.teamTurn = ko.pureComputed(() => game.currentStatus().teamTurn);
         this.mainView = ko.observable(MainView.Board);
         this.mainViewOptions = Object.values(

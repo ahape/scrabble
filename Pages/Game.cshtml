@@ -98,6 +98,13 @@
         </p>
     </div>
     <!-- /ko -->
+
+    <!-- ko if: mainView() === "options" -->
+    <div class="options" data-bind="with: options">
+        <button class="btn btn-danger"
+            data-bind="click: onDeleteClick">Delete Game</button>
+    </div>
+    <!-- /ko -->
 </div>
 
 <div class="rack" data-bind="foreach: { data: rack.rack, as: 'letter' }">

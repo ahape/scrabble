@@ -108,6 +108,42 @@ namespace scrabble
                     await context.Response.WriteAsync(responseData.ToString());
                 });
 
+                endpoints.MapDelete("/rest/games/{id}", async context =>
+                {
+                    var gameId = (string)context.Request.RouteValues["id"];
+                    var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                        .UseSqlite(Configuration.GetConnectionString("DefaultConnection"))
+                        .Options;
+
+                    using var dbContext = new ApplicationDbContext(options);
+
+                    var game = await dbContext.Games.FirstOrDefaultAsync(x => x.Id == gameId);
+
+                    if (game == null)
+                    {
+                        var errorData = new JObject(
+                            new JProperty("success", false),
+                            new JProperty("errorMessage", "Game doesn't exist"));
+
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync(errorData.ToString());
+
+                        return;
+                    }
+
+                    var playersForGame = dbContext.Players.Where(x => x.GameId == gameId);
+
+                    dbContext.Remove(game);
+                    dbContext.RemoveRange(playersForGame);
+
+                    await dbContext.SaveChangesAsync();
+
+                    var responseData = new JObject(
+                        new JProperty("success", true));
+
+                    await context.Response.WriteAsync(responseData.ToString());
+                });
+
                 endpoints.MapGet("/rest/games/{id}", async context =>
                 {
                     var gameId = (string)context.Request.RouteValues["id"];
