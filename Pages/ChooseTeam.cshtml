@@ -3,13 +3,21 @@
 @{
     ViewData["Title"] = "Choose Team";
 }
+@section Scripts {
+    <script>
+        ko.applyBindings({
+            data: _.groupBy(@Html.Raw(Model.ActivePlayers.ToString()), "team"),
+            teamChoice: ko.observable(),
+        });
+    </script>
+}
 <h3>Choose Team for Game</h3>
 
 <form method="POST">
     <label for="team-choice">Which team would you like to be on?</label>
     <br />
     <div class="btn-group">
-        <select id="team-choice" name="team" class="form-control">
+        <select id="team-choice" name="team" class="form-control" data-bind="value: teamChoice">
         @for (var i = 1; i <= Model.Teams; i++)
         {
             <option value="@i">@i</option>
@@ -19,4 +27,9 @@
     <div class="btn-group">
         <input type="submit" value="Submit" class="btn btn-primary">
     </div>
+    <p style="margin-top: 5px">
+        Players already on that team: 
+        <span class="text-info" 
+            data-bind="text: _.pluck(data[teamChoice()], 'userName').join(', ')">0</span>
+    </p>
 </form>

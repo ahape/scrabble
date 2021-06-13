@@ -17,8 +17,18 @@ namespace scrabble.Pages
     {
         private readonly ILogger<ChooseTeamModel> logger;
         private readonly ApplicationDbContext dbContext;
+        private JArray activePlayers;
 
         public int Teams { get; set; }
+        public JArray ActivePlayers
+        {
+            get
+            {
+                if (activePlayers == null)
+                    return new JArray();
+                return activePlayers;
+            }
+        }
 
         [BindProperty(SupportsGet=true)]
         public string GameId { get; set; }
@@ -33,8 +43,17 @@ namespace scrabble.Pages
         {
             var game = await dbContext.Games.FirstOrDefaultAsync(g => g.Id == GameId);
             if (game == null)
-                throw new Exception("Game doens't exist");
+                throw new Exception("Game doesn't exist");
 
+            activePlayers = JArray.FromObject(dbContext.Players
+                .Where(x => x.GameId == GameId)
+                .Select(x => x.ToJson()));
+            // <test>
+            var test = new GamePlayer();
+            test.UserName = "don francisco";
+            test.Team = 1;
+            activePlayers.Add(test.ToJson());
+            // </test>
             Teams = game.Teams;
         }
 

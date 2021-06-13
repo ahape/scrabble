@@ -15,8 +15,18 @@ namespace scrabble.Pages
 {
     public class GamesModel : PageModel
     {
-        public GamePlayer[] ActiveGames { get; set; }
 
+        public GamePlayer[] ActiveGames 
+        { 
+            get
+            {
+                if (activeGames == null)
+                    return new GamePlayer[0];
+                return activeGames;
+            }
+        }
+
+        private GamePlayer[] activeGames;
         private readonly ILogger<GamesModel> logger;
         private readonly ApplicationDbContext dbContext;
 
@@ -26,11 +36,11 @@ namespace scrabble.Pages
             this.dbContext = dbContext;
         }
 
-        async public void OnGetAsync()
+        public void OnGet()
         {
             var userName = User.Identity.Name;
 
-            ActiveGames = dbContext.Players
+            activeGames = dbContext.Players
                 .Where(x => x.UserName == userName)
                 .OrderByDescending(x => x.Id)
                 .ToArray();

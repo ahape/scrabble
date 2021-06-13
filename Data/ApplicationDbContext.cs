@@ -48,6 +48,16 @@ namespace scrabble.Data
         public string GameId { get; set; }
         public string UserName { get; set; }
         public int Team { get; set; }
+
+        public JObject ToJson()
+        {
+            var json = new JObject();
+            json["id"] = this.Id;
+            json["team"] = this.Team;
+            json["gameId"] = this.GameId;
+            json["userName"] = this.UserName;
+            return json;
+        }
     }
 
     public class ApplicationDbContext : IdentityDbContext
