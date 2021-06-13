@@ -3,13 +3,15 @@
 @{
     ViewData["Title"] = "Games";
 }
-<h1>@ViewData["Title"]</h1>
+<h3>Create Game</h3>
 
 <form method="POST">
-<fieldset>
     <label for="players">How many teams would you like there to be?</label>
-    <br />
-    <input type="number" name="teams" min="1" max="10" value="2" />
-    <input type="submit" value="Create New Game" />
-</fieldset>
+    <br>
+    <div class="btn-group">
+        <input type="number" name="teams" min="1" max="10" value="2" class="form-control">
+    </div>
+    <div class="btn-group">
+        <input type="submit" value="Create" class="btn btn-primary">
+    </div>
 </form>

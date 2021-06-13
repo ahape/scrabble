@@ -3,19 +3,20 @@
 @{
     ViewData["Title"] = "Choose Team";
 }
-<h1>@ViewData["Title"]</h1>
+<h3>Choose Team for Game</h3>
 
 <form method="POST">
-<fieldset>
-    <label for="team-choice">What team would you like to be on?</label>
+    <label for="team-choice">Which team would you like to be on?</label>
     <br />
-    <select id="team-choice" name="team">
-    @for (var i = 1; i <= Model.Teams; i++)
-    {
-        <option value="@i">@i</option>
-    }
-    </select>
-    <input type="submit" value="Submit" />
-</fieldset>
+    <div class="btn-group">
+        <select id="team-choice" name="team" class="form-control">
+        @for (var i = 1; i <= Model.Teams; i++)
+        {
+            <option value="@i">@i</option>
+        }
+        </select>
+    </div>
+    <div class="btn-group">
+        <input type="submit" value="Submit" class="btn btn-primary">
+    </div>
 </form>
-
