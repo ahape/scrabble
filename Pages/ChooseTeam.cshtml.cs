@@ -48,12 +48,6 @@ namespace scrabble.Pages
             activePlayers = JArray.FromObject(dbContext.Players
                 .Where(x => x.GameId == GameId)
                 .Select(x => x.ToJson()));
-            // <test>
-            var test = new GamePlayer();
-            test.UserName = "don francisco";
-            test.Team = 1;
-            activePlayers.Add(test.ToJson());
-            // </test>
             Teams = game.Teams;
         }
 
