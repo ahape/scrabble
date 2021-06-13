@@ -102,17 +102,25 @@
     <button class="btn btn-light"
         data-bind="click: onPlayClick">Play</button>
     <button class="btn btn-light"
+        data-bind="click: onDrawClick">Draw</button>
+    <button class="btn btn-light"
+        data-bind="click: onSkipClick">Skip</button>
+    <button class="btn btn-light"
         data-bind="click: onRecallClick">Recall</button>
     <button class="btn btn-light"
-        data-bind="click: onDrawClick">Draw</button>
+        data-bind="click: onShuffleClick">Shuffle</button>
     <!-- /ko -->
 
     <!-- ko ifnot: canGo -->
     <button class="btn btn-light"
         disabled="disabled">Play</button>
     <button class="btn btn-light"
-        disabled="disabled">Recall</button>
-    <button class="btn btn-light"
         disabled="disabled">Draw</button>
+    <button class="btn btn-light"
+        disabled="disabled">Skip</button>
+    <button class="btn btn-light"
+        data-bind="click: onRecallClick">Recall</button>
+    <button class="btn btn-light"
+        data-bind="click: onShuffleClick">Shuffle</button>
     <!-- /ko -->
 </div>

@@ -89,6 +89,12 @@ class Rack {
             this.rack(status.racks[rackIndex])
         );
     }
+
+    public shuffle(): void {
+        let letters = this.rack();
+        letters = _.shuffle(letters);
+        this.rack(letters);
+    }
 }
 
 class Buttons {
@@ -128,6 +134,18 @@ class Buttons {
         this._rack.rack(status.racks[this._rack.index]); // TODO Why tf has it come down to doing THIS?
 
         this.clicked("recall");
+    };
+
+    public onShuffleClick = (event: JQueryEventObject): void => {
+        this._rack.shuffle();
+
+        this.clicked("shuffle");
+    };
+
+    public onSkipClick = (event: JQueryEventObject): void => {
+        this._game.skip();
+
+        this.clicked("skip");
     };
 
     public onPlayClick = (event: JQueryEventObject): void => {
@@ -270,7 +288,8 @@ export class App {
         );
 
         this.buttons.clicked.subscribe((btn) => {
-            if (btn === "draw" || btn === "play") {
+            // Buttons that actually change the state of the game.
+            if (btn === "draw" || btn === "play" || btn === "skip") {
                 this._updateGame(game.snapshot()).then((response) =>
                     this._handleUpdateResponse(response)
                 );
