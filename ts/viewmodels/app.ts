@@ -157,6 +157,18 @@ class Buttons {
         }
     };
 
+    public onUndoClick = (event: JQueryEventObject): void => {
+        this._game.undo();
+
+        this.clicked("undo");
+    };
+
+    public onRedoClick = (event: JQueryEventObject): void => {
+        this._game.redo();
+
+        this.clicked("redo");
+    };
+
     public onPlayClick = (event: JQueryEventObject): void => {
         const $placed = $(`.board .letter`);
         const move: ISquare[] = [];
@@ -298,12 +310,15 @@ export class App {
 
         this.buttons.clicked.subscribe((btn) => {
             // Buttons that actually change the state of the game.
-            if (
-                btn === "draw" ||
-                btn === "play" ||
-                btn === "skip" ||
-                btn === "swap"
-            ) {
+            const stateChangingButtons = [
+                "draw",
+                "play",
+                "skip",
+                "swap",
+                "undo",
+                "redo",
+            ];
+            if (stateChangingButtons.includes(btn)) {
                 this._updateGame(game.snapshot()).then((response) =>
                     this._handleUpdateResponse(response)
                 );
