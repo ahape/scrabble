@@ -20,6 +20,7 @@ namespace scrabble.Pages
         public long Timestamp { get; set; }
         public JObject GameJson { get; set; }
         public JArray Players { get; set; }
+        public string UserName { get; set; }
 
         [BindProperty(SupportsGet=true)]
         public string GameId { get; set; }
@@ -39,10 +40,10 @@ namespace scrabble.Pages
                 return;
             }
 
-            var userName = User.Identity.Name;
+            UserName = User.Identity.Name;
             // TODO Need to also make sure GAME exists
             var entry = await dbContext.Players.FirstOrDefaultAsync(p => 
-                p.GameId == GameId && p.UserName == userName);
+                p.GameId == GameId && p.UserName == UserName);
             if (entry == null)
             {
                 Response.Redirect($"/games/{GameId}/choice");

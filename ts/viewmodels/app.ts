@@ -267,17 +267,33 @@ class Freebies {
 }
 
 class Options {
-    public constructor(private _gameId: string) {}
+    public constructor(private _gameId: string, private _userName: string) {}
 
     public onDeleteClick(): void {
         if (confirm("Are you sure you want to delete this game?"))
             this._handleDelete();
     }
 
+    public onLeaveClick(): void {
+        if (confirm("Are you sure you want to leave this game?"))
+            this._handleLeave();
+    }
+
     private async _handleDelete(): Promise<void> {
         var response = await fetch(`/rest/games/${this._gameId}`, {
             method: "DELETE",
         });
+        if (((await response.json()) as IResponse).success)
+            location.assign("/games");
+    }
+
+    private async _handleLeave(): Promise<void> {
+        var response = await fetch(
+            `/rest/players/${this._gameId}?userName=${this._userName}`,
+            {
+                method: "DELETE",
+            }
+        );
         if (((await response.json()) as IResponse).success)
             location.assign("/games");
     }
@@ -318,7 +334,8 @@ export class App {
         gameJson: IGameState,
         players: IGamePlayer[],
         teamNumber: number,
-        timestamp: number
+        timestamp: number,
+        userName: string
     ) {
         const game = new Game(gameJson);
 
@@ -337,7 +354,7 @@ export class App {
         this.bag = new Bag(game);
         this.teams = new Teams(game.teams, players);
         this.freebies = new Freebies(freebies);
-        this.options = new Options(game.id);
+        this.options = new Options(game.id, userName);
         this.teamTurn = ko.pureComputed(() => game.currentStatus().teamTurn);
         this.mainView = ko.observable(MainView.Board);
         this.mainViewOptions = Object.values(

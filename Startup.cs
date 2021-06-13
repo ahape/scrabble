@@ -144,6 +144,51 @@ namespace scrabble
                     await context.Response.WriteAsync(responseData.ToString());
                 });
 
+                endpoints.MapDelete("/rest/players/{gameId}", async context =>
+                {
+                    var userName = (string)context.Request.Query["userName"];
+                    var gameId = (string)context.Request.RouteValues["gameId"];
+                    var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                        .UseSqlite(Configuration.GetConnectionString("DefaultConnection"))
+                        .Options;
+
+                    using var dbContext = new ApplicationDbContext(options);
+
+                    var @record = await dbContext.Players.FirstOrDefaultAsync(x =>
+                        x.GameId == gameId && x.UserName == userName);
+
+                    if (@record == null)
+                    {
+                        var errorData = new JObject(
+                            new JProperty("success", false),
+                            new JProperty("errorMessage", "Game player doesn't exist"));
+
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync(errorData.ToString());
+
+                        return;
+                    }
+
+                    dbContext.Remove(@record);
+
+                    var playersLeft = dbContext.Players.Where(x =>
+                        x.GameId == gameId && x.UserName != userName);
+
+                    if (!playersLeft.Any())
+                    {
+                        var game = await dbContext.Games.FirstOrDefaultAsync(x => x.Id == gameId);
+                        if (game != null)
+                            dbContext.Remove(game);
+                    }
+
+                    await dbContext.SaveChangesAsync();
+
+                    var responseData = new JObject(
+                        new JProperty("success", true));
+
+                    await context.Response.WriteAsync(responseData.ToString());
+                });
+
                 endpoints.MapGet("/rest/games/{id}", async context =>
                 {
                     var gameId = (string)context.Request.RouteValues["id"];
