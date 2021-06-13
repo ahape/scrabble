@@ -9,6 +9,7 @@ import { createCommandFromMove } from "../scrabble/logic/createcommandfrommove";
 import { parseSquareCoordinates } from "../scrabble/logic/parsesquarecoordinates";
 import { Letter } from "../scrabble/logic/letter";
 import { IGameState } from "../scrabble/igamestate";
+import { freebies } from "../scrabble/freebies";
 
 interface SignalR {
     HubConnectionBuilder: SignalRConnectionBuilderConstructor;
@@ -188,6 +189,39 @@ class Moves {
     }
 }
 
+class Bag {
+    public remaining: KnockoutComputed<Array<[string, number]>>;
+
+    public constructor(game: Game) {
+        this.remaining = ko.pureComputed(() => {
+            var bag = game.currentStatus().bag.sort();
+            // Returns key/value pairs as tuples [string, number]
+            return _.pairs(_.countBy(bag, _.identity));
+        });
+    }
+}
+
+class Freebies {
+    public twoLetterWords: string[];
+    public qWithoutU: string[];
+
+    public constructor(freebies: {
+        twoLetterWords: string[];
+        qWithoutU: string[];
+    }) {
+        this.twoLetterWords = freebies.twoLetterWords;
+        this.qWithoutU = freebies.qWithoutU;
+    }
+}
+
+enum MainView {
+    Board = "board",
+    Moves = "moves",
+    Bag = "bag",
+    Teams = "teams",
+    Freebies = "freebies",
+}
+
 export class App {
     private _socketConnection: SignalRConnection;
     private _game: Game;
@@ -198,6 +232,11 @@ export class App {
     public buttons: Buttons;
     public moves: Moves;
     public scores: Scores;
+    public bag: Bag;
+    public freebies: Freebies;
+    public teamTurn: KnockoutComputed<number>;
+    public mainView: KnockoutObservable<MainView>;
+    public mainViewOptions: string[];
 
     /**
      * @param {teamNumber} - Team the current client is on
@@ -222,6 +261,13 @@ export class App {
         this.buttons = new Buttons(game, this.board, this.rack, teamNumber);
         this.moves = new Moves(game);
         this.scores = new Scores(game);
+        this.bag = new Bag(game);
+        this.freebies = new Freebies(freebies);
+        this.teamTurn = ko.pureComputed(() => game.currentStatus().teamTurn);
+        this.mainView = ko.observable(MainView.Board);
+        this.mainViewOptions = Object.values(
+            MainView as Record<string, string>
+        );
 
         this.buttons.clicked.subscribe((btn) => {
             if (btn === "draw" || btn === "play") {
@@ -322,7 +368,7 @@ document.addEventListener(
         const $target = $(event.target!) as JQuery<HTMLElement>;
         // highlight potential drop target when the draggable element enters it
         if ($target.hasClass("square")) {
-            $target.addClass("purple");
+            $target.addClass("drop-target");
         }
     },
     false
@@ -334,7 +380,7 @@ document.addEventListener(
         const $target = $(event.target!) as JQuery<HTMLElement>;
         // reset background of potential drop target when the draggable element leaves it
         if ($target.hasClass("square")) {
-            $target.removeClass("purple");
+            $target.removeClass("drop-target");
         }
     },
     false
@@ -366,7 +412,7 @@ document.addEventListener(
             */
         }
 
-        $target.removeClass("purple");
+        $target.removeClass("drop-target");
     },
     false
 );

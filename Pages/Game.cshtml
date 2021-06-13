@@ -23,22 +23,70 @@
         requirejs(["init"]);
     </script>
 }
-<p data-bind="foreach: scores.scores">
-    <span data-bind="text: $data"></span>&nbsp;&nbsp;
-</p>
-<p data-bind="with: moves">
-    <select class="form-control"
-        data-bind="options: moves, value: move">
-    </select>
-</p>
+<div class="scores">
+    <div data-bind="foreach: scores.scores">
+        <span data-bind="
+            text: $data,
+            css: { 
+                'team-yours': ($index() + 1) == $parent.teamNumber,
+                'team-turn': ($index() + 1) == $parent.teamTurn()
+            }"></span>
+        &nbsp;
+    </div>
+</div>
+<div class="view-selection btn-group" 
+    data-bind="foreach: { data: mainViewOptions, as: 'option' }">
+    <label class="btn btn-outline-info"
+        data-bind="css: { 'active': $parent.mainView() === option }">
+        <input type="radio" 
+            name="view" 
+            data-bind="checked: $parent.mainView, checkedValue: option"
+        />
+        <!-- ko text: option.charAt(0).toUpperCase()+option.substr(1) --><!-- /ko -->
+    </label>
+</div>
+<br />
 
-<div class="board" data-bind="foreach: { data: board.board, as: 'row' }">
-    <!-- ko foreach: row -->
-        <div class="square" 
-            data-bind="
-            text: blankLetter || letter,
-            css: multiplierType ? multiplierType + multiplier : '',
-            "></div>
+<div class="main-view">
+    <!-- ko if: mainView() === "board" -->
+    <div class="board" data-bind="foreach: { data: board.board, as: 'row' }">
+        <!-- ko foreach: row -->
+            <div class="square" 
+                data-bind="
+                text: blankLetter || letter,
+                css: multiplierType ? multiplierType + multiplier : '',
+                "></div>
+        <!-- /ko -->
+    </div>
+    <!-- /ko -->
+
+    <!-- ko if: mainView() === "moves" -->
+    <ol class="moves" data-bind="foreach: moves.moves">
+        <li data-bind="text: $data"></li>
+    </ol>
+    <!-- /ko -->
+
+    <!-- ko if: mainView() === "bag" -->
+    <ol class="bag" data-bind="foreach: bag.remaining()">
+        <li class="bag-row">
+            <!-- ko foreach: _.times($data[1],function(){return $data[0]}) -->
+                <div class="letter" data-bind="text: $data"></div>
+            <!-- /ko -->
+        </li>
+    </ol>
+    <!-- /ko -->
+
+    <!-- ko if: mainView() === "freebies" -->
+    <div class="freebies" data-bind="with: freebies">
+        <h3>Two Letter Words</h3>
+        <p data-bind="foreach: twoLetterWords">
+            <code data-bind="text: $data"></code>
+        </p>
+        <h3>Q Without U</h3>
+        <p data-bind="foreach: qWithoutU">
+            <code data-bind="text: $data"></code>
+        </p>
+    </div>
     <!-- /ko -->
 </div>
 
@@ -51,14 +99,20 @@
 <br />
 <div class"buttons" data-bind="with: buttons">
     <!-- ko if: canGo -->
-    <button data-bind="click: onPlayClick">Play</button>
-    <button data-bind="click: onRecallClick">Recall</button>
-    <button data-bind="click: onDrawClick">Draw</button>
+    <button class="btn btn-light"
+        data-bind="click: onPlayClick">Play</button>
+    <button class="btn btn-light"
+        data-bind="click: onRecallClick">Recall</button>
+    <button class="btn btn-light"
+        data-bind="click: onDrawClick">Draw</button>
     <!-- /ko -->
 
     <!-- ko ifnot: canGo -->
-    <span>[Play]</span>
-    <span>[Recall]</span>
-    <span>[Draw]</span>
+    <button class="btn btn-light"
+        disabled="disabled">Play</button>
+    <button class="btn btn-light"
+        disabled="disabled">Recall</button>
+    <button class="btn btn-light"
+        disabled="disabled">Draw</button>
     <!-- /ko -->
 </div>

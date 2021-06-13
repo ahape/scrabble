@@ -79,27 +79,63 @@ body {
     width: 35px;
     height: 35px;
     line-height: 35px;
-    border: 1px solid pink;
     text-align: center;
+    font-family: monospace;
+    font-size: 1.45rem;
+}
+.square {
+    border: 1px solid beige;
 }
 .letter {
     background-color: beige;
     line-height: 33px;
+    border: 1px solid tan;
 }
-
+.square > .letter {
+    border: none;
+}
+.scores {
+    margin-bottom: 10px;
+}
 .board {
+    margin-top: 15px;
     display: grid;
     grid-template-areas: ". . . . . . . . . . . . . . .";
     justify-content: center;
 }
-
+.freebies,
+.moves,
+.bag {
+    margin-top: 15px;
+    height: 500px;
+    overflow: auto;
+    border: 1px solid beige;
+    box-sizing: border-box;
+}
+.freebies {
+    padding: 15px;
+}
+.freebies code {
+    color: black;
+}
+.moves {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+.bag {
+    padding-left: 0;
+}
+.bag-row {
+    display: flex;
+}
 .rack {
     display: flex;
     margin-top: 20px;
+    height: 35px;
     justify-content: center;
 }
-.purple {
-    background-color: purple;
+.drop-target {
+    border: 3px dashed aquamarine;
 }
 .word3 {
     background-color: orange;
@@ -112,4 +148,19 @@ body {
 }
 .letter3 {
     background-color: lightsteelblue;
+}
+.team-turn {
+    font-weight: bolder;
+}
+.team-yours:after {
+    content: " (you)";
+}
+.view-selection input {
+    position: absolute;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
+.main-view {
+    height: 530px;
 }
