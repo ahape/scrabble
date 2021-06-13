@@ -19,6 +19,7 @@ namespace scrabble.Pages
         public int Team { get; set; }
         public long Timestamp { get; set; }
         public JObject GameJson { get; set; }
+        public JArray Players { get; set; }
 
         [BindProperty(SupportsGet=true)]
         public string GameId { get; set; }
@@ -61,6 +62,9 @@ namespace scrabble.Pages
             Team = entry.Team;
             Timestamp = game.Timestamp;
             GameJson = game.ToJson();
+            Players = JArray.FromObject(dbContext.Players
+                .Where(x => x.GameId == GameId)
+                .Select(x => x.ToJson()));
         }
     }
 }

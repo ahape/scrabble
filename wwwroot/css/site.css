@@ -105,6 +105,7 @@ body {
 }
 .freebies,
 .moves,
+.teams,
 .bag {
     margin-top: 15px;
     height: 500px;
@@ -118,7 +119,8 @@ body {
 .freebies code {
     color: black;
 }
-.moves {
+.moves,
+.teams {
     padding-top: 15px;
     padding-bottom: 15px;
 }

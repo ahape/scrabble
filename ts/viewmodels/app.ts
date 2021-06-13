@@ -10,6 +10,7 @@ import { parseSquareCoordinates } from "../scrabble/logic/parsesquarecoordinates
 import { Letter } from "../scrabble/logic/letter";
 import { ActionType } from "../scrabble/logic/actiontype";
 import { IGameState } from "../scrabble/igamestate";
+import { IGamePlayer } from "../scrabble/igameplayer";
 import { freebies } from "../scrabble/freebies";
 
 interface SignalR {
@@ -240,6 +241,16 @@ class Bag {
     }
 }
 
+class Teams {
+    public teams: number[];
+    public playersByTeam: Record<string, IGamePlayer[]>;
+
+    public constructor(teams: number, players: IGamePlayer[]) {
+        this.teams = _.range(1, teams + 1);
+        this.playersByTeam = _.groupBy(players, "team");
+    }
+}
+
 class Freebies {
     public twoLetterWords: string[];
     public qWithoutU: string[];
@@ -272,6 +283,7 @@ export class App {
     public moves: Moves;
     public scores: Scores;
     public bag: Bag;
+    public teams: Teams;
     public freebies: Freebies;
     public teamTurn: KnockoutComputed<number>;
     public mainView: KnockoutObservable<MainView>;
@@ -283,6 +295,7 @@ export class App {
      */
     public constructor(
         gameJson: IGameState,
+        players: IGamePlayer[],
         teamNumber: number,
         timestamp: number
     ) {
@@ -301,6 +314,7 @@ export class App {
         this.moves = new Moves(game);
         this.scores = new Scores(game);
         this.bag = new Bag(game);
+        this.teams = new Teams(game.teams, players);
         this.freebies = new Freebies(freebies);
         this.teamTurn = ko.pureComputed(() => game.currentStatus().teamTurn);
         this.mainView = ko.observable(MainView.Board);
