@@ -15,6 +15,8 @@ namespace scrabble.Pages
 {
     public class GamesModel : PageModel
     {
+        public GamePlayer[] ActiveGames { get; set; }
+
         private readonly ILogger<GamesModel> logger;
         private readonly ApplicationDbContext dbContext;
 
@@ -24,8 +26,14 @@ namespace scrabble.Pages
             this.dbContext = dbContext;
         }
 
-        public void OnGet()
+        async public void OnGetAsync()
         {
+            var userName = User.Identity.Name;
+
+            ActiveGames = dbContext.Players
+                .Where(x => x.UserName == userName)
+                .OrderByDescending(x => x.Id)
+                .ToArray();
         }
 
         async public void OnPostAsync(int teams)
