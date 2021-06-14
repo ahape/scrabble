@@ -21,7 +21,11 @@ import { createBagFromActions } from "./logic/createbagfromactions";
 import { playCommandHasLettersFromRack } from "./logic/playcommandhaslettersfromrack";
 import { createRackFromActions } from "./logic/createrackfromactions";
 import { createRacksFromActions } from "./logic/createracksfromactions";
-import { BOARD_X_LENGTH, BOARD_Y_LENGTH } from "./logic/constants";
+import {
+    MAX_RACK_TILES,
+    BOARD_X_LENGTH,
+    BOARD_Y_LENGTH,
+} from "./logic/constants";
 import { Bag } from "./bag";
 import { Rack } from "./rack";
 import { IGameState } from "./igamestate";
@@ -77,6 +81,9 @@ export class Game {
                 this._nonFutureActions(),
                 this.teams
             ),
+            gameOver:
+                parseAction(this.actions[this.actionIndex])[0] ==
+                ActionType.EndGame,
         };
     }
 
@@ -213,13 +220,25 @@ export class Game {
 
     /** @returns raw action containing drawn letters as well as exchanged letters */
     private _swap(actionRaw: string): string {
-        // TODO Are we handling errors here?
         const letters = parseAction(actionRaw)[1].split("").map(parseLetter);
         const rack = this._teamTurnRack();
+        const uniqRackLetters = _.unique(rack.letters);
+        const uniqSwapLetters = _.unique(letters);
+        if (
+            letters.length > MAX_RACK_TILES ||
+            // Check if the player is attempting to swap letters they don't have.
+            _.intersection(uniqRackLetters, uniqSwapLetters).length !=
+                uniqSwapLetters.length
+        ) {
+            throw new Error("You're trying to swap letters you don't have");
+        }
+        const bag = this._bag();
+        // Prevent swapping for more than is in the bag.
+        if (letters.length > bag.count()) letters.length = bag.count();
         rack.remove(letters);
-        const newLetters = this._bag().swap(letters);
+        const newLetters = bag.swap(letters);
         rack.add(newLetters);
-        return actionRaw + " " + newLetters.join("");
+        return `${ActionType.Swap} ${letters.join("")} ${newLetters.join("")}`;
     }
 
     private _play(command: string): string {

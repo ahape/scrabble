@@ -26,15 +26,19 @@
     </script>
 }
 <div class="scores">
-    <div data-bind="foreach: scores.scores">
-        <span data-bind="
-            text: $data,
-            css: { 
-                'team-yours': ($index() + 1) == $parent.teamNumber,
-                'team-turn': ($index() + 1) == $parent.teamTurn()
-            }"></span>
-        &nbsp;
-    </div>
+    <!-- ko if: scores.isGameOver -->
+    <em>(GAME OVER)</em>
+    &nbsp;
+    <!-- /ko -->
+    <!-- ko foreach: scores.scores -->
+    <span data-bind="
+        text: $data,
+        css: { 
+            'team-yours': ($index() + 1) == $parent.teamNumber,
+            'team-turn': ($index() + 1) == $parent.teamTurn()
+        }"></span>
+    &nbsp;
+    <!-- /ko -->
 </div>
 <div class="view-selection btn-group" 
     data-bind="foreach: { data: mainViewOptions, as: 'option' }">
@@ -106,6 +110,10 @@
             data-bind="click: onDeleteClick">Delete Game</button>
         <button class="btn btn-warning"
             data-bind="click: onLeaveClick">Leave Game</button>
+        <button class="btn btn-outline-danger"
+            data-bind="click: onUndoClick">Undo</button>
+        <button class="btn btn-outline-danger"
+            data-bind="click: onRedoClick">Redo</button>
     </div>
     <!-- /ko -->
 </div>
@@ -121,8 +129,10 @@
     <!-- ko if: canGo -->
     <button class="btn btn-primary"
         data-bind="click: onPlayClick">Play</button>
-    <button class="btn btn-light"
-        data-bind="click: onDrawClick">Draw</button>
+    <button class="btn"
+        data-bind="
+        class: canDraw() ? 'btn-success' : 'btn-light',
+        click: onDrawClick">Draw</button>
     <button class="btn btn-light"
         data-bind="click: onSwapClick">Swap</button>
     <button class="btn btn-light"
@@ -130,7 +140,7 @@
     <!-- /ko -->
 
     <!-- ko ifnot: canGo -->
-    <button class="btn btn-primary"
+    <button class="btn btn-light"
         disabled="disabled">Play</button>
     <button class="btn btn-light"
         disabled="disabled">Draw</button>
@@ -144,8 +154,4 @@
         data-bind="click: onRecallClick">Recall</button>
     <button class="btn btn-light"
         data-bind="click: onShuffleClick">Shuffle</button>
-    <button class="btn btn-outline-danger"
-        data-bind="click: onUndoClick">Undo</button>
-    <button class="btn btn-outline-danger"
-        data-bind="click: onRedoClick">Redo</button>
 </div>

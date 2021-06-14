@@ -12,6 +12,7 @@ import { ActionType } from "../scrabble/logic/actiontype";
 import { IGameState } from "../scrabble/igamestate";
 import { IGamePlayer } from "../scrabble/igameplayer";
 import { freebies } from "../scrabble/freebies";
+import { MAX_RACK_TILES } from "../scrabble/logic/constants";
 
 interface SignalR {
     HubConnectionBuilder: SignalRConnectionBuilderConstructor;
@@ -89,9 +90,11 @@ class Rack {
         this.index = rackIndex;
         this.rack = ko.observableArray(game.status().racks[rackIndex]);
 
-        game.currentStatus.subscribe((status) =>
-            this.rack(status.racks[rackIndex])
-        );
+        game.currentStatus.subscribe((status) => {
+            // Because of the way we mutate the array via drag and drop
+            this.rack.removeAll();
+            this.rack(status.racks[rackIndex]);
+        });
     }
 
     public shuffle(): void {
@@ -108,6 +111,7 @@ class Buttons {
 
     public canGo: KnockoutComputed<boolean>;
     public clicked: KnockoutObservable<string> = ko.observable("");
+    public canDraw: KnockoutComputed<boolean>;
 
     public constructor(
         game: Game,
@@ -122,6 +126,12 @@ class Buttons {
         this.canGo = ko.pureComputed(
             () => game.currentStatus().teamTurn === teamNumber
         );
+
+        this.canDraw = ko.pureComputed(() => {
+            const status = game.currentStatus();
+            const rack = status.racks[teamNumber - 1];
+            return status.bag.length > 0 && rack.length < MAX_RACK_TILES;
+        });
     }
 
     public onDrawClick = (event: JQueryEventObject): void => {
@@ -131,11 +141,13 @@ class Buttons {
     };
 
     public onRecallClick = (event: JQueryEventObject): void => {
-        const status = this._game.currentStatus();
+        this._game.currentState(this._game.snapshot());
+        this._game.currentStatus(this._game.status());
 
-        this._game.currentStatus.notifySubscribers(status);
+        /*
         this._rack.rack([]);
         this._rack.rack(status.racks[this._rack.index]); // TODO Why tf has it come down to doing THIS?
+        */
 
         this.clicked("recall");
     };
@@ -153,27 +165,25 @@ class Buttons {
     };
 
     public onSwapClick = (event: JQueryEventObject): void => {
-        const letters = prompt("Which letters do you want exchange?");
+        const letters = prompt(
+            "Which letters do you want exchange? (Denote blank tiles as '?')"
+        );
         if (letters) {
-            this._game.swap(ActionType.Swap + " " + letters.toUpperCase());
-            this.clicked("swap");
+            try {
+                this._game.swap(ActionType.Swap + " " + letters.toUpperCase());
+                this.clicked("swap");
+            } catch (err) {
+                alert(err.message);
+            }
         }
-    };
-
-    public onUndoClick = (event: JQueryEventObject): void => {
-        this._game.undo();
-
-        this.clicked("undo");
-    };
-
-    public onRedoClick = (event: JQueryEventObject): void => {
-        this._game.redo();
-
-        this.clicked("redo");
     };
 
     public onPlayClick = (event: JQueryEventObject): void => {
         const $placed = $(`.board .letter`);
+        if ($placed.length === 0) {
+            alert("No tiles were placed on the board");
+            return;
+        }
         const move: ISquare[] = [];
         const board = ko.toJS(this._board.board()); // Copy since we're mutating
         $placed.each(function (this: HTMLElement) {
@@ -207,6 +217,7 @@ class Buttons {
 }
 
 class Scores {
+    public isGameOver: KnockoutComputed<boolean>;
     public scores: KnockoutComputed<string[]>;
 
     public constructor(game: Game) {
@@ -214,6 +225,8 @@ class Scores {
             var status = game.currentStatus();
             return status.scores.map((s, i) => `Team ${i + 1}: ${s}`);
         });
+
+        this.isGameOver = ko.pureComputed(() => game.currentStatus().gameOver);
     }
 }
 
@@ -267,20 +280,37 @@ class Freebies {
 }
 
 class Options {
-    public constructor(private _gameId: string, private _userName: string) {}
+    public clicked: KnockoutObservable<string> = ko.observable("");
+    public constructor(private _game: Game, private _userName: string) {}
 
     public onDeleteClick(): void {
         if (confirm("Are you sure you want to delete this game?"))
             this._handleDelete();
+
+        this.clicked("delete");
     }
 
     public onLeaveClick(): void {
         if (confirm("Are you sure you want to leave this game?"))
             this._handleLeave();
+
+        this.clicked("leave");
+    }
+
+    public onUndoClick(): void {
+        this._game.undo();
+
+        this.clicked("undo");
+    }
+
+    public onRedoClick(): void {
+        this._game.redo();
+
+        this.clicked("redo");
     }
 
     private async _handleDelete(): Promise<void> {
-        var response = await fetch(`/rest/games/${this._gameId}`, {
+        var response = await fetch(`/rest/games/${this._game.id}`, {
             method: "DELETE",
         });
         if (((await response.json()) as IResponse).success)
@@ -289,7 +319,7 @@ class Options {
 
     private async _handleLeave(): Promise<void> {
         var response = await fetch(
-            `/rest/players/${this._gameId}?userName=${this._userName}`,
+            `/rest/players/${this._game.id}?userName=${this._userName}`,
             {
                 method: "DELETE",
             }
@@ -354,32 +384,36 @@ export class App {
         this.bag = new Bag(game);
         this.teams = new Teams(game.teams, players);
         this.freebies = new Freebies(freebies);
-        this.options = new Options(game.id, userName);
+        this.options = new Options(game, userName);
         this.teamTurn = ko.pureComputed(() => game.currentStatus().teamTurn);
         this.mainView = ko.observable(MainView.Board);
         this.mainViewOptions = Object.values(
             MainView as Record<string, string>
         );
 
-        this.buttons.clicked.subscribe((btn) => {
-            // Buttons that actually change the state of the game.
-            const stateChangingButtons = [
-                "draw",
-                "play",
-                "skip",
-                "swap",
-                "undo",
-                "redo",
-            ];
+        // Buttons that actually change the state of the game.
+        const stateChangingButtons = [
+            "draw",
+            "play",
+            "skip",
+            "swap",
+            "undo",
+            "redo",
+        ];
+        const onButtonClick = (btn: string) => {
             if (stateChangingButtons.includes(btn)) {
                 this._updateGame(game.snapshot()).then((response) =>
                     this._handleUpdateResponse(response)
                 );
             }
-        });
+        };
+
+        this.options.clicked.subscribe(onButtonClick);
+        this.buttons.clicked.subscribe(onButtonClick);
 
         // TODO Debug only
         this._game.currentState.subscribe((s) =>
+            // NOTE: Currently "recall" click manipulates the state to force an update
             console.log("Game state updated", s)
         );
 
@@ -506,11 +540,6 @@ document.addEventListener(
         ) {
             dragged.parentNode!.removeChild(dragged);
             $target.append(dragged);
-            /*
-            const letter = ko.dataFor(dragged);
-            const rack = ko.contextFor(dragged).$parent;
-            rack.rack.remove(letter);
-            */
         }
 
         $target.removeClass("drop-target");

@@ -58,17 +58,19 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                 newlyPlayedSquares += 1;
 
                 let crossingPoints = 0;
-                let x = move.x - 1;
+                let x = move.x;
                 let crossSq: ISquare;
                 const word: ISquare[] = [];
                 const xLength = result.board[moveY].length;
 
+                // If there is board space to the left
                 if (x > 0) {
+                    x--;
+                    // Collect all horizontally intersecting letters on the
+                    // left side of our vertical word.
                     do {
                         crossSq = result.board[moveY][x];
 
-                        // Starting with the NEXT right cell, add self + rest of
-                        // cells until vacant one found
                         if (crossSq && crossSq.letter) {
                             word.unshift(crossSq);
                         }
@@ -80,22 +82,23 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                     word.push(sq);
                 }
 
-                x = move.x + 1;
+                x = move.x;
 
-                if (x < xLength) {
+                // If there is board space to the right.
+                if (x < xLength - 1) {
+                    x++;
+                    // Collect all horizontally intersecting letters on the
+                    // right side of our vertical word.
                     do {
                         crossSq = result.board[moveY][x];
 
-                        // starting right the NEXT left cell, add self + rest of
-                        // cells until vacant one found
                         if (crossSq && crossSq.letter) {
                             word.push(crossSq);
                         }
                     } while (++x < xLength && crossSq.letter);
                 }
 
-                // If a word is forming, and we haven't already added to
-                // it, do that now.
+                // Add our letter to the crossing word if it hasn't yet been.
                 if (word.length > 0 && word.indexOf(sq) === -1) {
                     word.unshift(sq);
                 }
@@ -109,7 +112,13 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                 if (word.length > 0) {
                     connectsToPlayedSquare = true;
                     result.words.push({
-                        word: word.map((_sq) => _sq.letter).join(""),
+                        word: word
+                            .map((_sq) =>
+                                _sq.blankLetter
+                                    ? _sq.blankLetter.toLowerCase()
+                                    : _sq.letter
+                            )
+                            .join(""),
                         points: crossingPoints,
                     });
                 }
@@ -148,17 +157,17 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                 newlyPlayedSquares += 1;
 
                 let crossingPoints = 0;
-                let y = move.y - 1;
+                let y = move.y;
                 let crossSq: ISquare;
                 const word: ISquare[] = [];
                 const yLength = result.board.length;
 
                 if (y > 0) {
+                    y--;
+
                     do {
                         crossSq = result.board[y][moveX];
 
-                        // starting with the NEXT right cell, add self + rest of
-                        // cells until vacant one found
                         if (crossSq && crossSq.letter) {
                             word.unshift(crossSq);
                         }
@@ -170,9 +179,11 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                     word.push(sq);
                 }
 
-                y = move.y + 1;
+                y = move.y;
 
-                if (y < yLength) {
+                if (y < yLength - 1) {
+                    y++;
+
                     do {
                         crossSq = result.board[y][moveX];
 
@@ -197,7 +208,13 @@ export function playMove(move: IMove, board: ISquare[][]): IPlayResult {
                 if (word.length > 0) {
                     connectsToPlayedSquare = true;
                     result.words.push({
-                        word: word.map((_sq) => _sq.letter).join(""),
+                        word: word
+                            .map((_sq) =>
+                                _sq.blankLetter
+                                    ? _sq.blankLetter.toLowerCase()
+                                    : _sq.letter
+                            )
+                            .join(""),
                         points: crossingPoints,
                     });
                 }

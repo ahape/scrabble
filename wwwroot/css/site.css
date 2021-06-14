@@ -90,6 +90,7 @@ body {
     background-color: beige;
     line-height: 33px;
     border: 1px solid tan;
+    cursor: pointer;
 }
 .square > .letter {
     border: none;

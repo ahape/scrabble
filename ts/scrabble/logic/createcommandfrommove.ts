@@ -35,10 +35,12 @@ export function createCommandFromMove(
                 if (!started) {
                     started = true;
                     startingCoord = x;
+                    word = "";
                 }
 
-                // TODO is the `blankLetter` lower case?
-                word += sq.blankLetter || sq.letter;
+                word += sq.blankLetter
+                    ? sq.blankLetter.toLowerCase()
+                    : sq.letter;
 
                 if (!passedFirst && sq.id === first.id) passedFirst = true;
                 if (!passedLast && sq.id === last.id) passedLast = true;
@@ -52,6 +54,11 @@ export function createCommandFromMove(
                 started = false;
             }
         }
+        // Should only trigger if word ends at edge of board.
+        if (passedFirst && passedLast)
+            return `${word} ${
+                coordinateChars.charAt(startingCoord) + (y + 1)
+            } H`;
     } else {
         const x = coordinateChars.indexOf(move[0].id.charAt(0));
         const sorted = _.sortBy(move, (sq) => +sq.id.substr(1));
@@ -64,10 +71,12 @@ export function createCommandFromMove(
                 if (!started) {
                     started = true;
                     startingCoord = y;
+                    word = "";
                 }
 
-                // TODO is the `blankLetter` lower case?
-                word += sq.blankLetter || sq.letter;
+                word += sq.blankLetter
+                    ? sq.blankLetter.toLowerCase()
+                    : sq.letter;
 
                 if (!passedFirst && sq.id === first.id) passedFirst = true;
                 if (!passedLast && sq.id === last.id) passedLast = true;
@@ -81,6 +90,11 @@ export function createCommandFromMove(
                 started = false;
             }
         }
+        // Should only trigger if word ends at edge of board.
+        if (passedFirst && passedLast)
+            return `${word} ${
+                coordinateChars.charAt(x) + (startingCoord + 1)
+            } V`;
     }
 
     throw new Error("Invalid move");

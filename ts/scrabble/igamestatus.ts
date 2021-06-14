@@ -8,4 +8,5 @@ export interface IGameStatus {
     teamTurn: number;
     scores: number[];
     moveLog: string[];
+    gameOver: boolean;
 }

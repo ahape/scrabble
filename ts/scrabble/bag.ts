@@ -48,7 +48,13 @@ export class Bag {
 
     public swap(letters: Letter[]): Letter[] {
         const drawn = this.draw(letters.length);
-        this.add(letters);
+
+        // Ensure we can't receive more than we give (end of game scenario).
+        this.add(letters.slice(0, drawn.length));
+        // If attempting to exchange for more than is possible, give
+        // them back their extra letters.
+        if (letters.length > drawn.length)
+            return drawn.concat(letters.slice(drawn.length));
         return drawn;
     }
 
