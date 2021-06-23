@@ -158,6 +158,9 @@ body {
 .team-yours:after {
     content: " (you)";
 }
+.view-selection label {
+    text-transform: capitalize;
+}
 .view-selection input {
     position: absolute;
     visibility: hidden;
