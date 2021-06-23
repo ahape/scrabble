@@ -23,7 +23,7 @@
     @foreach (var activeGame in Model.ActiveGames)
     {
         <li>
-            <a href="/games/@activeGame.GameId">Game @activeGame.Id</a>
+            <a href="/games/@activeGame.GameId">@activeGame.GameId</a>
         </li>
     }
 </ul>
