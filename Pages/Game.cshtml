@@ -54,8 +54,13 @@
 <br />
 
 <div class="main-view">
-    <!-- ko if: mainView() === "board" -->
-    <div class="board" data-bind="foreach: { data: board.board, as: 'row' }">
+    <!--
+        Using 'visible' binding so that if tiles were placed from the
+        rack onto the board they don't get removed from DOM upon
+        switching views.
+    -->
+    <div class="board" data-bind="visible: mainView() === 'board'">
+        <!-- ko foreach: { data: board.board, as: 'row' } -->
         <!-- ko foreach: row -->
             <div class="square" 
                 data-bind="
@@ -63,8 +68,8 @@
                 css: multiplierType ? multiplierType + multiplier : '',
                 "></div>
         <!-- /ko -->
+        <!-- /ko -->
     </div>
-    <!-- /ko -->
 
     <!-- ko if: mainView() === "moves" -->
     <ol class="moves" data-bind="foreach: moves.moves">
