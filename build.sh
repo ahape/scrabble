@@ -1,3 +1,5 @@
+rm -rf ../scrabble-azure
+mkdir ../scrabble-azure
 cp -rf * ../scrabble-azure/
 cd ../scrabble-azure
 rm package.json
