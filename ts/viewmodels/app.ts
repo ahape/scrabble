@@ -12,6 +12,7 @@ import { ActionType } from "../scrabble/logic/actiontype";
 import { IGameState } from "../scrabble/igamestate";
 import { IGamePlayer } from "../scrabble/igameplayer";
 import { freebies } from "../scrabble/freebies";
+import { letterValueMap } from "../scrabble/logic/lettervaluemap";
 import { MAX_RACK_TILES } from "../scrabble/logic/constants";
 
 interface SignalR {
@@ -266,16 +267,22 @@ class Teams {
     }
 }
 
-class Freebies {
+class Help {
     public twoLetterWords: string[];
     public qWithoutU: string[];
+    public letterValues: Array<[string, number]>;
 
-    public constructor(freebies: {
-        twoLetterWords: string[];
-        qWithoutU: string[];
-    }) {
+    public constructor(
+        freebies: {
+            twoLetterWords: string[];
+            qWithoutU: string[];
+        },
+        letterValueMap: Record<string, number>
+    ) {
         this.twoLetterWords = freebies.twoLetterWords;
         this.qWithoutU = freebies.qWithoutU;
+        // Get rid of 'unset' entry.
+        this.letterValues = Object.entries(letterValueMap).slice(1);
     }
 }
 
@@ -334,7 +341,7 @@ enum MainView {
     Moves = "moves",
     Bag = "bag",
     Teams = "teams",
-    Freebies = "freebies",
+    Help = "help",
     Options = "options",
 }
 
@@ -350,7 +357,7 @@ export class App {
     public scores: Scores;
     public bag: Bag;
     public teams: Teams;
-    public freebies: Freebies;
+    public help: Help;
     public options: Options;
     public teamTurn: KnockoutComputed<number>;
     public mainView: KnockoutObservable<MainView>;
@@ -383,7 +390,7 @@ export class App {
         this.scores = new Scores(game);
         this.bag = new Bag(game);
         this.teams = new Teams(game.teams, players);
-        this.freebies = new Freebies(freebies);
+        this.help = new Help(freebies, letterValueMap);
         this.options = new Options(game, userName);
         this.teamTurn = ko.pureComputed(() => game.currentStatus().teamTurn);
         this.mainView = ko.observable(MainView.Board);

@@ -91,8 +91,12 @@
     </ul>
     <!-- /ko -->
 
-    <!-- ko if: mainView() === "freebies" -->
-    <div class="freebies" data-bind="with: freebies">
+    <!-- ko if: mainView() === "help" -->
+    <div class="help" data-bind="with: help">
+        <h3>Letter Values</h3>
+        <p data-bind="foreach: letterValues">
+            <code data-bind="text: $data[0] + ':' + $data[1]"></code>&nbsp;
+        </p>
         <h3>Two Letter Words</h3>
         <p data-bind="foreach: twoLetterWords">
             <code data-bind="text: $data"></code>

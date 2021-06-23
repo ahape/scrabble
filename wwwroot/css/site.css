@@ -104,7 +104,7 @@ body {
     grid-template-areas: ". . . . . . . . . . . . . . .";
     justify-content: center;
 }
-.freebies,
+.help,
 .moves,
 .teams,
 .bag {
@@ -114,10 +114,10 @@ body {
     border: 1px solid beige;
     box-sizing: border-box;
 }
-.freebies {
+.help {
     padding: 15px;
 }
-.freebies code {
+.help code {
     color: black;
 }
 .moves,
