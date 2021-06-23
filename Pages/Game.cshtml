@@ -83,12 +83,20 @@
     <!-- /ko -->
 
     <!-- ko if: mainView() === "teams" -->
-    <ul class="teams" data-bind="foreach: teams.teams">
-        <li>
-            Team <!-- ko text: $data --><!-- /ko -->:
-            <span data-bind="text: _.pluck($parent.teams.playersByTeam[$data],'userName').join(', ')"></span>
-        </li>
-    </ul>
+    <div class="teams">
+        <p>
+            Invite other players using this link: 
+            <input type="text" 
+                class="form-control-sm" 
+                data-bind="textinput: location.toString()" />
+        </p>
+        <ul data-bind="foreach: teams.teams">
+            <li>
+                Team <!-- ko text: $data --><!-- /ko -->:
+                <span data-bind="text: _.pluck($parent.teams.playersByTeam[$data],'userName').join(', ')"></span>
+            </li>
+        </ul>
+    </div>
     <!-- /ko -->
 
     <!-- ko if: mainView() === "help" -->

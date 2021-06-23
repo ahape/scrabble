@@ -120,10 +120,17 @@ body {
 .help code {
     color: black;
 }
-.moves,
-.teams {
+.moves {
     padding-top: 15px;
     padding-bottom: 15px;
+}
+.teams {
+    padding: 15px;
+}
+.teams ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 .bag {
     padding-left: 0;
