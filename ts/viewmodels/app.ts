@@ -43,9 +43,8 @@ interface IResponse {
     success: boolean;
     errorMessage?: string;
 }
-interface IUpdateResponse extends IResponse {
-    data?: IGameState;
-    timestamp?: number;
+interface IUpdateResponse {
+    timestamp: number;
 }
 
 class Board {
@@ -288,7 +287,7 @@ class Help {
 
 class Options {
     public clicked: KnockoutObservable<string> = ko.observable("");
-    public constructor(private _game: Game, private _userName: string) {}
+    public constructor(private _game: Game, private _playerId: number) {}
 
     public onDeleteClick(): void {
         if (confirm("Are you sure you want to delete this game?"))
@@ -317,22 +316,29 @@ class Options {
     }
 
     private async _handleDelete(): Promise<void> {
-        var response = await fetch(`/rest/games/${this._game.id}`, {
-            method: "DELETE",
-        });
-        if (((await response.json()) as IResponse).success)
-            location.assign("/games");
+        try {
+            await fetch(`/rest/games/${this._game.id}`, {
+                method: "DELETE",
+            });
+        } catch (err) {
+            alert(
+                "Error: Unable to delete game. Please refresh the page and try again"
+            );
+        }
     }
 
     private async _handleLeave(): Promise<void> {
-        var response = await fetch(
-            `/rest/players/${this._game.id}?userName=${this._userName}`,
-            {
+        try {
+            await fetch(`/rest/players/${this._playerId}`, {
                 method: "DELETE",
-            }
-        );
-        if (((await response.json()) as IResponse).success)
+            });
+
             location.assign("/games");
+        } catch (err) {
+            alert(
+                "Error: Unable to leave game. Please refresh the page and try again"
+            );
+        }
     }
 }
 
@@ -348,6 +354,7 @@ enum MainView {
 export class App {
     private _socketConnection: SignalRConnection;
     private _game: Game;
+    private _player: IGamePlayer;
     private _timestamp: number;
     public teamNumber: number;
     public board: Board;
@@ -371,8 +378,7 @@ export class App {
         gameJson: IGameState,
         players: IGamePlayer[],
         teamNumber: number,
-        timestamp: number,
-        userName: string
+        timestamp: number
     ) {
         const game = new Game(gameJson);
 
@@ -380,6 +386,7 @@ export class App {
             .withUrl("/chatHub")
             .build();
         this._game = game;
+        this._player = players[teamNumber - 1];
         this._timestamp = timestamp;
 
         this.teamNumber = teamNumber;
@@ -391,7 +398,7 @@ export class App {
         this.bag = new Bag(game);
         this.teams = new Teams(game.teams, players);
         this.help = new Help(freebies, letterValueMap);
-        this.options = new Options(game, userName);
+        this.options = new Options(game, this._player.id);
         this.teamTurn = ko.pureComputed(() => game.currentStatus().teamTurn);
         this.mainView = ko.observable(MainView.Board);
         this.mainViewOptions = Object.values(
@@ -409,9 +416,9 @@ export class App {
         ];
         const onButtonClick = (btn: string) => {
             if (stateChangingButtons.includes(btn)) {
-                this._updateGame(game.snapshot()).then((response) =>
-                    this._handleUpdateResponse(response)
-                );
+                this._updateGame(game.snapshot()).then((response) => {
+                    if (response) this._handleUpdateResponse(response);
+                });
             }
         };
 
@@ -452,32 +459,34 @@ export class App {
     }
 
     private _handleUpdateResponse(response: IUpdateResponse): void {
-        if (response.success) {
-            if (!response.data || !response.timestamp)
-                throw new Error("No data with successful request");
-
-            this._timestamp = response.timestamp;
-        } else {
-            alert(
-                response.errorMessage ||
-                    "There was an error updating the game. Please refresh for the latest state"
-            );
-        }
+        this._timestamp = response.timestamp;
     }
 
-    private async _updateGame(gameState: IGameState): Promise<IUpdateResponse> {
-        const body = $.param({
-            timestamp: this._timestamp,
-            ...gameState,
-        });
+    private async _updateGame(
+        gameState: IGameState
+    ): Promise<IUpdateResponse | null> {
+        try {
+            const response = await fetch("/rest/games/" + gameState.id, {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ...gameState,
+                    actions: gameState.actions.join(),
+                    timestamp: this._timestamp,
+                }),
+            });
 
-        const response = await fetch("/rest/games/" + gameState.id, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body,
-        });
+            return response.json();
+        } catch (err) {
+            alert(
+                "Error: Unable to update game. Please refresh the page try again"
+            );
+        }
 
-        return response.json();
+        return null;
     }
 }
 
