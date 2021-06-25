@@ -17,12 +17,12 @@ namespace scrabble.Pages
         private readonly ApplicationDbContext dbContext;
         
         public int Team { get; set; }
-        public long Timestamp { get; set; }
+        public long Version { get; set; }
         public JObject GameJson { get; set; }
         public JArray Players { get; set; }
 
         [BindProperty(SupportsGet=true)]
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
 
         public GameModel(ILogger<GameModel> logger, ApplicationDbContext dbContext)
         {
@@ -32,7 +32,7 @@ namespace scrabble.Pages
 
         async public void OnGetAsync()
         {
-            if (string.IsNullOrEmpty(GameId))
+            if (GameId == Guid.Empty)
             {
                 logger.LogWarning("GameId did not populate", null);
                 Response.Redirect("/games");
@@ -59,12 +59,14 @@ namespace scrabble.Pages
 
             Console.WriteLine($"{User.Identity.Name} loaded game " + game.Id);
 
+            var defser = Utils.DefaultSerializer;
+
             Team = entry.Team;
-            Timestamp = game.Timestamp;
-            GameJson = game.ToJson();
+            Version = game.Version;
+            GameJson = JObject.FromObject(game, defser);
             Players = JArray.FromObject(dbContext.Players
                 .Where(x => x.GameId == GameId)
-                .Select(x => x.ToJson()));
+                .Select(x => JObject.FromObject(x, defser)));
         }
     }
 }

@@ -380,6 +380,11 @@ export class App {
         teamNumber: number,
         timestamp: number
     ) {
+        // TODO: Do something less hacky here.
+        if (!Array.isArray(gameJson.actions))
+            gameJson.actions = (gameJson.actions as string).split(",");
+        if (gameJson.actions.length == 0) gameJson.actions.push("NEW_GAME");
+
         const game = new Game(gameJson);
 
         this._socketConnection = new signalR.HubConnectionBuilder()

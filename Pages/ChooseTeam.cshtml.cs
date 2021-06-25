@@ -31,7 +31,7 @@ namespace scrabble.Pages
         }
 
         [BindProperty(SupportsGet=true)]
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
 
         public ChooseTeamModel(ILogger<ChooseTeamModel> logger, ApplicationDbContext dbContext)
         {
@@ -45,9 +45,11 @@ namespace scrabble.Pages
             if (game == null)
                 throw new Exception("Game doesn't exist");
 
+            var defser = Utils.DefaultSerializer;
+
             activePlayers = JArray.FromObject(dbContext.Players
                 .Where(x => x.GameId == GameId)
-                .Select(x => x.ToJson()));
+                .Select(x => JObject.FromObject(x, defser)), defser);
             Teams = game.Teams;
         }
 

@@ -48,7 +48,7 @@ namespace scrabble.Pages
 
         async public void OnPostAsync(int teams)
         {
-            var game = new GameState(teams);
+            var game = new GameState { Teams = teams };
 
             dbContext.Add(game);
             await dbContext.SaveChangesAsync();
