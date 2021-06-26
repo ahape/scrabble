@@ -381,9 +381,9 @@ export class App {
         timestamp: number
     ) {
         // TODO: Do something less hacky here.
+        // Maybe use a specific JSON serializer
         if (!Array.isArray(gameJson.actions))
             gameJson.actions = (gameJson.actions as string).split(",");
-        if (gameJson.actions.length == 0) gameJson.actions.push("NEW_GAME");
 
         const game = new Game(gameJson);
 
