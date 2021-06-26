@@ -122,6 +122,7 @@
 
     <!-- ko if: mainView() === "options" -->
     <div class="options" data-bind="with: options">
+        <p class="border-danger text-danger form-control">Danger! Perform these actions at your own risk</p>
         <button class="btn btn-danger"
             data-bind="click: onDeleteClick">Delete Game</button>
         <button class="btn btn-warning"
