@@ -41,7 +41,7 @@ namespace scrabble.REST
         }
 
         // Don't save changes here
-        async private Task RemoveGameIfNoMorePlayers(string gameId)
+        async private Task RemoveGameIfNoMorePlayers(Guid gameId)
         {
             // TODO: Remove this once EF nav props work
             var playersLeft = dbContext.Players.Where(x => x.GameId == gameId);

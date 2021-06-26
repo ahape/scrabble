@@ -40,7 +40,7 @@ namespace scrabble.REST
         }
 
         [HttpPost]
-        async public Task<ActionResult<GameState>> Update(string id, GameState gameState)
+        async public Task<ActionResult<GameState>> Update(Guid id, GameState gameState)
         {
             if (id != gameState.Id)
                 return BadRequest();
@@ -53,17 +53,17 @@ namespace scrabble.REST
             }
             catch (DbUpdateConcurrencyException)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             // Notify interested parties of this change.
-            await hubContext.Clients.Group(id).SendAsync("GameUpdate", gameState);
+            await hubContext.Clients.Group(id.ToString()).SendAsync("GameUpdate", gameState);
             
             return gameState;
         }
 
         [HttpDelete]
-        async public Task<IActionResult> Delete(string id)
+        async public Task<IActionResult> Delete(Guid id)
         {
             var gameState = await dbContext.Games.FindAsync(id);
 

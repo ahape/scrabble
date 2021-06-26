@@ -31,7 +31,7 @@ namespace scrabble.Pages
         }
 
         [BindProperty(SupportsGet=true)]
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
 
         public ChooseTeamModel(ILogger<ChooseTeamModel> logger, ApplicationDbContext dbContext)
         {
