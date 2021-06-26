@@ -44,7 +44,7 @@ interface IResponse {
     errorMessage?: string;
 }
 interface IUpdateResponse {
-    timestamp: number;
+    version: number;
 }
 
 class Board {
@@ -444,8 +444,8 @@ export class App {
 
             state.actions = state.actions.split(",");
 
-            this._timestamp = state.timestamp;
-            delete state.timestamp;
+            this._timestamp = state.version;
+            delete state.version;
 
             if (!_.isEqual(this._game.currentState(), state))
                 this._game.load(state);
@@ -464,7 +464,7 @@ export class App {
     }
 
     private _handleUpdateResponse(response: IUpdateResponse): void {
-        this._timestamp = response.timestamp;
+        this._timestamp = response.version;
     }
 
     private async _updateGame(
@@ -480,7 +480,7 @@ export class App {
                 body: JSON.stringify({
                     ...gameState,
                     actions: gameState.actions.join(),
-                    timestamp: this._timestamp,
+                    version: this._timestamp,
                 }),
             });
 

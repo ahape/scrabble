@@ -53,7 +53,7 @@ namespace scrabble.REST
             }
             catch (DbUpdateConcurrencyException)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             // Notify interested parties of this change.

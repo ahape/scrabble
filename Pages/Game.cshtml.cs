@@ -62,9 +62,15 @@ namespace scrabble.Pages
             Team = entry.Team;
             Version = game.Version;
             GameJson = game.ToJson();
-            Players = JArray.FromObject(dbContext.Players
-                .Where(x => x.GameId == GameId)
-                .Select(x => x.ToJson()));
+            var players = new JObject[game.Teams];
+
+            foreach (var player in dbContext.Players.Where(x => x.GameId == GameId))
+            {
+                // Array may be sparse
+                players[player.Team - 1] = player.ToJson();
+            }
+
+            Players = JArray.FromObject(players);
         }
     }
 }
