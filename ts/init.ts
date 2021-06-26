@@ -7,10 +7,9 @@ declare const teamNumber: number;
 declare const timestamp: number;
 declare const gameJson: IGameState;
 declare const players: IGamePlayer[];
-declare const userName: string;
 
 $(() => {
-    const app = new App(gameJson, players, teamNumber, timestamp, userName);
+    const app = new App(gameJson, players, teamNumber, timestamp);
 
     ko.applyBindings(app);
 

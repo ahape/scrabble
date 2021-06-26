@@ -9,7 +9,6 @@
         const timestamp = @Model.Timestamp;
         const gameJson = @Html.Raw(Model.GameJson?.ToString() ?? "null");
         const players = @Html.Raw(Model.Players?.ToString() ?? "null");
-        const userName = "@Model.UserName";
 
         requirejs.config({
             baseUrl: "../js/",
