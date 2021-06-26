@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace scrabble.Data
 {
-    public class GameState
+    public class GameState : Serializable
     {
         public Guid Id { get; set; }
         public string Actions { get; set; } = "NEW_GAME";

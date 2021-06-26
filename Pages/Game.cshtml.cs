@@ -59,14 +59,12 @@ namespace scrabble.Pages
 
             Console.WriteLine($"{User.Identity.Name} loaded game " + game.Id);
 
-            var defser = Utils.DefaultSerializer;
-
             Team = entry.Team;
             Version = game.Version;
-            GameJson = JObject.FromObject(game, defser);
+            GameJson = game.ToJson();
             Players = JArray.FromObject(dbContext.Players
                 .Where(x => x.GameId == GameId)
-                .Select(x => JObject.FromObject(x, defser)));
+                .Select(x => x.ToJson()));
         }
     }
 }

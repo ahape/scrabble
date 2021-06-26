@@ -45,11 +45,9 @@ namespace scrabble.Pages
             if (game == null)
                 throw new Exception("Game doesn't exist");
 
-            var defser = Utils.DefaultSerializer;
-
             activePlayers = JArray.FromObject(dbContext.Players
                 .Where(x => x.GameId == GameId)
-                .Select(x => JObject.FromObject(x, defser)), defser);
+                .Select(x => x.ToJson()));
             Teams = game.Teams;
         }
 
