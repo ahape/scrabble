@@ -49,7 +49,7 @@ namespace scrabble.Pages
                 return;
             } 
 
-            var game = await dbContext.Games.FirstOrDefaultAsync(g => g.Id == GameId);
+            var game = await dbContext.Games.FindAsync(GameId);
             if (game == null)
             {
                 logger.LogWarning($"Couldn't find game for ID of {GameId}", null);
@@ -64,9 +64,11 @@ namespace scrabble.Pages
             GameJson = game.ToJson();
             var players = new JObject[game.Teams];
 
-            foreach (var player in dbContext.Players.Where(x => x.GameId == GameId))
+            dbContext.Entry(game).Collection(x => x.Players).Load();
+
+            foreach (var player in game.Players)
             {
-                // Array may be sparse
+                // Have to account for how array might be sparse.
                 players[player.Team - 1] = player.ToJson();
             }
 

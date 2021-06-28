@@ -70,13 +70,11 @@ namespace scrabble.REST
             if (gameState == null)
                 return NotFound();
 
-            // TODO: Remove this once EF nav props work
-            var playersForGame = dbContext.Players.Where(x => x.GameId == id);
+            dbContext.Entry(gameState).Collection(x => x.Players).Load();
+            // Remove all players associated to game.
+            gameState.Players.Clear();
 
-            dbContext.Remove(gameState);
-
-            // TODO: Remove this once EF nav props work
-            dbContext.RemoveRange(playersForGame);
+            dbContext.Games.Remove(gameState);
 
             await dbContext.SaveChangesAsync();
 

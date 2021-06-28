@@ -36,6 +36,8 @@ export class Options {
             await fetch(`/rest/games/${this._game.id}`, {
                 method: "DELETE",
             });
+
+            location.assign("/games");
         } catch (err) {
             alert(
                 "Error: Unable to delete game. Please refresh the page and try again"

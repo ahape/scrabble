@@ -41,12 +41,23 @@ namespace scrabble.Pages
 
         async public void OnGetAsync()
         {
-            var game = await dbContext.Games.FirstOrDefaultAsync(g => g.Id == GameId);
+            var game = await dbContext.Games.FindAsync(GameId);
             if (game == null)
-                throw new Exception("Game doesn't exist");
+            {
+                Response.Redirect("/games");
+                return;
+            }
 
-            activePlayers = JArray.FromObject(dbContext.Players
-                .Where(x => x.GameId == GameId)
+            dbContext.Entry(game).Collection(x => x.Players).Load();
+
+            var user = User.Identity.Name;
+            if (game.Players.Any(x => x.UserName == user))
+            {
+                Response.Redirect("/games/" + GameId);
+                return;
+            }
+
+            activePlayers = JArray.FromObject(game.Players
                 .Select(x => x.ToJson()));
             Teams = game.Teams;
         }
@@ -55,8 +66,6 @@ namespace scrabble.Pages
         {
             Console.WriteLine($"{User.Identity.Name} chose team {team} for game {GameId}");
 
-            // TODO Need to make sure that someone can't nav to this
-            // page and submit another participation entry
             dbContext.Add(new GamePlayer()
             {
                 UserName = User.Identity.Name,

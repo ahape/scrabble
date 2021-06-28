@@ -31,27 +31,24 @@ namespace scrabble.REST
             if (@record == null)
                 return NotFound();
 
+
+            // Load the associated game.
+            dbContext.Entry(@record).Reference(x => x.Game).Load();
+
+            // Remove this player from the game.
             dbContext.Players.Remove(@record);
 
-            await RemoveGameIfNoMorePlayers(@record.GameId);
+            // Load the assoc game's other players, if any.
+            dbContext.Entry(@record.Game).Collection(x => x.Players).Load();
+
+            if (!@record.Game.Players.Any())
+                dbContext.Games.Remove(@record.Game);
+
+            // TODO: Log that player has left game.
 
             await dbContext.SaveChangesAsync();
 
             return Ok();
-        }
-
-        // Don't save changes here
-        async private Task RemoveGameIfNoMorePlayers(Guid gameId)
-        {
-            // TODO: Remove this once EF nav props work
-            var playersLeft = dbContext.Players.Where(x => x.GameId == gameId);
-
-            if (!playersLeft.Any())
-            {
-                var game = await dbContext.Games.FindAsync(gameId);
-
-                dbContext.Games.Remove(game);
-            }
         }
     }
 }
