@@ -53,6 +53,8 @@ namespace scrabble
                 options.Conventions.AuthorizePage("/Games");
                 options.Conventions.AuthorizePage("/Game");
                 options.Conventions.AuthorizePage("/ChooseTeam");
+                options.Conventions.AddPageRoute("/Games", "/");
+                options.Conventions.AddPageRoute("/Games", "/Index");
                 options.Conventions.AddPageRoute("/Game", "/Games/{GameId}");
                 options.Conventions.AddPageRoute("/ChooseTeam", "/Games/{GameId}/Choice");
             });
