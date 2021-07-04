@@ -46,9 +46,11 @@
         </div>
     </footer>
 
+    <!--
     <script src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script src="~/lib/knockout.js"></script>
     <script src="~/lib/underscore.js"></script>
+    -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/require.js"></script>
@@ -56,11 +58,8 @@
         require.config({
             baseUrl: "../js/",
             paths: {
-                /*
-                jquery: "../lib/jquery/dist/jquery",
-                knockout: "../lib/knockout",
                 signalR: "../lib/signalr/dist/browser/signalr",
-                */
+                knockout: "../lib/knockout",
                 underscore: "../lib/underscore",
                 scrabblecore: "../lib/scrabblecore",
             },

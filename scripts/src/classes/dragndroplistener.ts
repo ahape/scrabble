@@ -1,3 +1,4 @@
+import * as ko from "knockout";
 import { ISquare } from "scrabblecore";
 
 export class DragNDropListener {

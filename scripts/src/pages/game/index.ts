@@ -1,4 +1,6 @@
+import * as ko from "knockout";
 import * as _ from "underscore";
+import * as signalR from "signalR";
 import { Game, IGameState, constants as sc } from "scrabblecore";
 import { IGamePlayer } from "../../interfaces/igameplayer";
 import { freebies } from "../../constants";

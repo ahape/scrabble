@@ -1,3 +1,4 @@
+import * as ko from "knockout";
 import { ISquare, Game, Letter, createNewBoard } from "scrabblecore";
 
 export class Board {

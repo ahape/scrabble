@@ -1,3 +1,4 @@
+import * as ko from "knockout";
 import * as _ from "underscore";
 import { Game } from "scrabblecore";
 

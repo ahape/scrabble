@@ -10,7 +10,7 @@
         const gameJson = @Html.Raw(Model.GameJson?.ToString() ?? "null");
         const players = @Html.Raw(Model.Players?.ToString() ?? "null");
 
-        require(["pages/game/index"], function (page) {
+        require(["knockout", "pages/game/index"], function (ko, page) {
             ko.applyBindings(new page.Index(gameJson, players, teamNumber, timestamp));
         });
     </script>
@@ -68,11 +68,10 @@
     <!-- /ko -->
 
     <!-- ko if: mainView() === "bag" -->
-    <ol class="bag" data-bind="foreach: bag.remaining()">
-        <li class="bag-row">
-            <!-- ko foreach: _.times($data[1],function(){return $data[0]}) -->
-                <div class="letter" data-bind="text: $data"></div>
-            <!-- /ko -->
+    <ol class="bag" 
+        data-bind="foreach: { data: bag.remaining, as: 'repeatedLetter' }">
+        <li class="bag-row" data-bind="foreach: repeatedLetter">
+            <div class="letter" data-bind="text: $data"></div>
         </li>
     </ol>
     <!-- /ko -->
@@ -87,8 +86,7 @@
         </p>
         <ul data-bind="foreach: teams.teams">
             <li>
-                Team <!-- ko text: $data --><!-- /ko -->:
-                <span data-bind="text: _.pluck($parent.teams.playersByTeam[$data],'userName').join(', ')"></span>
+                Team <!-- ko text: $data --><!-- /ko -->
             </li>
         </ul>
     </div>

@@ -1,3 +1,4 @@
+import * as ko from "knockout";
 import { Game } from "scrabblecore";
 
 export class Moves {

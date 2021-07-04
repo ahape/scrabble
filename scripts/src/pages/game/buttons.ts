@@ -1,3 +1,4 @@
+import * as ko from "knockout";
 import { Rack } from "./rack";
 import { Board } from "./board";
 import {
