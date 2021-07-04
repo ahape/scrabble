@@ -5,9 +5,9 @@
 }
 @section Scripts {
     <script>
-        ko.applyBindings({
-            data: _.groupBy(@Html.Raw(Model.ActivePlayers.ToString()), "team"),
-            teamChoice: ko.observable(),
+        require(["knockout", "pages/chooseteam/index"], function (ko, page) {
+            ko.applyBindings(new page.Index(
+                @Html.Raw(Model.ActivePlayers.ToString())));
         });
     </script>
 }
@@ -17,7 +17,10 @@
     <label for="team-choice">Which team would you like to be on?</label>
     <br />
     <div class="btn-group">
-        <select id="team-choice" name="team" class="form-control" data-bind="value: teamChoice">
+        <select id="team-choice" 
+            name="team" 
+            class="form-control" 
+            data-bind="value: teamChoice">
         @for (var i = 1; i <= Model.Teams; i++)
         {
             <option value="@i">@i</option>
@@ -30,6 +33,6 @@
     <p style="margin-top: 5px">
         Players already on that team: 
         <span class="text-info" 
-            data-bind="text: _.pluck(data[teamChoice()], 'userName').join(', ')">0</span>
+            data-bind="text: playersOnTeam"></span>
     </p>
 </form>
