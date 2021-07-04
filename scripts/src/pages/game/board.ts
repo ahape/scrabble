@@ -1,36 +1,17 @@
 import * as ko from "knockout";
-import { ISquare, Game, Letter, createNewBoard } from "scrabblecore";
+import { ISquare, Game, createBoardFromStatus } from "scrabblecore";
 
-export class Board {
+class Board {
     public board: KnockoutObservable<ISquare[][]>;
 
-    public constructor(game: Game) {
-        this.board = ko
-            .observable(this._getBoard(game.status().board))
-            .extend({ notify: "always" });
-        game.currentStatus.subscribe((status) =>
-            this.board(this._getBoard(status.board))
+    public constructor(params: { game: Game }) {
+        this.board = ko.pureComputed(() =>
+            createBoardFromStatus(params.game.currentStatus())
         );
     }
-
-    private _getBoard(board: string[][]): ISquare[][] {
-        const newBoard = createNewBoard();
-
-        for (let y = 0; y < board.length; y++)
-            for (let x = 0; x < board[y].length; x++) {
-                const square = newBoard[y][x];
-                const cha = board[y][x];
-                if (cha) {
-                    square.played = true;
-                    if (/[a-z]/.test(cha)) {
-                        square.letter = Letter.BLANK;
-                        square.blankLetter = cha;
-                    } else {
-                        square.letter = cha as Letter;
-                    }
-                }
-            }
-
-        return newBoard;
-    }
 }
+
+ko.components.register("board", {
+    viewModel: Board,
+    template: { require: "text!/templates/board.html" },
+});

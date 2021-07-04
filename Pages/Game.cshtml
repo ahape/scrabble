@@ -11,36 +11,16 @@
         const players = @Html.Raw(Model.Players?.ToString() ?? "null");
 
         require(["knockout", "pages/game/index"], function (ko, page) {
-            ko.applyBindings(new page.Index(gameJson, players, teamNumber, timestamp));
+            ko.applyBindings(
+                new page.Index(gameJson, players, teamNumber, timestamp));
         });
     </script>
 }
-<div class="scores">
-    <!-- ko if: scores.isGameOver -->
-    <em>(GAME OVER)</em>
-    &nbsp;
-    <!-- /ko -->
-    <!-- ko foreach: scores.scores -->
-    <span data-bind="
-        text: $data,
-        css: { 
-            'team-yours': ($index() + 1) == $parent.teamNumber,
-            'team-turn': ($index() + 1) == $parent.teamTurn()
-        }"></span>
-    &nbsp;
-    <!-- /ko -->
-</div>
-<div class="view-selection btn-group" 
-    data-bind="foreach: { data: mainViewOptions, as: 'option' }">
-    <label class="btn btn-outline-info"
-        data-bind="css: { 'active': $parent.mainView() === option }">
-        <input type="radio" 
-            name="view" 
-            data-bind="checked: $parent.mainView, checkedValue: option"
-        />
-        <!-- ko text: option --><!-- /ko -->
-    </label>
-</div>
+
+<scores params="game: game, teamNumber: teamNumber"></scores>
+
+<view-selection params="mainView: mainView"></view-selection>
+
 <br />
 
 <div class="main-view">
@@ -49,115 +29,39 @@
         rack onto the board they don't get removed from DOM upon
         switching views.
     -->
-    <div class="board" data-bind="visible: mainView() === 'board'">
-        <!-- ko foreach: { data: board.board, as: 'row' } -->
-        <!-- ko foreach: row -->
-            <div class="square" 
-                data-bind="
-                text: blankLetter || letter,
-                css: multiplierType ? multiplierType + multiplier : '',
-                "></div>
-        <!-- /ko -->
-        <!-- /ko -->
-    </div>
+    <board params="game: game" 
+        data-bind="visible: mainView() === 'board'"></board>
 
     <!-- ko if: mainView() === "moves" -->
-    <ol class="moves" data-bind="foreach: moves.moves">
-        <li data-bind="text: $data"></li>
-    </ol>
+    <moves params="game: game"></moves>
     <!-- /ko -->
 
     <!-- ko if: mainView() === "bag" -->
-    <ol class="bag" 
-        data-bind="foreach: { data: bag.remaining, as: 'repeatedLetter' }">
-        <li class="bag-row" data-bind="foreach: repeatedLetter">
-            <div class="letter" data-bind="text: $data"></div>
-        </li>
-    </ol>
+    <bag params="game: game"></bag>
     <!-- /ko -->
 
     <!-- ko if: mainView() === "teams" -->
-    <div class="teams">
-        <p>
-            Invite other players using this link: 
-            <input type="text" 
-                class="form-control-sm" 
-                data-bind="textinput: location.toString()" />
-        </p>
-        <ul data-bind="foreach: teams.teams">
-            <li>
-                Team <!-- ko text: $data --><!-- /ko -->
-            </li>
-        </ul>
-    </div>
+    <teams params="teams: game.teams, players: players"></teams>
     <!-- /ko -->
 
     <!-- ko if: mainView() === "help" -->
-    <div class="help" data-bind="with: help">
-        <h3>Letter Values</h3>
-        <p data-bind="foreach: letterValues">
-            <code data-bind="text: $data[0] + ':' + $data[1]"></code>&nbsp;
-        </p>
-        <h3>Two Letter Words</h3>
-        <p data-bind="foreach: twoLetterWords">
-            <code data-bind="text: $data"></code>
-        </p>
-        <h3>Q Without U</h3>
-        <p data-bind="foreach: qWithoutU">
-            <code data-bind="text: $data"></code>
-        </p>
-    </div>
+    <help></help>
     <!-- /ko -->
 
     <!-- ko if: mainView() === "options" -->
-    <div class="options" data-bind="with: options">
-        <p class="border-danger text-danger form-control">Danger! Perform these actions at your own risk</p>
-        <button class="btn btn-danger"
-            data-bind="click: onDeleteClick">Delete Game</button>
-        <button class="btn btn-warning"
-            data-bind="click: onLeaveClick">Leave Game</button>
-        <button class="btn btn-outline-danger"
-            data-bind="click: onUndoClick">Undo</button>
-        <button class="btn btn-outline-danger"
-            data-bind="click: onRedoClick">Redo</button>
-    </div>
+    <options params="
+        game: game, 
+        playerId: player.Id,
+        onClick: onClick"></options>
     <!-- /ko -->
 </div>
 
-<div class="rack" data-bind="foreach: { data: rack.rack, as: 'letter' }">
-    <div class="letter" 
-        draggable="true" 
-        ondragstart="event.dataTransfer.setData('text/plain',null)"
-        data-bind="text: letter"></div>
-</div>
+<rack params="rack: rackLetters"></rack>
+
 <br />
-<div class"buttons" data-bind="with: buttons">
-    <!-- ko if: canGo -->
-    <button class="btn btn-primary"
-        data-bind="click: onPlayClick">Play</button>
-    <button class="btn"
-        data-bind="
-        class: canDraw() ? 'btn-success' : 'btn-light',
-        click: onDrawClick">Draw</button>
-    <button class="btn btn-light"
-        data-bind="click: onSwapClick">Swap</button>
-    <button class="btn btn-light"
-        data-bind="click: onSkipClick">Skip</button>
-    <!-- /ko -->
 
-    <!-- ko ifnot: canGo -->
-    <button class="btn btn-light"
-        disabled="disabled">Play</button>
-    <button class="btn btn-light"
-        disabled="disabled">Draw</button>
-    <button class="btn btn-light"
-        disabled="disabled">Swap</button>
-    <button class="btn btn-light"
-        disabled="disabled">Skip</button>
-    <!-- /ko -->
-
-    <button class="btn btn-light"
-        data-bind="click: onRecallClick">Recall</button>
-    <button class="btn btn-light"
-        data-bind="click: onShuffleClick">Shuffle</button>
-</div>
+<buttons params="
+    game: game, 
+    rack: rackLetters, 
+    onClick: onClick, 
+    teamNumber: teamNumber"></buttons>

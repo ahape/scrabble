@@ -1,0 +1,17 @@
+<div
+    id="view-selection"
+    class="view-selection btn-group"
+    data-bind="foreach: { data: mainViewOptions, as: 'option' }"
+>
+    <label
+        class="btn btn-outline-info"
+        data-bind="css: { 'active': $parent.mainView() === option }"
+    >
+        <input
+            type="radio"
+            name="view"
+            data-bind="checked: $parent.mainView, checkedValue: option"
+        />
+        <!-- ko text: option --><!-- /ko -->
+    </label>
+</div>

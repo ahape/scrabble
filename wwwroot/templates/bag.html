@@ -1,0 +1,5 @@
+<ol class="bag" data-bind="foreach: { data: remaining, as: 'repeatedLetter' }">
+    <li class="bag-row" data-bind="foreach: repeatedLetter">
+        <div class="letter" data-bind="text: $data"></div>
+    </li>
+</ol>

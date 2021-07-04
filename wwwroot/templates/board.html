@@ -1,0 +1,13 @@
+<div id="board" class="board">
+    <!-- ko foreach: { data: board, as: 'row' } -->
+    <!-- ko foreach: row -->
+    <div
+        class="square"
+        data-bind="
+                text: blankLetter || letter,
+                css: multiplierType ? multiplierType + multiplier : '',
+                "
+    ></div>
+    <!-- /ko -->
+    <!-- /ko -->
+</div>

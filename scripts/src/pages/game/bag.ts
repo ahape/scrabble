@@ -2,12 +2,12 @@ import * as ko from "knockout";
 import * as _ from "underscore";
 import { Game } from "scrabblecore";
 
-export class Bag {
+class Bag {
     public remaining: KnockoutComputed<string[][]>;
 
-    public constructor(game: Game) {
+    public constructor(params: { game: Game }) {
         this.remaining = ko.pureComputed(() => {
-            var bag = game.currentStatus().bag.sort();
+            var bag = params.game.currentStatus().bag.sort();
 
             // Returns key/value pairs as tuples [string, number]
             var pairs = _.pairs(_.countBy(bag, _.identity));
@@ -18,3 +18,8 @@ export class Bag {
         });
     }
 }
+
+ko.components.register("bag", {
+    viewModel: Bag,
+    template: { require: "text!/templates/bag.html" },
+});

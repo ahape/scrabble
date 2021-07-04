@@ -1,0 +1,8 @@
+<div class="rack" data-bind="foreach: { data: rack, as: 'letter' }">
+    <div
+        class="letter"
+        draggable="true"
+        ondragstart="event.dataTransfer.setData('text/plain',null)"
+        data-bind="text: letter"
+    ></div>
+</div>

@@ -3,50 +3,36 @@ import * as _ from "underscore";
 import * as signalR from "signalR";
 import { Game, IGameState, constants as sc } from "scrabblecore";
 import { IGamePlayer } from "../../interfaces/igameplayer";
-import { freebies } from "../../constants";
 import { DragNDropListener } from "../../classes/dragndroplistener";
-import { Board } from "./board";
-import { Rack } from "./rack";
-import { Buttons } from "./buttons";
-import { Scores } from "./scores";
-import { Moves } from "./moves";
-import { Bag } from "./bag";
-import { Teams } from "./teams";
-import { Help } from "./help";
-import { Options } from "./options";
+import { MainView } from "./mainview";
+// Components
+import "./rack";
+import "./buttons";
+import "./scores";
+import "./moves";
+import "./viewselection";
+import "./board";
+import "./bag";
+import "./teams";
+import "./help";
+import "./options";
 
 interface IUpdateResponse {
     version: number;
 }
 
-enum MainView {
-    Board = "board",
-    Moves = "moves",
-    Bag = "bag",
-    Teams = "teams",
-    Help = "help",
-    Options = "options",
-}
-
 export class Index {
     private _socketConnection: SignalRConnection;
-    private _game: Game;
-    private _player: IGamePlayer;
     private _timestamp: number;
     private _dragNDropListener: DragNDropListener;
+    public game: Game;
+    public players: IGamePlayer[];
+    public player: IGamePlayer;
     public teamNumber: number;
-    public board: Board;
-    public rack: Rack;
-    public buttons: Buttons;
-    public moves: Moves;
-    public scores: Scores;
-    public bag: Bag;
-    public teams: Teams;
-    public help: Help;
-    public options: Options;
+    public onClick: KnockoutObservable<string> = ko.observable("");
+    public rackLetters: KnockoutObservableArray<string> = ko.observableArray();
     public teamTurn: KnockoutComputed<number>;
     public mainView: KnockoutObservable<MainView>;
-    public mainViewOptions: string[];
 
     /**
      * @param {teamNumber} - Team the current client is on
@@ -64,29 +50,20 @@ export class Index {
             gameJson.actions = (gameJson.actions as string).split(",");
 
         const game = new Game(gameJson);
+        const rackIndex = teamNumber - 1;
 
         this._socketConnection = new signalR.HubConnectionBuilder()
             .withUrl("/chatHub")
             .build();
-        this._game = game;
-        this._player = players[teamNumber - 1];
         this._timestamp = timestamp;
 
+        this.game = game;
+        this.players = players;
+        this.player = players[teamNumber - 1];
         this.teamNumber = teamNumber;
-        this.board = new Board(game);
-        this.rack = new Rack(game, teamNumber - 1);
-        this.buttons = new Buttons(game, this.board, this.rack, teamNumber);
-        this.moves = new Moves(game);
-        this.scores = new Scores(game);
-        this.bag = new Bag(game);
-        this.teams = new Teams(game.teams, players);
-        this.help = new Help(freebies, sc.letterValueMap);
-        this.options = new Options(game, this._player.id);
+        this.rackLetters(game.status().racks[rackIndex]);
         this.teamTurn = ko.pureComputed(() => game.currentStatus().teamTurn);
         this.mainView = ko.observable(MainView.Board);
-        this.mainViewOptions = Object.values(
-            MainView as Record<string, string>
-        );
 
         // Buttons that actually change the state of the game.
         const stateChangingButtons = [
@@ -105,14 +82,19 @@ export class Index {
             }
         };
 
-        this.options.clicked.subscribe(onButtonClick);
-        this.buttons.clicked.subscribe(onButtonClick);
+        this.onClick.subscribe(onButtonClick);
 
         // TODO Debug only
-        this._game.currentState.subscribe((s) =>
-            // NOTE: Currently "recall" click manipulates the state to force an update
+        this.game.currentState.subscribe((s) =>
+            // NOTE: Currently "recall" click manipulates the state
+            // to force an update
             console.log("Game state updated", s)
         );
+
+        this.game.currentStatus.subscribe((s) => {
+            this.rackLetters.removeAll();
+            this.rackLetters(s.racks[rackIndex]);
+        });
 
         // TODO Make receiving object be better
         this._socketConnection.on("GameUpdate", (...args: any[]) => {
@@ -125,8 +107,8 @@ export class Index {
             this._timestamp = state.version;
             delete state.version;
 
-            if (!_.isEqual(this._game.currentState(), state))
-                this._game.load(state);
+            if (!_.isEqual(this.game.currentState(), state))
+                this.game.load(state);
         });
 
         this._socketConnection.on("GroupUpdate", (...args: any[]) => {
@@ -136,7 +118,7 @@ export class Index {
         this._socketConnection
             .start()
             .then(() =>
-                this._socketConnection.invoke("AddToGroup", this._game.id)
+                this._socketConnection.invoke("AddToGroup", this.game.id)
             )
             .catch((err) => console.log(err));
 

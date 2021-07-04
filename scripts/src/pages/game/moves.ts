@@ -1,16 +1,15 @@
 import * as ko from "knockout";
 import { Game } from "scrabblecore";
 
-export class Moves {
+class Moves {
     public moves: KnockoutComputed<string[]>;
-    public move: KnockoutComputed<string>;
 
-    public constructor(game: Game) {
-        this.moves = ko.pureComputed(() => game.currentStatus().moveLog);
-        this.move = ko.pureComputed(() => {
-            var state = game.snapshot();
-            var status = game.currentStatus();
-            return status.moveLog[state.actionIndex];
-        });
+    public constructor(params: { game: Game }) {
+        this.moves = ko.pureComputed(() => params.game.currentStatus().moveLog);
     }
 }
+
+ko.components.register("moves", {
+    viewModel: Moves,
+    template: { require: "text!/templates/moves.html" },
+});

@@ -1,0 +1,29 @@
+<div class="buttons">
+    <!-- ko if: canGo -->
+    <button class="btn btn-primary" data-bind="click: onPlayClick">Play</button>
+    <button
+        class="btn"
+        data-bind="
+        class: canDraw() ? 'btn-success' : 'btn-light',
+        click: onDrawClick"
+    >
+        Draw
+    </button>
+    <button class="btn btn-light" data-bind="click: onSwapClick">Swap</button>
+    <button class="btn btn-light" data-bind="click: onSkipClick">Skip</button>
+    <!-- /ko -->
+
+    <!-- ko ifnot: canGo -->
+    <button class="btn btn-light" disabled="disabled">Play</button>
+    <button class="btn btn-light" disabled="disabled">Draw</button>
+    <button class="btn btn-light" disabled="disabled">Swap</button>
+    <button class="btn btn-light" disabled="disabled">Skip</button>
+    <!-- /ko -->
+
+    <button class="btn btn-light" data-bind="click: onRecallClick">
+        Recall
+    </button>
+    <button class="btn btn-light" data-bind="click: onShuffleClick">
+        Shuffle
+    </button>
+</div>

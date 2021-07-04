@@ -1,34 +1,48 @@
 import * as ko from "knockout";
 import { Game } from "scrabblecore";
 
-export class Options {
-    public clicked: KnockoutObservable<string> = ko.observable("");
-    public constructor(private _game: Game, private _playerId: number) {}
+function errorText(specificMessage: string): string {
+    return `Error: ${specificMessage}. Please refresh the page and try again`;
+}
+
+class Options {
+    private _game: Game;
+    private _playerId: number;
+    private _clicked: KnockoutObservable<string>;
+    public constructor(params: {
+        game: Game;
+        playerId: number;
+        onClick: KnockoutObservable<string>;
+    }) {
+        this._game = params.game;
+        this._playerId = params.playerId;
+        this._clicked = params.onClick;
+    }
 
     public onDeleteClick(): void {
         if (confirm("Are you sure you want to delete this game?"))
             this._handleDelete();
 
-        this.clicked("delete");
+        this._clicked("delete");
     }
 
     public onLeaveClick(): void {
         if (confirm("Are you sure you want to leave this game?"))
             this._handleLeave();
 
-        this.clicked("leave");
+        this._clicked("leave");
     }
 
     public onUndoClick(): void {
         this._game.undo();
 
-        this.clicked("undo");
+        this._clicked("undo");
     }
 
     public onRedoClick(): void {
         this._game.redo();
 
-        this.clicked("redo");
+        this._clicked("redo");
     }
 
     private async _handleDelete(): Promise<void> {
@@ -39,9 +53,7 @@ export class Options {
 
             location.assign("/games");
         } catch (err) {
-            alert(
-                "Error: Unable to delete game. Please refresh the page and try again"
-            );
+            alert(errorText("Unable to delete game"));
         }
     }
 
@@ -53,9 +65,12 @@ export class Options {
 
             location.assign("/games");
         } catch (err) {
-            alert(
-                "Error: Unable to leave game. Please refresh the page and try again"
-            );
+            alert(errorText("Unable to leave game"));
         }
     }
 }
+
+ko.components.register("options", {
+    viewModel: Options,
+    template: { require: "text!/templates/options.html" },
+});

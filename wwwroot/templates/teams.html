@@ -1,0 +1,16 @@
+<div class="teams">
+    <p>
+        Invite other players using this link:
+        <input
+            type="text"
+            class="form-control-sm"
+            data-bind="textinput: location.toString()"
+        />
+    </p>
+    <ul data-bind="foreach: teams">
+        <li>
+            Team
+            <!-- ko text: $data --><!-- /ko -->
+        </li>
+    </ul>
+</div>

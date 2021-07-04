@@ -1,42 +1,41 @@
+import * as _ from "underscore";
 import * as ko from "knockout";
-import { Rack } from "./rack";
-import { Board } from "./board";
 import {
     Game,
     Letter,
     ActionType,
     ISquare,
     createPlayCommand,
+    createBoardFromStatus,
     parseSquareCoordinates,
     constants as sc,
 } from "scrabblecore";
 
-export class Buttons {
+class Buttons {
     private _game: Game;
-    private _board: Board;
-    private _rack: Rack;
+    private _rack: KnockoutObservableArray<string>;
+    private _clicked: KnockoutObservable<string> = ko.observable("");
 
     public canGo: KnockoutComputed<boolean>;
-    public clicked: KnockoutObservable<string> = ko.observable("");
     public canDraw: KnockoutComputed<boolean>;
 
-    public constructor(
-        game: Game,
-        board: Board,
-        rack: Rack,
-        teamNumber: number
-    ) {
-        this._game = game;
-        this._board = board;
-        this._rack = rack;
+    public constructor(params: {
+        game: Game;
+        rack: KnockoutObservableArray<string>;
+        onClick: KnockoutObservable<string>;
+        teamNumber: number;
+    }) {
+        this._game = params.game;
+        this._rack = params.rack;
+        this._clicked = params.onClick;
 
         this.canGo = ko.pureComputed(
-            () => game.currentStatus().teamTurn === teamNumber
+            () => this._game.currentStatus().teamTurn === params.teamNumber
         );
 
         this.canDraw = ko.pureComputed(() => {
-            const status = game.currentStatus();
-            const rack = status.racks[teamNumber - 1];
+            const status = this._game.currentStatus();
+            const rack = status.racks[params.teamNumber - 1];
             return status.bag.length > 0 && rack.length < sc.MAX_RACK_TILES;
         });
     }
@@ -44,31 +43,26 @@ export class Buttons {
     public onDrawClick = (event: JQueryEventObject): void => {
         this._game.draw();
 
-        this.clicked("draw");
+        this._clicked("draw");
     };
 
     public onRecallClick = (event: JQueryEventObject): void => {
         this._game.currentState(this._game.snapshot());
         this._game.currentStatus(this._game.status());
 
-        /*
-        this._rack.rack([]);
-        this._rack.rack(status.racks[this._rack.index]); // TODO Why tf has it come down to doing THIS?
-        */
-
-        this.clicked("recall");
+        this._clicked("recall");
     };
 
     public onShuffleClick = (event: JQueryEventObject): void => {
-        this._rack.shuffle();
+        this._rack(_.shuffle(this._rack()));
 
-        this.clicked("shuffle");
+        this._clicked("shuffle");
     };
 
     public onSkipClick = (event: JQueryEventObject): void => {
         this._game.skip();
 
-        this.clicked("skip");
+        this._clicked("skip");
     };
 
     public onSwapClick = (event: JQueryEventObject): void => {
@@ -78,7 +72,7 @@ export class Buttons {
         if (letters) {
             try {
                 this._game.swap(ActionType.Swap + " " + letters.toUpperCase());
-                this.clicked("swap");
+                this._clicked("swap");
             } catch (err) {
                 alert(err.message);
             }
@@ -91,8 +85,10 @@ export class Buttons {
             alert("No tiles were placed on the board");
             return;
         }
+
         const move: ISquare[] = [];
-        const board = ko.toJS(this._board.board()); // Copy since we're mutating
+        const board = createBoardFromStatus(this._game.currentStatus());
+
         $placed.each(function (this: HTMLElement) {
             let letter = ko.dataFor(this);
             const square = ko.toJS(ko.dataFor(this.parentNode!)); // Copy since we're mutating
@@ -119,6 +115,11 @@ export class Buttons {
             return;
         }
 
-        this.clicked("play");
+        this._clicked("play");
     };
 }
+
+ko.components.register("buttons", {
+    viewModel: Buttons,
+    template: { require: "text!/templates/buttons.html" },
+});

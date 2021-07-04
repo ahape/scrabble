@@ -2,24 +2,15 @@ import * as ko from "knockout";
 import * as _ from "underscore";
 import { Game } from "scrabblecore";
 
-export class Rack {
-    public index: number;
-    public rack: KnockoutObservableArray<string>;
+class Rack {
+    public rack: KnockoutComputed<string[]>;
 
-    public constructor(game: Game, rackIndex: number) {
-        this.index = rackIndex;
-        this.rack = ko.observableArray(game.status().racks[rackIndex]);
-
-        game.currentStatus.subscribe((status) => {
-            // Because of the way we mutate the array via drag and drop
-            this.rack.removeAll();
-            this.rack(status.racks[rackIndex]);
-        });
-    }
-
-    public shuffle(): void {
-        let letters = this.rack();
-        letters = _.shuffle(letters);
-        this.rack(letters);
+    public constructor(params: { rack: KnockoutObservableArray<string> }) {
+        this.rack = ko.pureComputed(() => params.rack());
     }
 }
+
+ko.components.register("rack", {
+    viewModel: Rack,
+    template: { require: "text!/templates/rack.html" },
+});

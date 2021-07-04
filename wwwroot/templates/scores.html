@@ -1,0 +1,18 @@
+<div id="scores" class="scores">
+    <!-- ko if: isGameOver -->
+    <em>(GAME OVER)</em>
+    &nbsp;
+    <!-- /ko -->
+
+    <!-- ko foreach: scores -->
+    <span
+        data-bind="
+        text: $data,
+        css: { 
+            'team-yours': ($index() + 1) == $parent.teamNumber,
+            'team-turn': ($index() + 1) == $parent.teamTurn()
+        }"
+    ></span>
+    &nbsp;
+    <!-- /ko -->
+</div>

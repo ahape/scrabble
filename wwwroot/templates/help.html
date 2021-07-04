@@ -1,0 +1,14 @@
+<div class="help">
+    <h3>Letter Values</h3>
+    <p data-bind="foreach: letterValues">
+        <code data-bind="text: $data[0] + ':' + $data[1]"></code>&nbsp;
+    </p>
+    <h3>Two Letter Words</h3>
+    <p data-bind="foreach: twoLetterWords">
+        <code data-bind="text: $data"></code>
+    </p>
+    <h3>Q Without U</h3>
+    <p data-bind="foreach: qWithoutU">
+        <code data-bind="text: $data"></code>
+    </p>
+</div>
