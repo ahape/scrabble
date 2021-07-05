@@ -3,6 +3,11 @@
     <p data-bind="foreach: letterValues">
         <code data-bind="text: $data[0] + ':' + $data[1]"></code>&nbsp;
     </p>
+    <h3>Square Values</h3>
+    <p data-bind="foreach: squareValues">
+        <span style="color: transparent;" data-bind="css: $data[0]">XX</span> -
+        <span data-bind="text: $data[1]"></span>&nbsp;
+    </p>
     <h3>Two Letter Words</h3>
     <p data-bind="foreach: twoLetterWords">
         <code data-bind="text: $data"></code>
