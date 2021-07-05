@@ -1,10 +1,9 @@
 <div
-    id="view-selection"
-    class="view-selection btn-group"
+    class="btn-group"
     data-bind="foreach: { data: mainViewOptions, as: 'option' }"
 >
     <label
-        class="btn btn-outline-info"
+        class="btn btn-outline-secondary"
         data-bind="css: { 'active': $parent.mainView() === option }"
     >
         <input

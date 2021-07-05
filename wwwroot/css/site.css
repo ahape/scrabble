@@ -73,6 +73,10 @@ body {
 
 /* Custom styles
 -------------------------------------------------- */
+body,
+a[href] {
+    color: #ddd;
+}
 .square,
 .letter {
     box-sizing: border-box;
@@ -82,14 +86,15 @@ body {
     text-align: center;
     font-family: monospace;
     font-size: 1.45rem;
+    color: gold;
 }
 .square {
-    border: 1px solid beige;
+    border: 1px solid black;
 }
 .letter {
-    background-color: beige;
+    background-color: saddlebrown;
     line-height: 33px;
-    border: 1px solid tan;
+    border: 1px solid gold;
     cursor: pointer;
 }
 .square > .letter {
@@ -107,18 +112,24 @@ body {
 .help,
 .moves,
 .teams,
+.options,
 .bag {
     margin-top: 15px;
     height: 500px;
     overflow: auto;
-    border: 1px solid beige;
     box-sizing: border-box;
+}
+.help,
+.moves,
+.teams,
+.bag {
+    border: 1px solid black;
 }
 .help {
     padding: 15px;
 }
 .help code {
-    color: black;
+    color: #ccc;
 }
 .moves {
     padding-top: 15px;
@@ -149,21 +160,25 @@ body {
 }
 .word3 {
     background-color: orange;
+    color: black;
 }
 .word2 {
-    background-color: pink;
+    background-color: darkmagenta;
 }
 .letter2 {
-    background-color: aliceblue;
+    background-color: darkcyan;
 }
 .letter3 {
-    background-color: lightsteelblue;
+    background-color: midnightblue;
 }
 .team-turn {
     font-weight: bolder;
 }
 .team-yours:after {
     content: " (you)";
+}
+.view-selection {
+    display: block;
 }
 .view-selection label {
     text-transform: capitalize;

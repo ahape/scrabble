@@ -11,9 +11,9 @@ class Help {
         this.twoLetterWords = freebies.twoLetterWords;
         this.qWithoutU = freebies.qWithoutU;
         this.letterValues = Object.entries(sc.letterValueMap);
-
-        // TODO: Determine if we even need an UNSET (null) value
-        if ("UNSET" in sc.letterValueMap) this.letterValues.splice(0, 1);
+        // TODO: Determine if we even need an UNSET (null) value.
+        // The `splice` here is removing it from displaying.
+        this.letterValues.splice(0, 1);
     }
 }
 

@@ -32,7 +32,8 @@
     </div>
     <p style="margin-top: 5px">
         Players already on that team: 
-        <span class="text-info" 
-            data-bind="text: playersOnTeam"></span>
+        <ul data-bind="foreach: playersOnTeam">
+            <li data-bind="text: $data"></li>
+        </ul>
     </p>
 </form>
