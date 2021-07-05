@@ -60,9 +60,10 @@ class Buttons {
     };
 
     public onSkipClick = (event: JQueryEventObject): void => {
-        this._game.skip();
-
-        this._clicked("skip");
+        if (confirm("Are you sure you want to skip your turn?")) {
+            this._game.skip();
+            this._clicked("skip");
+        }
     };
 
     public onSwapClick = (event: JQueryEventObject): void => {

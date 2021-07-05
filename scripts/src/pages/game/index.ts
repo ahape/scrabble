@@ -84,7 +84,7 @@ export class Index {
 
         this.onClick.subscribe(onButtonClick);
 
-        // TODO Debug only
+        // NOTE: Debug only
         this.game.currentState.subscribe((s) =>
             // NOTE: Currently "recall" click manipulates the state
             // to force an update
@@ -106,6 +106,9 @@ export class Index {
 
             this._timestamp = state.version;
             delete state.version;
+            // TODO: Stop mixing JSON serializers--"players" gets added
+            // to JSON object via System.Text.Json.
+            delete state.players;
 
             if (!_.isEqual(this.game.currentState(), state))
                 this.game.load(state);
