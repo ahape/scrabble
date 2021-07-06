@@ -33,3 +33,7 @@ dotnet run
 ```
 
 and follow the instructions on the command line.
+
+## Rough Roadmap
+
+https://coda.io/d/Scrabble-Requirements-MVP_dNFDDTqdu2q
