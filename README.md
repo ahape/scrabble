@@ -16,6 +16,12 @@ Once you clone the repo, run the following:
 yarn install
 ```
 
+then
+
+```
+yarn run build
+```
+
 That loads all the JS dependencies and whatnot.
 
 Next, run:
