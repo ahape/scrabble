@@ -40,6 +40,17 @@ dotnet run
 
 and follow the instructions on the command line.
 
+## Configuration
+
+For Google authentication, you need to add the Client ID and Secrets to the local secrets store.  To obtain these, you can create your autorization credentials by following the guild [here](https://developers.google.com/identity/sign-in/web/sign-in).
+
+To add these credentials to your local user store, run the following commands:
+
+```
+dotnet user-secrets set "Authentication:Google:ClientId" "<client-id>"
+dotnet user-secrets set "Authentication:Google:ClientSecret" "<client-secret>"
+```
+
 ## Rough Roadmap
 
 https://coda.io/d/Scrabble-Requirements-MVP_dNFDDTqdu2q
