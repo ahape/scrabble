@@ -10,6 +10,10 @@ dotnet tool install --global dotnet-ef
 
 This is for doing code-first DB configuration through EF.
 
+NOTE: You can do the `yarn install` stuff and `yarn run <script name>`
+with `npm install` and `npm run-script <name>`, but I suggest installing `yarn`
+globally because it's better.
+
 Once you clone the repo, run the following:
 
 ```
