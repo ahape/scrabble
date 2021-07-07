@@ -1,3 +1,5 @@
+yarn run build
+dotnet clean
 rm -rf ../scrabble-azure
 mkdir ../scrabble-azure
 cp -rf * ../scrabble-azure/
