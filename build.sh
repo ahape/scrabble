@@ -10,3 +10,4 @@ rm yarn*
 rm build.sh
 rm -rf node_modules/
 rm -rf ts/
+rm -rf scripts/
