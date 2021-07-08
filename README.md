@@ -61,7 +61,7 @@ and follow the instructions on the command line.
 
 ## Configuration
 
-For Google authentication, you need to add the Client ID and Secrets to the local secrets store.  To obtain these, you can create your autorization credentials by following the guild [here](https://developers.google.com/identity/sign-in/web/sign-in).
+For Google authentication, you need to add the Client ID and Secrets to the local secrets store.  To obtain these, you can create your autorization credentials by following the guide [here](https://developers.google.com/identity/sign-in/web/sign-in).
 
 To add these credentials to your local user store, run the following commands:
 
