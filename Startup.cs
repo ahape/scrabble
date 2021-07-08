@@ -39,6 +39,7 @@ namespace scrabble
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequireDigit = false;
@@ -58,6 +59,17 @@ namespace scrabble
                 options.Conventions.AddPageRoute("/Game", "/Games/{GameId}");
                 options.Conventions.AddPageRoute("/ChooseTeam", "/Games/{GameId}/Choice");
             });
+
+            services.AddAuthentication()
+            .AddGoogle(options =>
+            {
+                IConfigurationSection googleAuthNSection =
+                    Configuration.GetSection("Authentication:Google");
+
+                options.ClientId = googleAuthNSection["ClientId"];
+                options.ClientSecret = googleAuthNSection["ClientSecret"];
+            });
+
             services.AddSignalR();
             services.AddControllers();
         }
