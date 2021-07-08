@@ -60,15 +60,18 @@ namespace scrabble
                 options.Conventions.AddPageRoute("/ChooseTeam", "/Games/{GameId}/Choice");
             });
 
-            services.AddAuthentication()
-            .AddGoogle(options =>
+            var googleAuthNSection = Configuration.GetSection("Authentication:Google");
+            if (googleAuthNSection != null &&
+                !string.IsNullOrWhiteSpace(googleAuthNSection["ClientId"]) &&
+                !string.IsNullOrWhiteSpace(googleAuthNSection["ClientSecret"]))
             {
-                IConfigurationSection googleAuthNSection =
-                    Configuration.GetSection("Authentication:Google");
-
-                options.ClientId = googleAuthNSection["ClientId"];
-                options.ClientSecret = googleAuthNSection["ClientSecret"];
-            });
+                services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    options.ClientId = googleAuthNSection["ClientId"];
+                    options.ClientSecret = googleAuthNSection["ClientSecret"];
+                });
+            }
 
             services.AddSignalR();
             services.AddControllers();
