@@ -40,7 +40,7 @@ bld/
 node_modules/
 package-lock.json
 yarn.lock
-app.db
+!app.db
 wwwroot/js/*
 # This is the only JS file that's not auto-gen'd. Track changes
 !wwwroot/js/site.js

@@ -2,13 +2,16 @@
 
 ## 1. Prereqs
 
-You'll need to download the [Entity Framework Core tool](https://docs.microsoft.com/en-us/ef/core/cli/dotnet).
+- Node ([download](https://nodejs.org/en/download/))
+- dotnet ([download](https://dotnet.microsoft.com/download))
+- Entity Framework Core tool ([info](https://docs.microsoft.com/en-us/ef/core/cli/dotnet))
 
+For the EF tool, once you have `dotnet` installed, just run this command:
 ```
 dotnet tool install --global dotnet-ef
 ```
 
-This is for doing code-first DB configuration through EF.
+That's for doing code-first DB configuration through EF.
 
 ## 2. Setup
 
@@ -58,7 +61,7 @@ and follow the instructions on the command line.
 
 ## Configuration
 
-For Google authentication, you need to add the Client ID and Secrets to the local secrets store.  To obtain these, you can create your autorization credentials by following the guild [here](https://developers.google.com/identity/sign-in/web/sign-in).
+For Google authentication, you need to add the Client ID and Secrets to the local secrets store.  To obtain these, you can create your autorization credentials by following the guide [here](https://developers.google.com/identity/sign-in/web/sign-in).
 
 To add these credentials to your local user store, run the following commands:
 
