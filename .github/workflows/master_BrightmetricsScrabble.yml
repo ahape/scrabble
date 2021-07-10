@@ -16,6 +16,17 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set up Node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    
+    - name: Install package deps
+      run: npm install
+      
+    - name: Gen JS assets
+      run: npm run-script build
+
     - name: Set up .NET Core
       uses: actions/setup-dotnet@v1
       with:
@@ -23,10 +34,10 @@ jobs:
         include-prerelease: true
 
     - name: Build with dotnet
-      run: dotnet build --configuration Release
+      run: dotnet build
 
     - name: dotnet publish
-      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      run: dotnet publish -o ${{env.DOTNET_ROOT}}/myapp
 
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v2
