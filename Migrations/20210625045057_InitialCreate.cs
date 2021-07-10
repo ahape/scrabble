@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace scrabble.Migrations
@@ -188,7 +188,9 @@ namespace scrabble.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.Sql(@"
+            if (migrationBuilder.ActiveProvider == "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                migrationBuilder.Sql(@"
 CREATE TRIGGER UpdateCustomerVersion
 AFTER UPDATE ON Games
 BEGIN
@@ -196,6 +198,7 @@ BEGIN
     SET Version = Version + 1
     WHERE rowid = NEW.rowid;
 END;");
+            }
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
