@@ -32,12 +32,6 @@ jobs:
       with:
         dotnet-version: '5.0.x'
         include-prerelease: true
-        
-    - name: Configure Google SSO Client ID
-      run: dotnet user-secrets set Authentication:Google:ClientId ${{secrets.GOOGLE_AUTH_CLIENT_ID}}
-    
-    - name: Configure Google SSO Client Secret
-      run: dotnet user-secrets set Authentication:Google:ClientSecret ${{secrets.GOOGLE_AUTH_CLIENT_SECRET}}
 
     - name: Build with dotnet
       run: dotnet build
