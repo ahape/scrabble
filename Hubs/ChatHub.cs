@@ -7,10 +7,7 @@ namespace scrabble.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task NotifyGameUpdate(string groupName, GameState state)
-        {
-            await Clients.Group(groupName).SendAsync("GameUpdate", state);
-        }
+        // NOTE: Group name is game ID.
 
         public async Task AddToGroup(string groupName)
         {
