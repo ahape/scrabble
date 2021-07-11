@@ -24,7 +24,6 @@ namespace scrabble
 {
     public class Startup
     {
-        private readonly IWebHostEnvironment Environment;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
@@ -33,21 +32,45 @@ namespace scrabble
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Environment;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            if (Environment.IsProduction())
+            var conn = Configuration.GetConnectionString("ScrabbleDbConnection");
+
+            // Used to override the default provider settings
+            var provider = Configuration["DbProvider"];
+
+            // Set default provider if not specified
+            if (string.IsNullOrEmpty(provider))
+                provider = Environment.IsProduction() ? "SqlServer" : "Sqlite";
+
+            if (!string.IsNullOrEmpty(provider))
             {
-                services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                switch (provider)
+                {
+                    case "SqlServer":
+                        services.AddDbContext<ApplicationDbContext, SqlServerApplicationDbContext>(options =>
+                        {
+                            if (!string.IsNullOrEmpty(conn))
+                                options.UseSqlServer(conn);
+                        },
+                        ServiceLifetime.Transient);
+                        break;
+                    case "Sqlite":
+                        services.AddDbContext<ApplicationDbContext, SqliteApplicationDbContext>(options =>
+                        {
+                            if (!string.IsNullOrEmpty(conn))
+                                options.UseSqlite(conn);
+                        },
+                        ServiceLifetime.Transient);
+                        break;
+                }
             }
-            else
-            {
-                services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            if (Environment.IsDevelopment())
                 services.AddDatabaseDeveloperPageExceptionFilter();
-            }
 
 
             services.AddDefaultIdentity<IdentityUser>()
@@ -88,12 +111,12 @@ namespace scrabble
             ILogger<Startup> logger,
             ApplicationDbContext dbContext)
         {
-            dbContext.Database.Migrate();
+            dbContext?.Database?.Migrate();
 
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
+                app.UseDeveloperExceptionPage();
             }
             else
             {

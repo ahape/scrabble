@@ -39,7 +39,7 @@ namespace scrabble.Pages
             this.dbContext = dbContext;
         }
 
-        async public void OnGetAsync()
+        async public Task OnGetAsync()
         {
             var game = await dbContext.Games.FindAsync(GameId);
             if (game == null)
