@@ -1,6 +1,10 @@
 <ol id="moves" class="moves" data-bind="foreach: moves">
     <li>
-        <!-- ko text: $data --><!-- /ko -->
-        <em data-bind="click: $parent.onBestMoveClick">(see best)</em>
+        <span data-bind="text: $data[0]"></span>
+        <!-- ko if: $data[1] -->
+        <span data-bind="with: $data[1]">
+            {<span data-bind="click: onShowMoreClick, text: score"></span>}
+        </span>
+        <!-- /ko -->
     </li>
 </ol>

@@ -1,3 +1,6 @@
+export const lsKey = {
+    showBest: "__scrabble.showBestPossibleWord",
+};
 export const freebies = {
     twoLetterWords: [
         "AA",

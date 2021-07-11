@@ -1,27 +1,88 @@
 import * as ko from "knockout";
 import * as _ from "underscore";
 import { Game } from "scrabblecore";
+import { IGameStatus } from "scrabblecore";
+import { lsKey } from "../../constants";
+
+function cacheKey(actionIndex: number, action: string): string {
+    return `${actionIndex}:${action}`;
+}
+
+const bestPossibleMovesCache: Record<
+    string,
+    KnockoutObservable<BestWord> | null
+> = {};
+
+interface IBestWordData {
+    score: number;
+}
+
+class BestWord {
+    public score: number;
+
+    constructor(data?: IBestWordData) {
+        if (data) this.score = data.score;
+        else this.score = 0;
+    }
+
+    public onShowMoreClick(): void {
+        alert("<show the play in string>");
+    }
+}
 
 class Moves {
-    public moves: KnockoutComputed<string[]>;
+    public moves: KnockoutComputed<
+        Array<[string, KnockoutObservable<BestWord> | null]>
+    >;
+    public showBest: boolean = localStorage.getItem(lsKey.showBest) === "true";
 
     private _game: Game;
 
     public constructor(params: { game: Game }) {
         this._game = params.game;
 
-        this.moves = ko.pureComputed(() => params.game.currentStatus().moveLog);
+        this.moves = ko.pureComputed(() => {
+            var status = this._game.currentStatus();
+            return this._getMoves(status);
+        });
     }
 
-    public onBestMoveClick = async (): Promise<void> => {
-        const status = this._game.currentStatus();
+    private _getMoves(
+        status: IGameStatus
+    ): Array<[string, KnockoutObservable<BestWord> | null]> {
+        return status.moveLog.map((move, i) => {
+            var bestPossibleMove = this._getBestPossibleMove(i);
+            return [move, bestPossibleMove];
+        });
+    }
+
+    private _getBestPossibleMove(
+        actionIndex: number
+    ): KnockoutObservable<BestWord> | null {
+        const actionForIndex = this._game.actions[actionIndex];
+        const observable = ko.observable<BestWord>(new BestWord());
+
+        if (actionForIndex.indexOf("PLAY ") === -1) return null;
+        if (!this.showBest) return null;
+
+        const key = cacheKey(actionIndex, actionForIndex);
+        const existingEntry = bestPossibleMovesCache[key];
+
+        if (existingEntry) return existingEntry;
+
+        bestPossibleMovesCache[key] = observable;
+
+        // Need to grab state from right before their move.
+        const status = this._game.status(actionIndex - 1);
         const params = $.param({
             board: _.flatten(status.board).join(""),
             rack: status.racks[status.teamTurn - 1].join(""),
         });
-        const response = await fetch(`/rest/move?${params}`);
-        console.log("Best move response", response);
-    };
+        fetch(`/rest/move?${params}`)
+            .then((response) => response.json())
+            .then((json) => observable(new BestWord(json)));
+        return observable;
+    }
 }
 
 ko.components.register("moves", {

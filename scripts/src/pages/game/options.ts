@@ -1,14 +1,18 @@
 import * as ko from "knockout";
 import { Game } from "scrabblecore";
+import { lsKey } from "../../constants";
 
 function errorText(specificMessage: string): string {
     return `Error: ${specificMessage}. Please refresh the page and try again`;
 }
 
 class Options {
+    public showBestPossibleWords: KnockoutObservable<boolean>;
+
     private _game: Game;
     private _playerId: number;
     private _clicked: KnockoutObservable<string>;
+
     public constructor(params: {
         game: Game;
         playerId: number;
@@ -17,6 +21,14 @@ class Options {
         this._game = params.game;
         this._playerId = params.playerId;
         this._clicked = params.onClick;
+
+        this.showBestPossibleWords = ko.observable(
+            localStorage.getItem(lsKey.showBest) === "true"
+        );
+
+        this.showBestPossibleWords.subscribe((checked) =>
+            localStorage.setItem(lsKey.showBest, checked.toString())
+        );
     }
 
     public onDeleteClick(): void {
