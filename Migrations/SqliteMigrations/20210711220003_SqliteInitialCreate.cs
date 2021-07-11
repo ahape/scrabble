@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace scrabble.Migrations
+namespace scrabble.Migrations.SqliteMigrations
 {
-    public partial class InitialCreate : Migration
+    public partial class SqliteInitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -54,7 +54,7 @@ namespace scrabble.Migrations
                     Actions = table.Column<string>(type: "TEXT", nullable: true),
                     ActionIndex = table.Column<int>(type: "INTEGER", nullable: false),
                     Teams = table.Column<int>(type: "INTEGER", nullable: false),
-                    Version = table.Column<long>(type: "INTEGER", rowVersion: true, nullable: false, defaultValue: 0L)
+                    Version = table.Column<byte[]>(type: "BLOB", rowVersion: true, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -189,11 +189,20 @@ namespace scrabble.Migrations
                 });
 
             migrationBuilder.Sql(@"
-CREATE TRIGGER UpdateCustomerVersion
+CREATE TRIGGER UpdateGameStateVersion
 AFTER UPDATE ON Games
 BEGIN
     UPDATE Games
-    SET Version = Version + 1
+    SET Version = randomblob(8)
+    WHERE rowid = NEW.rowid;
+END;");
+
+            migrationBuilder.Sql(@"
+CREATE TRIGGER InsertGameStateVersion
+AFTER INSERT ON Games
+BEGIN
+    UPDATE Games
+    SET Version = randomblob(8)
     WHERE rowid = NEW.rowid;
 END;");
 

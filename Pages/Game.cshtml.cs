@@ -17,7 +17,7 @@ namespace scrabble.Pages
         private readonly ApplicationDbContext dbContext;
         
         public int Team { get; set; }
-        public long Version { get; set; }
+        public byte[] Version { get; set; }
         public JObject GameJson { get; set; }
         public JArray Players { get; set; }
 
@@ -30,7 +30,7 @@ namespace scrabble.Pages
             this.dbContext = dbContext;
         }
 
-        async public void OnGetAsync()
+        async public Task OnGetAsync()
         {
             if (GameId == Guid.Empty)
             {

@@ -10,7 +10,7 @@ namespace scrabble.Data
         public string Actions { get; set; } = "NEW_GAME";
         public int ActionIndex { get; set; }
         public int Teams { get; set; }
-        public long Version { get; set; }
+        public byte[] Version { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
         [Newtonsoft.Json.JsonIgnore]
