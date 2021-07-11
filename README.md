@@ -59,6 +59,22 @@ dotnet run
 
 and follow the instructions on the command line.
 
+## Database Migrations
+
+When you change one of the database models, you will need to also produce migration files for each provider.  
+
+### SQLite
+
+```
+dotnet ef migrations add <useful migration name> -c SqliteApplicationDbContext -- --DbProvider Sqlite
+```
+
+### SQL Server
+
+```
+dotnet ef migrations add <useful migration name> -c SqlServerApplicationDbContext -- --DbProvider SqlServer
+```
+
 ## Configuration
 
 For Google authentication, you need to add the Client ID and Secrets to the local secrets store.  To obtain these, you can create your autorization credentials by following the guide [here](https://developers.google.com/identity/sign-in/web/sign-in).
