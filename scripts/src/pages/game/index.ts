@@ -26,7 +26,7 @@ export class Index {
     private _timestamp: number;
     private _dragNDropListener: DragNDropListener;
     public game: Game;
-    public players: IGamePlayer[];
+    public players: KnockoutObservableArray<IGamePlayer>;
     public player: IGamePlayer;
     public teamNumber: number;
     public onClick: KnockoutObservable<string> = ko.observable("");
@@ -58,7 +58,7 @@ export class Index {
         this._timestamp = timestamp;
 
         this.game = game;
-        this.players = players;
+        this.players = ko.observableArray(players);
         this.player = players[teamNumber - 1];
         this.teamNumber = teamNumber;
         this.rackLetters(game.status().racks[rackIndex]);
@@ -112,6 +112,16 @@ export class Index {
 
             if (!_.isEqual(this.game.currentState(), state))
                 this.game.load(state);
+        });
+
+        this._socketConnection.on("PlayerAdd", (...args: any[]) => {
+            const player = args[0] as IGamePlayer;
+            this.players.push(player);
+        });
+
+        this._socketConnection.on("PlayerRemove", (...args: any[]) => {
+            const player = args[0] as IGamePlayer;
+            this.players.remove((p) => p.id == player.id);
         });
 
         this._socketConnection.on("GroupUpdate", (...args: any[]) => {

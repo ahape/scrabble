@@ -1,5 +1,4 @@
 using System;
-using Newtonsoft.Json;
 
 namespace scrabble.Data
 {
@@ -10,7 +9,8 @@ namespace scrabble.Data
         public string UserName { get; set; }
         public int Team { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public GameState Game { get; set; }
     }
 }

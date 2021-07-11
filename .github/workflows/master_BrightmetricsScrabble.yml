@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - kind-mushroom-a834b49df95e4fd1a90559c314a21efb
+name: Build and deploy ASP.Net Core app to Azure Web App - BrightmetricsScrabble
 
 on:
   push:
@@ -62,7 +62,7 @@ jobs:
       id: deploy-to-webapp
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'kind-mushroom-a834b49df95e4fd1a90559c314a21efb'
+        app-name: 'BrightmetricsScrabble'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_e0ce5a108b4c410886f2cf342a3bba67 }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_46b0ae0a31f742cbbaab9bd1ecac865c }}
         package: .
