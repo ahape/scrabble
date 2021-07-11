@@ -15,18 +15,16 @@ const bestPossibleMovesCache: Record<
 
 interface IBestWordData {
     score: number;
+    text: string;
 }
 
 class BestWord {
-    public score: number;
+    constructor(public data: IBestWordData) {}
 
-    constructor(data?: IBestWordData) {
-        if (data) this.score = data.score;
-        else this.score = 0;
-    }
+    public static default = new BestWord({ score: "loading..." } as any);
 
     public onShowMoreClick(): void {
-        alert("<show the play in string>");
+        alert(this.data.text);
     }
 }
 
@@ -60,7 +58,7 @@ class Moves {
         actionIndex: number
     ): KnockoutObservable<BestWord> | null {
         const actionForIndex = this._game.actions[actionIndex];
-        const observable = ko.observable<BestWord>(new BestWord());
+        const observable = ko.observable<BestWord>(BestWord.default);
 
         if (actionForIndex.indexOf("PLAY ") === -1) return null;
         if (!this.showBest) return null;
@@ -75,7 +73,9 @@ class Moves {
         // Need to grab state from right before their move.
         const status = this._game.status(actionIndex - 1);
         const params = $.param({
-            board: _.flatten(status.board).join(""),
+            board: _.flatten(status.board)
+                .map((x) => x || " ")
+                .join(""),
             rack: status.racks[status.teamTurn - 1].join(""),
         });
         fetch(`/rest/move?${params}`)

@@ -26,17 +26,18 @@ namespace scrabble.REST
             var bag = new char[0];
             var turn = 0;
 
-            Console.WriteLine("Board is -- {0}", board);
-            Console.WriteLine("Rack is -- {0}", rack);
-
-            var bestPossibleScore = Api.FindBestWord(
+            var best = Api.FindBestWord(
                 teams,
                 (board ?? "").ToCharArray(),
                 bag,
                 (rack ?? "").ToCharArray(),
                 turn);
 
-            return Ok(new { score = bestPossibleScore });
+            return Ok(new 
+            { 
+                score = best.TotalScore, 
+                text = $"With the letters: {rack}\n" + best.ToString(),
+            });
         }
     }
 }
