@@ -44,7 +44,7 @@ That loads all the JS dependencies and whatnot.
 Next, run:
 
 ```
-dotnet ef database update
+dotnet ef database update --context SqliteApplicationDbContext
 ```
 
 That should build the project, configure the local SQLite database, and load whatever migrations it needs to.
@@ -75,7 +75,7 @@ dotnet ef migrations add <useful migration name> -c SqliteApplicationDbContext -
 dotnet ef migrations add <useful migration name> -c SqlServerApplicationDbContext -- --DbProvider SqlServer
 ```
 
-## Configuration
+## Using SSO locally
 
 For Google authentication, you need to add the Client ID and Secrets to the local secrets store.  To obtain these, you can create your autorization credentials by following the guide [here](https://developers.google.com/identity/sign-in/web/sign-in).
 
