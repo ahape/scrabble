@@ -8,14 +8,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
 using scrabble.Data;
+using scrabble.Hubs;
 
 namespace scrabble.Pages
 {
     public class ChooseTeamModel : PageModel
     {
         private readonly ILogger<ChooseTeamModel> logger;
+        private readonly IHubContext<ChatHub> hubContext;
         private readonly ApplicationDbContext dbContext;
         private JArray activePlayers;
 
@@ -33,10 +36,11 @@ namespace scrabble.Pages
         [BindProperty(SupportsGet=true)]
         public Guid GameId { get; set; }
 
-        public ChooseTeamModel(ILogger<ChooseTeamModel> logger, ApplicationDbContext dbContext)
+        public ChooseTeamModel(ILogger<ChooseTeamModel> logger, IHubContext<ChatHub> hubContext, ApplicationDbContext dbContext)
         {
             this.logger = logger;
             this.dbContext = dbContext;
+            this.hubContext = hubContext;
         }
 
         async public Task OnGetAsync()
@@ -62,17 +66,21 @@ namespace scrabble.Pages
             Teams = game.Teams;
         }
 
-        public void OnPost(int team)
+        async public void OnPostAsync(int team)
         {
             Console.WriteLine($"{User.Identity.Name} chose team {team} for game {GameId}");
 
-            dbContext.Add(new GamePlayer()
+            var player = new GamePlayer()
             {
                 UserName = User.Identity.Name,
                 GameId = GameId,
                 Team = team,
-            });
-            dbContext.SaveChanges();
+            };
+
+            dbContext.Add(player);
+            await dbContext.SaveChangesAsync();
+
+            await hubContext.Clients.Group(GameId.ToString()).SendAsync("PlayerAdd", player);
 
             Response.Redirect("/games/" + GameId);
         }

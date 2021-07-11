@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
 
 namespace scrabble.Data
 {
@@ -13,7 +12,8 @@ namespace scrabble.Data
         public int Teams { get; set; }
         public byte[] Version { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public ICollection<GamePlayer> Players { get; set; }
     }
 }
