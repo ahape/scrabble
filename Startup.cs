@@ -69,12 +69,23 @@ namespace scrabble
                 }
             }
 
-            if (Environment.IsDevelopment())
-                services.AddDatabaseDeveloperPageExceptionFilter();
-
-
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            if (Environment.IsDevelopment())
+            {
+                services.AddDatabaseDeveloperPageExceptionFilter();
+
+                services.Configure<IdentityOptions>(options =>
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredLength = 1;
+                    options.Password.RequiredUniqueChars = 0;
+                });
+            }
 
             services.AddRazorPages(options =>
             {
