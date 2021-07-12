@@ -66,7 +66,7 @@ namespace scrabble.Pages
             Teams = game.Teams;
         }
 
-        async public void OnPostAsync(int team)
+        async public Task OnPostAsync(int team)
         {
             Console.WriteLine($"{User.Identity.Name} chose team {team} for game {GameId}");
 
