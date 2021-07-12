@@ -77,10 +77,10 @@ namespace scrabble.Pages
                 Team = team,
             };
 
+            await hubContext.Clients.Group(GameId.ToString()).SendAsync("PlayerAdd", player);
+
             dbContext.Add(player);
             await dbContext.SaveChangesAsync();
-
-            await hubContext.Clients.Group(GameId.ToString()).SendAsync("PlayerAdd", player);
 
             Response.Redirect("/games/" + GameId);
         }
