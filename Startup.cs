@@ -24,31 +24,69 @@ namespace scrabble
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            Environment = env;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Environment;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDatabaseDeveloperPageExceptionFilter();
+            var conn = Configuration.GetConnectionString("ScrabbleDbConnection");
+
+            // Used to override the default provider settings
+            var provider = Configuration["DbProvider"];
+
+            // Set default provider if not specified
+            if (string.IsNullOrEmpty(provider))
+                provider = Environment.IsProduction() ? "SqlServer" : "Sqlite";
+
+            if (!string.IsNullOrEmpty(provider))
+            {
+                switch (provider)
+                {
+                    case "SqlServer":
+                        services.AddDbContext<ApplicationDbContext, SqlServerApplicationDbContext>(options =>
+                        {
+                            if (!string.IsNullOrEmpty(conn))
+                                options.UseSqlServer(conn);
+                        },
+                        ServiceLifetime.Transient);
+                        break;
+                    case "Sqlite":
+                        services.AddDbContext<ApplicationDbContext, SqliteApplicationDbContext>(options =>
+                        {
+                            if (!string.IsNullOrEmpty(conn))
+                                options.UseSqlite(conn);
+                        },
+                        ServiceLifetime.Transient);
+                        break;
+                }
+            }
+
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.Configure<IdentityOptions>(options =>
+            if (Environment.IsDevelopment())
             {
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 1;
-                options.Password.RequiredUniqueChars = 0;
-            });
+                services.AddDatabaseDeveloperPageExceptionFilter();
+
+                services.Configure<IdentityOptions>(options =>
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredLength = 1;
+                    options.Password.RequiredUniqueChars = 0;
+                });
+            }
+
             services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizePage("/Games");
@@ -81,12 +119,15 @@ namespace scrabble
         public void Configure(
             IApplicationBuilder app, 
             IWebHostEnvironment env, 
-            ILogger<Startup> logger)
+            ILogger<Startup> logger,
+            ApplicationDbContext dbContext)
         {
+            dbContext?.Database?.Migrate();
+
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
+                app.UseDeveloperExceptionPage();
             }
             else
             {

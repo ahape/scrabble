@@ -44,7 +44,7 @@ That loads all the JS dependencies and whatnot.
 Next, run:
 
 ```
-dotnet ef database update
+dotnet ef database update --context SqliteApplicationDbContext
 ```
 
 That should build the project, configure the local SQLite database, and load whatever migrations it needs to.
@@ -59,7 +59,23 @@ dotnet run
 
 and follow the instructions on the command line.
 
-## Configuration
+## Database Migrations
+
+When you change one of the database models, you will need to also produce migration files for each provider.  
+
+### SQLite
+
+```
+dotnet ef migrations add <useful migration name> -c SqliteApplicationDbContext -- --DbProvider Sqlite
+```
+
+### SQL Server
+
+```
+dotnet ef migrations add <useful migration name> -c SqlServerApplicationDbContext -- --DbProvider SqlServer
+```
+
+## Using SSO locally
 
 For Google authentication, you need to add the Client ID and Secrets to the local secrets store.  To obtain these, you can create your autorization credentials by following the guide [here](https://developers.google.com/identity/sign-in/web/sign-in).
 
@@ -69,6 +85,10 @@ To add these credentials to your local user store, run the following commands:
 dotnet user-secrets set "Authentication:Google:ClientId" "<client-id>"
 dotnet user-secrets set "Authentication:Google:ClientSecret" "<client-secret>"
 ```
+
+### If you run into certificate issues, especially on Firefox
+
+Check out [this article](https://docs.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-5.0&tabs=netcore-cli) on how to fix that.
 
 ## Rough Roadmap
 

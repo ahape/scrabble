@@ -46,7 +46,7 @@ namespace scrabble.Pages
                 .ToArray();
         }
 
-        async public void OnPostAsync(int teams)
+        async public Task OnPostAsync(int teams)
         {
             var game = new GameState { Teams = teams };
 
