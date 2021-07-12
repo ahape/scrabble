@@ -58,27 +58,24 @@ class Options {
     }
 
     private async _handleDelete(): Promise<void> {
-        try {
-            await fetch(`/rest/games/${this._game.id}`, {
-                method: "DELETE",
-            });
+        const response = await fetch(`/rest/games/${this._game.id}`, {
+            method: "DELETE",
+        });
 
+        if (response.ok) {
             location.assign("/games");
-        } catch (err) {
+        } else {
             alert(errorText("Unable to delete game"));
         }
     }
 
     private async _handleLeave(): Promise<void> {
-        try {
-            await fetch(`/rest/players/${this._playerId}`, {
-                method: "DELETE",
-            });
+        const response = await fetch(`/rest/players/${this._playerId}`, {
+            method: "DELETE",
+        });
 
-            location.assign("/games");
-        } catch (err) {
-            alert(errorText("Unable to leave game"));
-        }
+        if (response.ok) location.assign("/games");
+        else alert(errorText("Unable to leave game"));
     }
 }
 

@@ -147,27 +147,26 @@ export class Index {
     private async _updateGame(
         gameState: IGameState
     ): Promise<IUpdateResponse | null> {
-        try {
-            const response = await fetch("/rest/games/" + gameState.id, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    ...gameState,
-                    actions: gameState.actions.join(),
-                    version: this._timestamp,
-                }),
-            });
+        const response = await fetch("/rest/games/" + gameState.id, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                ...gameState,
+                actions: gameState.actions.join(),
+                version: this._timestamp,
+            }),
+        });
 
+        if (response.ok) {
             return response.json();
-        } catch (err) {
-            alert(
-                "Error: Unable to update game. Please refresh the page try again"
-            );
         }
 
+        alert(
+            "Error: Unable to update game. Please refresh the page try again"
+        );
         return null;
     }
 }
