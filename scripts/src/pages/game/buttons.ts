@@ -8,6 +8,10 @@ import {
     createPlayCommand,
     createBoardFromStatus,
     parseSquareCoordinates,
+    parseAction,
+    parsePlayCommand,
+    playMove,
+    createBoardFromActions,
     constants as sc,
 } from "scrabblecore";
 
@@ -18,6 +22,7 @@ class Buttons {
 
     public canGo: KnockoutComputed<boolean>;
     public canDraw: KnockoutComputed<boolean>;
+    public canChallenge: KnockoutComputed<boolean>;
 
     public constructor(params: {
         game: Game;
@@ -37,6 +42,14 @@ class Buttons {
             const status = this._game.currentStatus();
             const rack = status.racks[params.teamNumber - 1];
             return status.bag.length > 0 && rack.length < sc.MAX_RACK_TILES;
+        });
+
+        this.canChallenge = ko.pureComputed(() => {
+            const state = this._game.currentState();
+            const lastAction = state.actions[state.actionIndex];
+
+            // Can only challenge is the last action was a "PLAY"
+            return lastAction.indexOf("PLAY ") > -1;
         });
     }
 
@@ -118,6 +131,68 @@ class Buttons {
 
         this._clicked("play");
     };
+
+    public onChallengeClick(): void {
+        if (
+            this.canChallenge() &&
+            confirm("Are you sure you want to challenge?")
+        ) {
+            this._checkIfMoveIsValid().then((result) => {
+                if (result) this._handleMoveValidityResult(result);
+            });
+        }
+    }
+
+    private async _checkIfMoveIsValid(): Promise<Record<
+        string,
+        boolean
+    > | null> {
+        let result: Record<string, boolean> | null = null;
+        try {
+            const actionIndex = this._game.actionIndex;
+            const [, cmd] = parseAction(this._game.actions[actionIndex]);
+            const lastMove = parsePlayCommand(cmd);
+            const boardBeforeLastMove = createBoardFromActions(
+                this._game.actions.slice(0, actionIndex)
+            );
+            const playResult = playMove(lastMove, boardBeforeLastMove);
+            const words = playResult.words.map((x) => x.word);
+
+            const response = await fetch(
+                `/rest/move/validate?words=${words.join(",")}`
+            );
+
+            if (!response.ok) return null;
+
+            result = ((await response.json()) as {
+                answer: Record<string, boolean>;
+            }).answer;
+        } catch (err) {
+            alert("Unable to challenge word");
+        }
+
+        return result;
+    }
+
+    private _handleMoveValidityResult(result: Record<string, boolean>): void {
+        let anyInvalid = false;
+        let summary = "";
+
+        Object.keys(result).forEach((word) => {
+            let isValid = result[word];
+            summary += `${word} -> ${isValid}\n`;
+            if (!isValid) anyInvalid = true;
+        });
+
+        if (anyInvalid) {
+            summary += "\nUndoing last move and skipping turn";
+            this._game.undo();
+            this._game.skip();
+            this._clicked("challenge");
+        }
+
+        alert(summary);
+    }
 }
 
 ko.components.register("buttons", {

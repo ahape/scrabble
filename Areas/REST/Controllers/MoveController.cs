@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -38,6 +39,16 @@ namespace scrabble.REST
                 score = best.TotalScore, 
                 text = $"With the letters: {rack}\n" + best.ToString(),
             });
+        }
+
+        [HttpGet("validate")]
+        public IActionResult Validate(string words)
+        {
+            var results = new Dictionary<string, bool>();
+            foreach (var word in words.Split(','))
+                results.Add(word, Api.IsWordReal(word));
+
+            return Ok(new { answer = results });
         }
     }
 }

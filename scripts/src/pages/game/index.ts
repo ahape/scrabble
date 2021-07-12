@@ -73,6 +73,7 @@ export class Index {
             "swap",
             "undo",
             "redo",
+            "challenge",
         ];
         const onButtonClick = (btn: string) => {
             if (stateChangingButtons.includes(btn)) {
