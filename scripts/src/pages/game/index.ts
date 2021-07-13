@@ -21,10 +21,21 @@ interface IUpdateResponse {
     version: number;
 }
 
+function checkNotificationPromise(): boolean {
+    try {
+        Notification.requestPermission().then();
+    } catch (e) {
+        return false;
+    }
+
+    return true;
+}
+
 export class Index {
     private _socketConnection: SignalRConnection;
     private _timestamp: number;
     private _dragNDropListener: DragNDropListener;
+    private _notifyWhenTurn: boolean = false;
     public game: Game;
     public players: KnockoutObservableArray<IGamePlayer>;
     public player: IGamePlayer;
@@ -113,6 +124,21 @@ export class Index {
 
             if (!_.isEqual(this.game.currentState(), state))
                 this.game.load(state);
+
+            const lastState = state.actions.slice(-1)[0];
+            // If this user has enabled notifications
+            // AND it's *now* this user's turn
+            // AND the last action was a play
+            // AND this window is in the background
+            // THEN notify the user
+            if (
+                this._notifyWhenTurn &&
+                this.game.status().teamTurn === teamNumber &&
+                lastState?.indexOf("PLAY ") === 0 &&
+                document.visibilityState === "hidden"
+            ) {
+                let _ = new Notification("It's your turn!");
+            }
         });
 
         this._socketConnection.on("PlayerAdd", (...args: any[]) => {
@@ -138,6 +164,8 @@ export class Index {
 
         this._dragNDropListener = new DragNDropListener();
         this._dragNDropListener.init();
+
+        this._askNotificationPermission();
     }
 
     private _handleUpdateResponse(response: IUpdateResponse): void {
@@ -168,5 +196,20 @@ export class Index {
             "Error: Unable to update game. Please refresh the page try again"
         );
         return null;
+    }
+
+    private _askNotificationPermission(): void {
+        // Let's check if the browser supports notifications
+        if ("Notification" in window) {
+            if (checkNotificationPromise()) {
+                Notification.requestPermission().then((permission) => {
+                    this._notifyWhenTurn = permission === "granted";
+                });
+            } else {
+                Notification.requestPermission((permission) => {
+                    this._notifyWhenTurn = permission === "granted";
+                });
+            }
+        }
     }
 }

@@ -66,7 +66,7 @@ namespace scrabble.Pages
             Teams = game.Teams;
         }
 
-        async public void OnPostAsync(int team)
+        async public Task OnPostAsync(int team)
         {
             Console.WriteLine($"{User.Identity.Name} chose team {team} for game {GameId}");
 
@@ -77,10 +77,10 @@ namespace scrabble.Pages
                 Team = team,
             };
 
+            await hubContext.Clients.Group(GameId.ToString()).SendAsync("PlayerAdd", player);
+
             dbContext.Add(player);
             await dbContext.SaveChangesAsync();
-
-            await hubContext.Clients.Group(GameId.ToString()).SendAsync("PlayerAdd", player);
 
             Response.Redirect("/games/" + GameId);
         }
