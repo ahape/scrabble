@@ -23,10 +23,6 @@ namespace scrabble.REST
         [HttpGet]
         public IActionResult Read(string board, string rack)
         {
-            var teams = 2;
-            var bag = new char[0];
-            var turn = 0;
-
             var best = MoveGenerator.FindBestMove(
                 (board ?? "").ToCharArray(),
                 (rack ?? "").ToCharArray());
