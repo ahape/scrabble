@@ -134,8 +134,8 @@ export class Index {
             if (
                 this._notifyWhenTurn &&
                 this.game.status().teamTurn === teamNumber &&
-                lastState?.indexOf("PLAY ") === 0 //&&
-                //document.visibilityState === "hidden"
+                lastState?.indexOf("PLAY ") === 0 &&
+                document.visibilityState === "hidden"
             ) {
                 let _ = new Notification("It's your turn!", { 
                     icon: "https://play-lh.googleusercontent.com/FBQm8PPSeC4oCX8O06tDN6qgHV7VzsfpaXbLMGpNWn39b8WIxnLBVD-0-jLm_Olhnf8" 

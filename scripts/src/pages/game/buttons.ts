@@ -49,7 +49,7 @@ class Buttons {
             const lastAction = state.actions[state.actionIndex];
 
             // Can only challenge is the last action was a "PLAY"
-            return lastAction.indexOf("PLAY ") > -1;
+            return lastAction.indexOf("PLAY ") === 0;
         });
     }
 
