@@ -1,3 +1,13 @@
 <ol id="moves" class="moves" data-bind="foreach: moves">
-    <li data-bind="text: $data"></li>
+    <li>
+        <span data-bind="text: $data[0]"></span>
+        <!-- ko if: $data[1] -->
+        <code data-bind="with: $data[1]">
+            <em
+                style="cursor: pointer;"
+                data-bind="click: onShowMoreClick, text: '{' + data.score + '}'"
+            ></em>
+        </code>
+        <!-- /ko -->
+    </li>
 </ol>

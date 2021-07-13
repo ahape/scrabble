@@ -248,6 +248,7 @@ declare module "functions/createrackfromactions" {
     export function createRackFromActions(rawActions: string[], teams: number): Rack;
 }
 declare module "classes/game" {
+    import { ISquare } from "interfaces/isquare";
     import { IGameState } from "interfaces/igamestate";
     import { IGameStatus } from "interfaces/igamestatus";
     export class Game {
@@ -259,8 +260,8 @@ declare module "classes/game" {
         currentState: KnockoutObservable<IGameState>;
         currentStatus: KnockoutObservable<IGameStatus>;
         constructor(gameJson?: IGameState);
-        snapshot(): IGameState;
-        status(): IGameStatus;
+        snapshot(actionIndex?: number): IGameState;
+        status(actionIndex?: number): IGameStatus;
         draw(): void;
         skip(): void;
         swap(actionRaw: string): void;
@@ -269,10 +270,11 @@ declare module "classes/game" {
         redo(): void;
         print(): void;
         load(gameJson: IGameState): void;
+        board(): ISquare[][];
+        private _getStatusFromActionIndex;
         private _handleAction;
         private _nonFutureActions;
         private _bag;
-        private _board;
         private _teamTurn;
         private _teamTurnRack;
         private _teamPreviousRack;

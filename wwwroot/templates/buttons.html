@@ -20,6 +20,12 @@
     <button class="btn btn-dark" disabled="disabled">Skip</button>
     <!-- /ko -->
 
+    <button
+        class="btn btn-dark"
+        data-bind="enable: canChallenge, click: onChallengeClick"
+    >
+        Challenge
+    </button>
     <button class="btn btn-dark" data-bind="click: onRecallClick">
         Recall
     </button>
