@@ -35,9 +35,11 @@ class Moves {
     public showBest: boolean = localStorage.getItem(lsKey.showBest) === "true";
 
     private _game: Game;
+    private _teamNumber: number;
 
-    public constructor(params: { game: Game }) {
+    public constructor(params: { game: Game, teamNumber: number }) {
         this._game = params.game;
+        this._teamNumber = params.teamNumber;
 
         this.moves = ko.pureComputed(() => {
             var status = this._game.currentStatus();
@@ -72,6 +74,9 @@ class Moves {
 
         // Need to grab state from right before their move.
         const status = this._game.status(actionIndex - 1);
+
+        if (status.teamTurn !== this._teamNumber) return null;
+
         const params = $.param({
             board: _.flatten(status.board)
                 .map((x) => x || " ")

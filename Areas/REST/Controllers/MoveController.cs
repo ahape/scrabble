@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScrabbleMoveApi;
+using ScrabbleMoveGenerator;
 
 namespace scrabble.REST
 {
@@ -27,12 +27,9 @@ namespace scrabble.REST
             var bag = new char[0];
             var turn = 0;
 
-            var best = Api.FindBestWord(
-                teams,
+            var best = MoveGenerator.FindBestMove(
                 (board ?? "").ToCharArray(),
-                bag,
-                (rack ?? "").ToCharArray(),
-                turn);
+                (rack ?? "").ToCharArray());
 
             return Ok(new 
             { 
@@ -45,9 +42,12 @@ namespace scrabble.REST
         public IActionResult Validate(string words)
         {
             var results = new Dictionary<string, bool>();
+            /*
             foreach (var word in words.Split(','))
-                results.Add(word, Api.IsWordReal(word));
+                results.Add(word, MoveGenerator.IsWordReal(word));
 
+            return Ok(new { answer = results });
+            */
             return Ok(new { answer = results });
         }
     }

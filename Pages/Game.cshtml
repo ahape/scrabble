@@ -32,7 +32,7 @@
         data-bind="visible: mainView() === 'board'"></board>
 
     <!-- ko if: mainView() === "moves" -->
-    <moves params="game: game"></moves>
+    <moves params="game: game, teamNumber: teamNumber"></moves>
     <!-- /ko -->
 
     <!-- ko if: mainView() === "bag" -->
