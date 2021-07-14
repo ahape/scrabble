@@ -27,9 +27,16 @@ namespace scrabble.REST
                 (board ?? "").ToCharArray(),
                 (rack ?? "").ToCharArray());
 
+            if (best == null || best.TotalScore == 0)
+                return Ok(new { score = 0, text = "" });
+
+            var placement = best.Placements.FirstOrDefault();
             return Ok(new 
             { 
                 score = best.TotalScore, 
+                command = best.Words.First().Word + " " + 
+                    PotentialMove.SquareToCoords(placement.Square) + " " +
+                    best.Words.First().Direction.ToString().Substring(0, 1),
                 text = $"With the letters: {rack}\n" + best.ToString(),
             });
         }

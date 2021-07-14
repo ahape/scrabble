@@ -1,7 +1,6 @@
 import * as ko from "knockout";
 import * as _ from "underscore";
-import { Game } from "scrabblecore";
-import { IGameStatus } from "scrabblecore";
+import { Game, parsePlayCommand, IMove, IGameStatus } from "scrabblecore";
 import { lsKey } from "../../constants";
 
 function cacheKey(actionIndex: number, action: string): string {
@@ -56,6 +55,44 @@ class Moves {
         });
     }
 
+    private _createStringBoard(board: string[][], placements: number[]): string {
+        const vacant = `\u2716\uFE0F`;
+        const occupied = `\u274C`;
+        const played = `\u2705`;
+        const template = `
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+        `;
+        let i = 0;
+        return template.replace(/x/g, () => {
+            const letter = board[Math.floor(i / 15)][i % 15];
+            i += 1;
+            if (placements.indexOf(i) > -1) return played;
+            if (letter) return occupied;
+            return vacant;
+        });
+    }
+
+    private _convertMoveToPlacements(move: IMove): number[] {
+        return _.range(
+            (move.y * 15) + move.x + 1, 
+            (move.y * 15) + move.x + 1 + (move.isVertical ? 15 * move.letters.length : move.letters.length), 
+            move.isVertical ? 15 : 1);
+    }
+
     private _getBestPossibleMove(
         actionIndex: number
     ): KnockoutObservable<BestWord> | null {
@@ -84,7 +121,14 @@ class Moves {
         });
         fetch(`/rest/move?${params}`)
             .then((response) => response.json())
-            .then((json) => observable(new BestWord(json)));
+            .then((json) => {
+                var move = parsePlayCommand(json.command);
+                var placements = this._convertMoveToPlacements(move);
+                observable(new BestWord({
+                    ...json,
+                    text: this._createStringBoard(status.board, placements) + "\n\n" + json.text,
+                }));
+            });
         return observable;
     }
 }
