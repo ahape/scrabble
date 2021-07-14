@@ -16,10 +16,10 @@ namespace scrabble.Pages
         private readonly ILogger<GameModel> logger;
         private readonly ApplicationDbContext dbContext;
         
-        public int Team { get; set; }
         public byte[] Version { get; set; }
         public JObject GameJson { get; set; }
         public JArray Players { get; set; }
+        public JObject Player { get; set; }
 
         [BindProperty(SupportsGet=true)]
         public Guid GameId { get; set; }
@@ -59,20 +59,14 @@ namespace scrabble.Pages
 
             Console.WriteLine($"{User.Identity.Name} loaded game " + game.Id);
 
-            Team = entry.Team;
             Version = game.Version;
             GameJson = game.ToJson();
-            var players = new JObject[game.Teams];
+            Player = entry.ToJson();
 
             dbContext.Entry(game).Collection(x => x.Players).Load();
 
-            foreach (var player in game.Players)
-            {
-                // Have to account for how array might be sparse.
-                players[player.Team - 1] = player.ToJson();
-            }
-
-            Players = JArray.FromObject(players);
+            Players = JArray.FromObject(
+                game.Players.Select(p => p.ToJson()).ToArray());
         }
     }
 }

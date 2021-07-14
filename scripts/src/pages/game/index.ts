@@ -52,7 +52,7 @@ export class Index {
     public constructor(
         gameJson: IGameState,
         players: IGamePlayer[],
-        teamNumber: number,
+        player: IGamePlayer,
         timestamp: number
     ) {
         // TODO: Do something less hacky here.
@@ -60,6 +60,7 @@ export class Index {
         if (!Array.isArray(gameJson.actions))
             gameJson.actions = (gameJson.actions as string).split(",");
 
+        const teamNumber = player.team;
         const game = new Game(gameJson);
         const rackIndex = teamNumber - 1;
 
@@ -70,7 +71,7 @@ export class Index {
 
         this.game = game;
         this.players = ko.observableArray(players);
-        this.player = players[teamNumber - 1];
+        this.player = player;
         this.teamNumber = teamNumber;
         this.rackLetters(game.status().racks[rackIndex]);
         this.teamTurn = ko.pureComputed(() => game.currentStatus().teamTurn);
@@ -137,8 +138,9 @@ export class Index {
                 lastState?.indexOf("PLAY ") === 0 &&
                 document.visibilityState === "hidden"
             ) {
-                let _ = new Notification("It's your turn!", { 
-                    icon: "https://play-lh.googleusercontent.com/FBQm8PPSeC4oCX8O06tDN6qgHV7VzsfpaXbLMGpNWn39b8WIxnLBVD-0-jLm_Olhnf8" 
+                let _ = new Notification("It's your turn!", {
+                    icon:
+                        "https://play-lh.googleusercontent.com/FBQm8PPSeC4oCX8O06tDN6qgHV7VzsfpaXbLMGpNWn39b8WIxnLBVD-0-jLm_Olhnf8",
                 });
             }
         });
