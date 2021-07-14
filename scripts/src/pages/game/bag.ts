@@ -7,10 +7,13 @@ class Bag {
 
     public constructor(params: { game: Game }) {
         this.remaining = ko.pureComputed(() => {
-            var bag = params.game.currentStatus().bag.sort();
+            var status = params.game.currentStatus();
+            var bagAndRackLetters = status.bag
+                .concat(_.flatten(status.racks))
+                .sort();
 
             // Returns key/value pairs as tuples [string, number]
-            var pairs = _.pairs(_.countBy(bag, _.identity));
+            var pairs = _.pairs(_.countBy(bagAndRackLetters, _.identity));
 
             return pairs.map((pair) => {
                 return _.times(pair[1], () => pair[0]);
