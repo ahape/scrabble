@@ -37,7 +37,7 @@ class Moves {
     private _game: Game;
     private _teamNumber: number;
 
-    public constructor(params: { game: Game, teamNumber: number }) {
+    public constructor(params: { game: Game; teamNumber: number }) {
         this._game = params.game;
         this._teamNumber = params.teamNumber;
 
@@ -68,14 +68,13 @@ class Moves {
         const key = cacheKey(actionIndex, actionForIndex);
         const existingEntry = bestPossibleMovesCache[key];
 
-        if (existingEntry) return existingEntry;
-
-        bestPossibleMovesCache[key] = observable;
-
         // Need to grab state from right before their move.
         const status = this._game.status(actionIndex - 1);
 
         if (status.teamTurn !== this._teamNumber) return null;
+        if (existingEntry) return existingEntry;
+
+        bestPossibleMovesCache[key] = observable;
 
         const params = $.param({
             board: _.flatten(status.board)
