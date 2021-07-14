@@ -2,6 +2,7 @@
     <div
         class="letter"
         draggable="true"
+        title="Press 'h' to hide/reveal tiles"
         ondragstart="event.dataTransfer.setData('text/plain',null)"
         data-bind="text: letter, style: { color: $parent.isHiding() ? 'transparent' : 'gold' }"
     ></div>
