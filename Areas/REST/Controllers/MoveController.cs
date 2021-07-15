@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,6 +15,8 @@ namespace scrabble.REST
     {
         private readonly ILogger<GameController> logger;
 
+        private static IWordDatabase defaultWordList = new NaspaWordList();
+
         public MoveController(
             ILogger<GameController> logger)
         {
@@ -25,19 +28,17 @@ namespace scrabble.REST
         {
             var best = MoveGenerator.FindBestMove(
                 (board ?? "").ToCharArray(),
-                (rack ?? "").ToCharArray());
+                (rack ?? "").ToCharArray(),
+                defaultWordList);
 
-            if (best == null || best.TotalScore == 0)
+            if (best == null || !best.Words.Any() || !best.Placements.Any())
                 return Ok(new { score = 0, text = "" });
 
-            var placement = best.Placements.FirstOrDefault();
             return Ok(new 
             { 
                 score = best.TotalScore, 
-                command = best.Words.First().Word + " " + 
-                    PotentialMove.SquareToCoords(placement.Square) + " " +
-                    best.Words.First().Direction.ToString().Substring(0, 1),
-                text = $"With the letters: {rack}\n" + best.ToString(),
+                command = CreatePlayCommand(best),
+                text = BestMoveToString(best, rack),
             });
         }
 
@@ -52,6 +53,28 @@ namespace scrabble.REST
             return Ok(new { answer = results });
             */
             return Ok(new { answer = results });
+        }
+
+        private string CreatePlayCommand(PotentialMove move)
+        {
+            var word = move.Words.First();
+            var placement = move.Placements.First();
+            // E.g. "ZEBRA H8 V"
+            return word.Word + " " + 
+                PotentialMove.SquareToCoords(placement.Square) + " " +
+                word.Direction.ToString().Substring(0, 1); // H or V
+        }
+
+        private string BestMoveToString(PotentialMove move, string letters)
+        {
+            var sb = new StringBuilder();
+            var i = 0;
+            foreach (var word in move.Words)
+                sb.AppendLine(++i + ". " + word.Word + " for " + word.Score + " points");
+            if (move.Bonus) sb.AppendLine("And 50 bonus points");
+            return $@"Could have gotten {move.TotalScore} total points with the letters {letters}.
+Breakdown:
+{sb}";
         }
     }
 }

@@ -58,6 +58,7 @@ class Moves {
     private _createStringBoard(board: string[][], placements: number[]): string {
         const vacant = `\u2716\uFE0F`;
         const occupied = `\u274C`;
+        const stemmed = `\u274E`;
         const played = `\u2705`;
         const template = `
 xxxxxxxxxxxxxxx
@@ -74,22 +75,23 @@ xxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxx
-        `;
+xxxxxxxxxxxxxxx`;
         let i = 0;
         return template.replace(/x/g, () => {
             const letter = board[Math.floor(i / 15)][i % 15];
             i += 1;
+            if (placements.indexOf(i) > -1 && letter) return stemmed;
             if (placements.indexOf(i) > -1) return played;
             if (letter) return occupied;
             return vacant;
         });
     }
 
-    private _convertMoveToPlacements(move: IMove): number[] {
+    private _convertBestMoveTo1DPlacements(move: IMove): number[] {
+        var trueX = (move.y * 15) + move.x + 1;
         return _.range(
-            (move.y * 15) + move.x + 1, 
-            (move.y * 15) + move.x + 1 + (move.isVertical ? 15 * move.letters.length : move.letters.length), 
+            trueX, 
+            trueX + (move.isVertical ? 15 * move.letters.length : move.letters.length), 
             move.isVertical ? 15 : 1);
     }
 
@@ -102,19 +104,20 @@ xxxxxxxxxxxxxxx
         if (actionForIndex.indexOf("PLAY ") === -1) return null;
         if (!this.showBest) return null;
 
-        const key = cacheKey(actionIndex, actionForIndex);
-        const existingEntry = bestPossibleMovesCache[key];
-
         // Need to grab state from right before their move.
         const status = this._game.status(actionIndex - 1);
 
         if (status.teamTurn !== this._teamNumber) return null;
+
+        const key = cacheKey(actionIndex, actionForIndex);
+        const existingEntry = bestPossibleMovesCache[key];
         if (existingEntry) return existingEntry;
 
         bestPossibleMovesCache[key] = observable;
 
         const params = $.param({
             board: _.flatten(status.board)
+                // Normalize empties w/ whitespace so length is 15x15
                 .map((x) => x || " ")
                 .join(""),
             rack: status.racks[status.teamTurn - 1].join(""),
@@ -123,7 +126,7 @@ xxxxxxxxxxxxxxx
             .then((response) => response.json())
             .then((json) => {
                 var move = parsePlayCommand(json.command);
-                var placements = this._convertMoveToPlacements(move);
+                var placements = this._convertBestMoveTo1DPlacements(move);
                 observable(new BestWord({
                     ...json,
                     text: this._createStringBoard(status.board, placements) + "\n\n" + json.text,
