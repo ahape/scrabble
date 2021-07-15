@@ -75,7 +75,7 @@ xxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxx`;
+xxxxxxxxxxxxxxx`.trim();
         let i = 0;
         return template.replace(/x/g, () => {
             const letter = board[Math.floor(i / 15)][i % 15];
