@@ -46,12 +46,9 @@ namespace scrabble.REST
         public IActionResult Validate(string words)
         {
             var results = new Dictionary<string, bool>();
-            /*
             foreach (var word in words.Split(','))
-                results.Add(word, MoveGenerator.IsWordReal(word));
+                results.Add(word, defaultWordList.Contains(word));
 
-            return Ok(new { answer = results });
-            */
             return Ok(new { answer = results });
         }
 
