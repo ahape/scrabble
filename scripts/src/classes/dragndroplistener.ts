@@ -16,7 +16,7 @@ export class DragNDropListener {
         const $target = $(event.target!) as JQuery<HTMLElement>;
 
         // highlight potential drop target when the draggable element enters it
-        if ($target.hasClass("square")) {
+        if ($target.hasClass("square") || $target.hasClass("letter")) {
             $target.addClass("drop-target");
         }
     }
@@ -25,7 +25,7 @@ export class DragNDropListener {
         const $target = $(event.target!) as JQuery<HTMLElement>;
 
         // reset background of potential drop target when the draggable element leaves it
-        if ($target.hasClass("square")) {
+        if ($target.hasClass("square") || $target.hasClass("letter")) {
             $target.removeClass("drop-target");
         }
     }
@@ -41,10 +41,25 @@ export class DragNDropListener {
 
         const $target = $(event.target!) as JQuery<HTMLElement>;
         const sq = ko.dataFor(event.target as HTMLElement) as ISquare;
+
+        // Rearrange tile w/in rack OR
+        // Drop tile back onto rack
+        if (this._dragged &&
+            $target.hasClass("letter") &&
+            // Make sure not same elem. Not the same exact elem ref though,
+            // so have to compare via some identifier
+            this._dragged.dataset.id !== $target.data("id") &&
+            $target.parent().hasClass("rack")) 
+        {
+            // Could be board OR rack
+            this._dragged.parentNode!.removeChild(this._dragged);
+            // Will always be rack
+            $(this._dragged).insertBefore($target);
+        }
         //
         // move dragged elem to the selected drop target
         //
-        if (
+        else if (
             this._dragged &&
             $target.hasClass("square") &&
             $target.children().length == 0 &&
