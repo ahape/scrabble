@@ -66,7 +66,7 @@ When you change one of the database models, you will need to also produce migrat
 ### SQLite
 
 ```
-dotnet ef migrations add <useful migration name> -c SqliteApplicationDbContext -- --DbProvider Sqlite
+dotnet ef migrations add <useful migration name> -c SqliteApplicationDbContext
 ```
 
 ### SQL Server
