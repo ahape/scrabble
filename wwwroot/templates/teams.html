@@ -17,27 +17,24 @@
             <!-- /ko -->
 
             <!-- ko ifnot: $data[1] -->
-            Add computer opponent:
+            <em>empty</em> (Add computer opponent:
             <span
                 class="add-computer-opp"
                 data-bind="click: function(){$data[2](0)}"
+                >Easy</span
             >
-                Easy
-            </span>
             -
             <span
                 class="add-computer-opp"
                 data-bind="click: function(){$data[2](1)}"
+                >Medium</span
             >
-                Medium
-            </span>
             -
             <span
                 class="add-computer-opp"
                 data-bind="click: function(){$data[2](2)}"
-            >
-                Hard
-            </span>
+                >Hard</span
+            >)
             <!-- /ko -->
         </li>
     </ul>

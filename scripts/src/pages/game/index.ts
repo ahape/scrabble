@@ -105,6 +105,7 @@ export class Index {
         );
 
         this.game.currentStatus.subscribe((s) => {
+            // Specifically for "recall"
             this.rackLetters.removeAll();
             this.rackLetters(s.racks[rackIndex]);
         });
