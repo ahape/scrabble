@@ -14,12 +14,12 @@ namespace scrabble.REST
     [Route("rest/players/{id}")]
     public class PlayerController : ControllerBase
     {
-        private readonly ILogger<GameController> logger;
+        private readonly ILogger<PlayerController> logger;
         private readonly IHubContext<ChatHub> hubContext;
         private readonly ApplicationDbContext dbContext;
 
         public PlayerController(
-            ILogger<GameController> logger,
+            ILogger<PlayerController> logger,
             IHubContext<ChatHub> hubContext,
             ApplicationDbContext dbContext)
         {

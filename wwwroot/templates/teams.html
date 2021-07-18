@@ -10,7 +10,35 @@
     <ul data-bind="foreach: teams">
         <li>
             Team
-            <!-- ko text: $data --><!-- /ko -->
+            <!-- ko text: $data[0] --><!-- /ko -->:
+
+            <!-- ko if: $data[1] -->
+            <!-- ko text: $data[1] --><!-- /ko -->
+            <!-- /ko -->
+
+            <!-- ko ifnot: $data[1] -->
+            Add computer opponent:
+            <span
+                class="add-computer-opp"
+                data-bind="click: function(){$data[2](0)}"
+            >
+                Easy
+            </span>
+            -
+            <span
+                class="add-computer-opp"
+                data-bind="click: function(){$data[2](1)}"
+            >
+                Medium
+            </span>
+            -
+            <span
+                class="add-computer-opp"
+                data-bind="click: function(){$data[2](2)}"
+            >
+                Hard
+            </span>
+            <!-- /ko -->
         </li>
     </ul>
 </div>

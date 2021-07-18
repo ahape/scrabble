@@ -57,6 +57,12 @@ class Options {
         this._clicked("redo");
     }
 
+    public onSkipClick(): void {
+        this._game.skip();
+
+        this._clicked("skip");
+    }
+
     private async _handleDelete(): Promise<void> {
         const response = await fetch(`/rest/games/${this._game.id}`, {
             method: "DELETE",

@@ -177,6 +177,10 @@ a[href] {
 .team-yours:after {
     content: " (you)";
 }
+.add-computer-opp {
+    cursor: pointer;
+    color: white;
+}
 .view-selection {
     display: block;
 }
