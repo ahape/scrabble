@@ -40,12 +40,16 @@ namespace scrabble.REST
                 wordList = wordListMap[difficulty.Value];
 
             var best = MoveGenerator.FindBestMove(
-                (board ?? "").ToCharArray(),
-                (rack ?? "").ToCharArray(),
+                (board ?? string.Empty).ToCharArray(),
+                (rack ?? string.Empty).ToCharArray(),
                 wordList);
 
-            if (best == null || !best.Words.Any() || !best.Placements.Any())
-                return Ok(new { score = 0, text = "", command = ""  });
+            if (best?.Words.Any() == false)
+                return Ok(new { 
+                    score = 0, 
+                    command = string.Empty,
+                    text = string.Empty, 
+                });
 
             return Ok(new 
             { 

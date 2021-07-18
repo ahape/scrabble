@@ -30,7 +30,7 @@ namespace scrabble.REST
         }
 
         [HttpPost]
-        async public Task<IActionResult> Post(GamePlayer player)
+        async public Task<IActionResult> Add(GamePlayer player)
         {
             dbContext.Players.Add(player);
 
