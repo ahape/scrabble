@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ScrabbleMoveGenerator;
+using scrabble.Data;
 
 namespace scrabble.REST
 {
@@ -16,6 +17,14 @@ namespace scrabble.REST
         private readonly ILogger<GameController> logger;
 
         private static IWordDatabase defaultWordList = new NaspaWordList();
+        private static IWordDatabase easyWordList = new RankedWordList(100_000, true, true);
+        private static IWordDatabase mediumWordList = new RankedWordList(20_000, true, true);
+        private static IWordDatabase hardWordList = new RankedWordList(5_000, true, true);
+        private static Dictionary<ComputerDifficulty, IWordDatabase> wordListMap = new() {
+            { ComputerDifficulty.Easy, easyWordList },
+            { ComputerDifficulty.Medium, mediumWordList },
+            { ComputerDifficulty.Hard, hardWordList },
+        };
 
         public MoveController(
             ILogger<GameController> logger)
@@ -24,15 +33,23 @@ namespace scrabble.REST
         }
 
         [HttpGet]
-        public IActionResult Read(string board, string rack)
+        public IActionResult Read(string board, string rack, ComputerDifficulty? difficulty)
         {
-            var best = MoveGenerator.FindBestMove(
-                (board ?? "").ToCharArray(),
-                (rack ?? "").ToCharArray(),
-                defaultWordList);
+            var wordList = defaultWordList;
+            if (difficulty.HasValue)
+                wordList = wordListMap[difficulty.Value];
 
-            if (best == null || !best.Words.Any() || !best.Placements.Any())
-                return Ok(new { score = 0, text = "" });
+            var best = MoveGenerator.FindBestMove(
+                (board ?? string.Empty).ToCharArray(),
+                (rack ?? string.Empty).ToCharArray(),
+                wordList);
+
+            if (best?.Words.Any() == false)
+                return Ok(new { 
+                    score = 0, 
+                    command = string.Empty,
+                    text = string.Empty, 
+                });
 
             return Ok(new 
             { 
@@ -47,7 +64,7 @@ namespace scrabble.REST
         {
             var results = new Dictionary<string, bool>();
             foreach (var word in words.Split(','))
-                results.Add(word, defaultWordList.Contains(word));
+                results.Add(word, defaultWordList.Contains(word.ToUpper()));
 
             return Ok(new { answer = results });
         }
@@ -57,8 +74,7 @@ namespace scrabble.REST
             var word = move.Words.First();
             var placement = move.Placements.First();
             // E.g. "ZEBRA H8 V"
-            return word.Word + " " + 
-                PotentialMove.SquareToCoords(placement.Square) + " " +
+            return word.Word + " " + word.Start + " " +
                 word.Direction.ToString().Substring(0, 1); // H or V
         }
 

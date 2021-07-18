@@ -105,6 +105,7 @@ export class Index {
         );
 
         this.game.currentStatus.subscribe((s) => {
+            // Specifically for "recall"
             this.rackLetters.removeAll();
             this.rackLetters(s.racks[rackIndex]);
         });
@@ -126,28 +127,13 @@ export class Index {
             if (!_.isEqual(this.game.currentState(), state))
                 this.game.load(state);
 
-            const lastState = state.actions.slice(-1)[0];
-            // If this user has enabled notifications
-            // AND it's *now* this user's turn
-            // AND the last action was a play
-            // AND this window is in the background
-            // THEN notify the user
-            if (
-                this._notifyWhenTurn &&
-                this.game.status().teamTurn === teamNumber &&
-                lastState?.indexOf("PLAY ") === 0 &&
-                document.visibilityState === "hidden"
-            ) {
-                let _ = new Notification("It's your turn!", {
-                    icon:
-                        "https://play-lh.googleusercontent.com/FBQm8PPSeC4oCX8O06tDN6qgHV7VzsfpaXbLMGpNWn39b8WIxnLBVD-0-jLm_Olhnf8",
-                });
-            }
+            this._handleStateChangeNotification();
         });
 
         this._socketConnection.on("PlayerAdd", (...args: any[]) => {
             const player = args[0] as IGamePlayer;
-            this.players.push(player);
+
+            this._handlePlayerAdd(player);
         });
 
         this._socketConnection.on("PlayerRemove", (...args: any[]) => {
@@ -172,8 +158,87 @@ export class Index {
         this._askNotificationPermission();
     }
 
+    private _handlePlayerAdd(player: IGamePlayer): void {
+        this.players.push(player);
+
+        // If a computer opponent was added, and it's currently their turn,
+        // then they should go immediately.
+        this._handleStateChangeComputerOpp();
+    }
+
+    private _handleStateChangeComputerOpp(): void {
+        const status = this.game.status();
+        const playerTurn = _.find(
+            this.players(),
+            (p) => p.team === status.teamTurn
+        );
+
+        if (playerTurn?.isComputer) {
+            if (this.game.canDraw()) {
+                this.game.draw();
+                this._updateGame(this.game.snapshot()).then((response) => {
+                    if (response) this._handleUpdateResponse(response);
+                });
+            } else {
+                const params = $.param({
+                    board: _.flatten(status.board)
+                        // Normalize empties w/ whitespace so length is 15x15
+                        .map((x) => x || " ")
+                        .join(""),
+                    rack: status.racks[status.teamTurn - 1].join(""),
+                    difficulty: playerTurn.computerDifficulty,
+                });
+                fetch(`/rest/move?${params}`)
+                    .then((response) => response.json())
+                    .then((json) => {
+                        if (json.score === 0) {
+                            this.game.skip();
+                            this._updateGame(this.game.snapshot()).then(
+                                (response) => {
+                                    if (response)
+                                        this._handleUpdateResponse(response);
+                                }
+                            );
+                        } else {
+                            this.game.play("PLAY " + json.command);
+                            this._updateGame(this.game.snapshot()).then(
+                                (response) => {
+                                    if (response)
+                                        this._handleUpdateResponse(response);
+                                }
+                            );
+                        }
+                    });
+            }
+        }
+    }
+
+    private _handleStateChangeNotification(): void {
+        const lastState = this.game.snapshot().actions.slice(-1)[0];
+        // If this user has enabled notifications
+        // AND it's *now* this user's turn
+        // AND the last action was a play
+        // AND this window is in the background
+        // THEN notify the user
+        if (
+            this._notifyWhenTurn &&
+            this.game.status().teamTurn === this.teamNumber &&
+            lastState?.indexOf("PLAY ") === 0 &&
+            document.visibilityState === "hidden"
+        ) {
+            let _ = new Notification("It's your turn!", {
+                icon:
+                    "https://play-lh.googleusercontent.com/FBQm8PPSeC4oCX8O06tDN6qgHV7VzsfpaXbLMGpNWn39b8WIxnLBVD-0-jLm_Olhnf8",
+            });
+        }
+    }
+
     private _handleUpdateResponse(response: IUpdateResponse): void {
         this._timestamp = response.version;
+
+        if (!this.game.status().gameOver) {
+            this._handleStateChangeComputerOpp();
+        }
     }
 
     private async _updateGame(

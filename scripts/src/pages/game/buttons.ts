@@ -18,7 +18,7 @@ import {
 class Buttons {
     private _game: Game;
     private _rack: KnockoutObservableArray<string>;
-    private _clicked: KnockoutObservable<string> = ko.observable("");
+    private _clicked: KnockoutObservable<string>;
 
     public canGo: KnockoutComputed<boolean>;
     public canDraw: KnockoutComputed<boolean>;
@@ -39,9 +39,9 @@ class Buttons {
         );
 
         this.canDraw = ko.pureComputed(() => {
-            const status = this._game.currentStatus();
-            const rack = status.racks[params.teamNumber - 1];
-            return status.bag.length > 0 && rack.length < sc.MAX_RACK_TILES;
+            // Meh, explicitly subscribe to changes
+            this._game.currentStatus();
+            return this._game.canDraw();
         });
 
         this.canChallenge = ko.pureComputed(() => {

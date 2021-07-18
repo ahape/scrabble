@@ -226,8 +226,14 @@ namespace scrabble.Migrations.SqlServerMigrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("ComputerDifficulty")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("GameId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsComputer")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Team")
                         .HasColumnType("int");
