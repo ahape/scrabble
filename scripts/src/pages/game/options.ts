@@ -58,9 +58,11 @@ class Options {
     }
 
     public onSkipClick(): void {
-        this._game.skip();
-
-        this._clicked("skip");
+        const status = this._game.status();
+        if (confirm(`Skip Team ${status.teamTurn}'s turn?`)) {
+            this._game.skip();
+            this._clicked("skip");
+        }
     }
 
     private async _handleDelete(): Promise<void> {
