@@ -9,21 +9,21 @@ class Teams {
     public teams: KnockoutComputed<Array<[number, string, Function]>>;
 
     private _game: Game;
-    private _playersByTeam: KnockoutComputed<Record<string, IGamePlayer[]>>;
+    private _onPlayerAdd: (player: IGamePlayer) => void;
 
     public constructor(params: {
         game: Game;
         players: KnockoutObservableArray<IGamePlayer>;
+        onPlayerAdd: (player: IGamePlayer) => void;
     }) {
         this._game = params.game;
-        this._playersByTeam = ko.pureComputed(() =>
-            _.groupBy(params.players(), "team")
-        );
+        this._onPlayerAdd = params.onPlayerAdd;
 
         // E.g. ["1: a@e.co, b@e.co", "2: c@e.co, d@e.co"]
-        this.teams = ko.pureComputed(() =>
-            _.range(1, params.game.teams + 1).map((team) => {
-                const players = _.map(this._playersByTeam()[team], (p) => {
+        this.teams = ko.pureComputed(() => {
+            const playersByTeam = _.groupBy(params.players(), "team");
+            return _.range(1, params.game.teams + 1).map((team) => {
+                const players = _.map(playersByTeam[team], (p) => {
                     if (p.isComputer)
                         return extendComputerName(
                             p.userName,
@@ -38,8 +38,8 @@ class Teams {
                     (difficulty: ComputerDifficulty) =>
                         this.onAddComputerOpponentClick(team, difficulty),
                 ];
-            })
-        );
+            });
+        });
     }
 
     public async onAddComputerOpponentClick(
@@ -53,7 +53,7 @@ class Teams {
 
         if (!oppName) return;
 
-        await fetch("/rest/players", {
+        const response = await fetch("/rest/players", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -66,6 +66,8 @@ class Teams {
                 computerDifficulty: difficulty,
             }),
         });
+
+        if (response.ok) this._onPlayerAdd(await response.json());
     }
 }
 

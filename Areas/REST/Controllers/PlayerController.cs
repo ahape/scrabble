@@ -33,7 +33,6 @@ namespace scrabble.REST
         {
             var @record = await dbContext.Players.FindAsync(id);
 
-            Console.WriteLine("Debug: player record found " + (@record != null));
             if (@record == null)
                 return NotFound();
 

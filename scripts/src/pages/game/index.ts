@@ -110,11 +110,33 @@ export class Index {
             this.rackLetters(s.racks[rackIndex]);
         });
 
+        this._initSocketListener();
+
+        this._dragNDropListener = new DragNDropListener();
+        this._dragNDropListener.init();
+
+        this._askNotificationPermission();
+    }
+
+    public onPlayerAdd = (player: IGamePlayer) => {
+        this._addPlayerIfNotExists(player);
+        this._handleStateChangeComputerOpp();
+    };
+
+    private _addPlayerIfNotExists(player: IGamePlayer): boolean {
+        if (this.players().some((p) => p.id === player.id)) {
+            return false;
+        }
+        this.players.push(player);
+        return true;
+    }
+
+    private _initSocketListener(): void {
         // TODO Make receiving object be better
         this._socketConnection.on("GameUpdate", (...args: any[]) => {
             const state = args[0];
 
-            console.log("Received state from SignalR ", state);
+            console.log("SignalR: GameUpdate", state);
 
             state.actions = state.actions.split(",");
 
@@ -132,15 +154,24 @@ export class Index {
 
         this._socketConnection.on("PlayerAdd", (...args: any[]) => {
             const player = args[0] as IGamePlayer;
+            const clientInChargeOfComputerPlays = args[1] as string;
 
-            this._handlePlayerAdd(player);
+            console.log("SignalR: PlayerAdd", player);
+
+            this._addPlayerIfNotExists(player);
         });
 
         this._socketConnection.on("PlayerRemove", (...args: any[]) => {
             const player = args[0] as IGamePlayer;
+
+            console.log("SignalR: PlayerRemove", player);
+
+            // NOTE: Once we give the user the ability to remove a computer
+            // player, this will need to include similar logic to adding a player.
             this.players.remove((p) => p.id == player.id);
         });
 
+        // This notifies us when a browser client joins the game--not using this yet.
         this._socketConnection.on("GroupUpdate", (...args: any[]) => {
             console.log(...args);
         });
@@ -151,19 +182,6 @@ export class Index {
                 this._socketConnection.invoke("AddToGroup", this.game.id)
             )
             .catch((err) => console.log(err));
-
-        this._dragNDropListener = new DragNDropListener();
-        this._dragNDropListener.init();
-
-        this._askNotificationPermission();
-    }
-
-    private _handlePlayerAdd(player: IGamePlayer): void {
-        this.players.push(player);
-
-        // If a computer opponent was added, and it's currently their turn,
-        // then they should go immediately.
-        this._handleStateChangeComputerOpp();
     }
 
     private _handleStateChangeComputerOpp(): void {
