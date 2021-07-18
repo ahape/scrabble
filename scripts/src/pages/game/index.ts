@@ -176,6 +176,10 @@ export class Index {
             console.log(...args);
         });
 
+        this._socketConnection.on("GameDeleted", (...args: any[]) => {
+            location.assign("/games");
+        });
+
         this._socketConnection
             .start()
             .then(() =>
