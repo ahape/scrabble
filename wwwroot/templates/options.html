@@ -12,10 +12,20 @@
     <button class="btn btn-warning" data-bind="click: onLeaveClick">
         Leave Game
     </button>
-    <button class="btn btn-outline-danger" data-bind="click: onUndoClick">
+    <button
+        class="btn btn-outline-danger"
+        data-bind="
+        enable: canUndo,
+        click: onUndoClick"
+    >
         Undo
     </button>
-    <button class="btn btn-outline-danger" data-bind="click: onRedoClick">
+    <button
+        class="btn btn-outline-danger"
+        data-bind="
+        enable: canRedo,
+        click: onRedoClick"
+    >
         Redo
     </button>
     <button class="btn btn-outline-danger" data-bind="click: onSkipClick">

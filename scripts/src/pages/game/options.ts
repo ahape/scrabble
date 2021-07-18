@@ -8,6 +8,8 @@ function errorText(specificMessage: string): string {
 
 class Options {
     public showBestPossibleWords: KnockoutObservable<boolean>;
+    public canUndo: KnockoutComputed<boolean>;
+    public canRedo: KnockoutComputed<boolean>;
 
     private _game: Game;
     private _playerId: number;
@@ -29,6 +31,16 @@ class Options {
         this.showBestPossibleWords.subscribe((checked) =>
             localStorage.setItem(lsKey.showBest, checked.toString())
         );
+
+        this.canUndo = ko.pureComputed(() => {
+            this._game.currentStatus(); // Necessary for the ko subscription.
+            return this._game.canUndo();
+        });
+
+        this.canRedo = ko.pureComputed(() => {
+            this._game.currentStatus(); // Necessary for the ko subscription.
+            return this._game.canRedo();
+        });
     }
 
     public onDeleteClick(): void {
