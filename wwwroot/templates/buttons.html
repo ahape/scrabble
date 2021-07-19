@@ -5,6 +5,7 @@
         class="btn"
         data-bind="
         class: canDraw() ? 'btn-success' : 'btn-dark',
+        enable: canDraw,
         click: onDrawClick"
     >
         Draw

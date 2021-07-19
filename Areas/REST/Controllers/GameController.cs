@@ -78,6 +78,8 @@ namespace scrabble.REST
 
             await dbContext.SaveChangesAsync();
 
+            await hubContext.Clients.Group(id.ToString()).SendAsync("GameDeleted", gameState);
+
             return Ok();
         }
     }

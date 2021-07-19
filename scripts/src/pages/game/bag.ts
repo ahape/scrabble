@@ -1,17 +1,24 @@
 import * as ko from "knockout";
 import * as _ from "underscore";
-import { Game } from "scrabblecore";
+import { Game, IGameStatus } from "scrabblecore";
+
+function getBagAndRackLetters(gameStatus: IGameStatus): string[] {
+    return gameStatus.bag.concat(_.flatten(gameStatus.racks)).sort();
+}
 
 class Bag {
+    public remainingCount: KnockoutComputed<number>;
     public remaining: KnockoutComputed<string[][]>;
 
     public constructor(params: { game: Game }) {
+        // Includes bag + rack so no one can cheat via deductive reasoning
+        this.remainingCount = ko.pureComputed(
+            () => getBagAndRackLetters(params.game.currentStatus()).length
+        );
         this.remaining = ko.pureComputed(() => {
-            var status = params.game.currentStatus();
-            var bagAndRackLetters = status.bag
-                .concat(_.flatten(status.racks))
-                .sort();
-
+            var bagAndRackLetters = getBagAndRackLetters(
+                params.game.currentStatus()
+            );
             // Returns key/value pairs as tuples [string, number]
             var pairs = _.pairs(_.countBy(bagAndRackLetters, _.identity));
 

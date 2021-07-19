@@ -1,7 +1,13 @@
 import * as ko from "knockout";
 import * as _ from "underscore";
 import * as signalR from "signalR";
-import { Game, IGameState, constants as sc } from "scrabblecore";
+import {
+    Game,
+    IGameState,
+    actionChangesTurn,
+    parseAction,
+    constants as sc,
+} from "scrabblecore";
 import { IGamePlayer } from "../../interfaces/igameplayer";
 import { DragNDropListener } from "../../classes/dragndroplistener";
 import { MainView } from "./mainview";
@@ -40,7 +46,7 @@ export class Index {
     public players: KnockoutObservableArray<IGamePlayer>;
     public player: IGamePlayer;
     public teamNumber: number;
-    public onClick: KnockoutObservable<string> = ko.observable("");
+    public onClick: (eventName: string) => void;
     public rackLetters: KnockoutObservableArray<string> = ko.observableArray();
     public teamTurn: KnockoutComputed<number>;
     public mainView: KnockoutObservable<MainView>;
@@ -87,15 +93,13 @@ export class Index {
             "redo",
             "challenge",
         ];
-        const onButtonClick = (btn: string) => {
+        this.onClick = (btn) => {
             if (stateChangingButtons.includes(btn)) {
                 this._updateGame(game.snapshot()).then((response) => {
                     if (response) this._handleUpdateResponse(response);
                 });
             }
         };
-
-        this.onClick.subscribe(onButtonClick);
 
         // NOTE: Debug only
         this.game.currentState.subscribe((s) =>
@@ -110,11 +114,33 @@ export class Index {
             this.rackLetters(s.racks[rackIndex]);
         });
 
+        this._initSocketListener();
+
+        this._dragNDropListener = new DragNDropListener();
+        this._dragNDropListener.init();
+
+        this._askNotificationPermission();
+    }
+
+    public onPlayerAdd = (player: IGamePlayer) => {
+        this._addPlayerIfNotExists(player);
+        this._handleStateChangeComputerOpp();
+    };
+
+    private _addPlayerIfNotExists(player: IGamePlayer): boolean {
+        if (this.players().some((p) => p.id === player.id)) {
+            return false;
+        }
+        this.players.push(player);
+        return true;
+    }
+
+    private _initSocketListener(): void {
         // TODO Make receiving object be better
         this._socketConnection.on("GameUpdate", (...args: any[]) => {
             const state = args[0];
 
-            console.log("Received state from SignalR ", state);
+            console.log("SignalR: GameUpdate", state);
 
             state.actions = state.actions.split(",");
 
@@ -132,17 +158,30 @@ export class Index {
 
         this._socketConnection.on("PlayerAdd", (...args: any[]) => {
             const player = args[0] as IGamePlayer;
+            const clientInChargeOfComputerPlays = args[1] as string;
 
-            this._handlePlayerAdd(player);
+            console.log("SignalR: PlayerAdd", player);
+
+            this._addPlayerIfNotExists(player);
         });
 
         this._socketConnection.on("PlayerRemove", (...args: any[]) => {
             const player = args[0] as IGamePlayer;
+
+            console.log("SignalR: PlayerRemove", player);
+
+            // NOTE: Once we give the user the ability to remove a computer
+            // player, this will need to include similar logic to adding a player.
             this.players.remove((p) => p.id == player.id);
         });
 
+        // This notifies us when a browser client joins the game--not using this yet.
         this._socketConnection.on("GroupUpdate", (...args: any[]) => {
             console.log(...args);
+        });
+
+        this._socketConnection.on("GameDeleted", (...args: any[]) => {
+            location.assign("/games");
         });
 
         this._socketConnection
@@ -151,19 +190,6 @@ export class Index {
                 this._socketConnection.invoke("AddToGroup", this.game.id)
             )
             .catch((err) => console.log(err));
-
-        this._dragNDropListener = new DragNDropListener();
-        this._dragNDropListener.init();
-
-        this._askNotificationPermission();
-    }
-
-    private _handlePlayerAdd(player: IGamePlayer): void {
-        this.players.push(player);
-
-        // If a computer opponent was added, and it's currently their turn,
-        // then they should go immediately.
-        this._handleStateChangeComputerOpp();
     }
 
     private _handleStateChangeComputerOpp(): void {
@@ -215,6 +241,9 @@ export class Index {
 
     private _handleStateChangeNotification(): void {
         const lastState = this.game.snapshot().actions.slice(-1)[0];
+        const icon =
+            "https://play-lh.googleusercontent.com/" +
+            "FBQm8PPSeC4oCX8O06tDN6qgHV7VzsfpaXbLMGpNWn39b8WIxnLBVD-0-jLm_Olhnf8";
         // If this user has enabled notifications
         // AND it's *now* this user's turn
         // AND the last action was a play
@@ -223,12 +252,15 @@ export class Index {
         if (
             this._notifyWhenTurn &&
             this.game.status().teamTurn === this.teamNumber &&
-            lastState?.indexOf("PLAY ") === 0 &&
+            actionChangesTurn(parseAction(lastState)[0]) &&
             document.visibilityState === "hidden"
         ) {
             let _ = new Notification("It's your turn!", {
-                icon:
-                    "https://play-lh.googleusercontent.com/FBQm8PPSeC4oCX8O06tDN6qgHV7VzsfpaXbLMGpNWn39b8WIxnLBVD-0-jLm_Olhnf8",
+                icon,
+            });
+        } else if (this.game.status().gameOver) {
+            let _ = new Notification("Game over!", {
+                icon,
             });
         }
     }

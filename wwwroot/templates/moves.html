@@ -1,4 +1,5 @@
-<ol id="moves" class="moves" data-bind="foreach: moves">
+<ol id="moves" class="moves">
+    <!-- ko foreach: moves -->
     <li>
         <span data-bind="text: $data[0]"></span>
         <!-- ko if: $data[1] -->
@@ -10,4 +11,11 @@
         </code>
         <!-- /ko -->
     </li>
+    <!-- /ko -->
+    <!-- ko if: teamTurn -->
+    <li style="list-style-type: disc; list-style-type: disclosure-closed;">
+        It's now Team
+        <!-- ko text: teamTurn --><!-- /ko -->'s turn
+    </li>
+    <!-- /ko -->
 </ol>

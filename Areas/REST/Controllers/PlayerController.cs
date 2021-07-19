@@ -33,7 +33,6 @@ namespace scrabble.REST
         {
             var @record = await dbContext.Players.FindAsync(id);
 
-            Console.WriteLine("Debug: player record found " + (@record != null));
             if (@record == null)
                 return NotFound();
 
@@ -44,9 +43,10 @@ namespace scrabble.REST
             dbContext.Entry(@record.Game).Collection(x => x.Players).Load();
 
             // Remove this player from the game.
-            dbContext.Players.Remove(@record);
+            @record.Game.Players.Remove(@record);
 
-            if (!@record.Game.Players.Any())
+            // If there aren't any non-computer players.
+            if (!@record.Game.Players.Any(p => !p.IsComputer))
                 dbContext.Games.Remove(@record.Game);
 
             // TODO: Log that player has left game.

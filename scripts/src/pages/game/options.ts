@@ -8,10 +8,12 @@ function errorText(specificMessage: string): string {
 
 class Options {
     public showBestPossibleWords: KnockoutObservable<boolean>;
+    public canUndo: KnockoutComputed<boolean>;
+    public canRedo: KnockoutComputed<boolean>;
 
     private _game: Game;
     private _playerId: number;
-    private _clicked: KnockoutObservable<string>;
+    private _clicked: (eventName: string) => void;
 
     public constructor(params: {
         game: Game;
@@ -29,6 +31,16 @@ class Options {
         this.showBestPossibleWords.subscribe((checked) =>
             localStorage.setItem(lsKey.showBest, checked.toString())
         );
+
+        this.canUndo = ko.pureComputed(() => {
+            this._game.currentStatus(); // Necessary for the ko subscription.
+            return this._game.canUndo();
+        });
+
+        this.canRedo = ko.pureComputed(() => {
+            this._game.currentStatus(); // Necessary for the ko subscription.
+            return this._game.canRedo();
+        });
     }
 
     public onDeleteClick(): void {
@@ -58,9 +70,11 @@ class Options {
     }
 
     public onSkipClick(): void {
-        this._game.skip();
-
-        this._clicked("skip");
+        const status = this._game.status();
+        if (confirm(`Skip Team ${status.teamTurn}'s turn?`)) {
+            this._game.skip();
+            this._clicked("skip");
+        }
     }
 
     private async _handleDelete(): Promise<void> {

@@ -144,6 +144,7 @@ a[href] {
     list-style: none;
 }
 .bag {
+    height: 450px;
     padding-left: 0;
 }
 .bag-row {

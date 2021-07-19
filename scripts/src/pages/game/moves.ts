@@ -32,6 +32,7 @@ class Moves {
         Array<[string, KnockoutObservable<BestWord> | null]>
     >;
     public showBest: boolean = localStorage.getItem(lsKey.showBest) === "true";
+    public teamTurn: KnockoutComputed<number | null>;
 
     private _game: Game;
     private _teamNumber: number;
@@ -43,6 +44,12 @@ class Moves {
         this.moves = ko.pureComputed(() => {
             var status = this._game.currentStatus();
             return this._getMoves(status);
+        });
+
+        this.teamTurn = ko.pureComputed(() => {
+            var status = this._game.currentStatus();
+            if (status.gameOver) return null;
+            return status.teamTurn;
         });
     }
 
