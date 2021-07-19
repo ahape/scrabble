@@ -1,7 +1,13 @@
 import * as ko from "knockout";
 import * as _ from "underscore";
 import * as signalR from "signalR";
-import { Game, IGameState, constants as sc } from "scrabblecore";
+import {
+    Game,
+    IGameState,
+    actionChangesTurn,
+    parseAction,
+    constants as sc,
+} from "scrabblecore";
 import { IGamePlayer } from "../../interfaces/igameplayer";
 import { DragNDropListener } from "../../classes/dragndroplistener";
 import { MainView } from "./mainview";
@@ -243,7 +249,7 @@ export class Index {
         if (
             this._notifyWhenTurn &&
             this.game.status().teamTurn === this.teamNumber &&
-            lastState?.indexOf("PLAY ") === 0 &&
+            actionChangesTurn(parseAction(lastState)[0]) &&
             document.visibilityState === "hidden"
         ) {
             let _ = new Notification("It's your turn!", {
