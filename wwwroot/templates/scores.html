@@ -7,7 +7,7 @@
     <!-- ko foreach: scores -->
     <span
         data-bind="
-        text: $data,
+        html: $data,
         css: { 
             'team-yours': ($index() + 1) == $parent.teamNumber,
             'team-turn': ($index() + 1) == $parent.teamTurn()
