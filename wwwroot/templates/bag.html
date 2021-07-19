@@ -1,3 +1,6 @@
+<p class="p-1 text-center">
+    Note: the letters below <em>also</em> include what is on the racks (<!-- ko text: remainingCount --><!-- /ko -->)
+</p>
 <ol class="bag" data-bind="foreach: { data: remaining, as: 'repeatedLetter' }">
     <li class="bag-row" data-bind="foreach: repeatedLetter">
         <div class="letter" data-bind="text: $data"></div>
