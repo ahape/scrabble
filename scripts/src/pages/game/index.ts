@@ -241,6 +241,9 @@ export class Index {
 
     private _handleStateChangeNotification(): void {
         const lastState = this.game.snapshot().actions.slice(-1)[0];
+        const icon =
+            "https://play-lh.googleusercontent.com/" +
+            "FBQm8PPSeC4oCX8O06tDN6qgHV7VzsfpaXbLMGpNWn39b8WIxnLBVD-0-jLm_Olhnf8";
         // If this user has enabled notifications
         // AND it's *now* this user's turn
         // AND the last action was a play
@@ -253,8 +256,11 @@ export class Index {
             document.visibilityState === "hidden"
         ) {
             let _ = new Notification("It's your turn!", {
-                icon:
-                    "https://play-lh.googleusercontent.com/FBQm8PPSeC4oCX8O06tDN6qgHV7VzsfpaXbLMGpNWn39b8WIxnLBVD-0-jLm_Olhnf8",
+                icon,
+            });
+        } else if (this.game.status().gameOver) {
+            let _ = new Notification("Game over!", {
+                icon,
             });
         }
     }
