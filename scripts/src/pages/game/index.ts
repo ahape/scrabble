@@ -40,7 +40,7 @@ export class Index {
     public players: KnockoutObservableArray<IGamePlayer>;
     public player: IGamePlayer;
     public teamNumber: number;
-    public onClick: KnockoutObservable<string> = ko.observable("");
+    public onClick: (eventName: string) => void;
     public rackLetters: KnockoutObservableArray<string> = ko.observableArray();
     public teamTurn: KnockoutComputed<number>;
     public mainView: KnockoutObservable<MainView>;
@@ -87,15 +87,13 @@ export class Index {
             "redo",
             "challenge",
         ];
-        const onButtonClick = (btn: string) => {
+        this.onClick = (btn) => {
             if (stateChangingButtons.includes(btn)) {
                 this._updateGame(game.snapshot()).then((response) => {
                     if (response) this._handleUpdateResponse(response);
                 });
             }
         };
-
-        this.onClick.subscribe(onButtonClick);
 
         // NOTE: Debug only
         this.game.currentState.subscribe((s) =>

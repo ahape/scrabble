@@ -13,7 +13,7 @@ class Options {
 
     private _game: Game;
     private _playerId: number;
-    private _clicked: KnockoutObservable<string>;
+    private _clicked: (eventName: string) => void;
 
     public constructor(params: {
         game: Game;

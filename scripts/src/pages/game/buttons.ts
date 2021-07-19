@@ -18,7 +18,7 @@ import {
 class Buttons {
     private _game: Game;
     private _rack: KnockoutObservableArray<string>;
-    private _clicked: KnockoutObservable<string>;
+    private _clicked: (eventName: string) => void;
 
     public canGo: KnockoutComputed<boolean>;
     public canDraw: KnockoutComputed<boolean>;
