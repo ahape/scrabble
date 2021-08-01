@@ -104,7 +104,7 @@ class Buttons {
         const board = createBoardFromStatus(this._game.currentStatus());
 
         $placed.each(function (this: HTMLElement) {
-            let letter = ko.dataFor(this);
+            let letter: null | string = this.innerText.trim();
             const square = ko.toJS(ko.dataFor(this.parentNode!)); // Copy since we're mutating
             const isBlank = letter == "?";
             square.letter = isBlank ? Letter.BLANK : (letter as Letter);

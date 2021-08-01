@@ -9,7 +9,7 @@ import {
     constants as sc,
 } from "scrabblecore";
 import { IGamePlayer } from "../../interfaces/igameplayer";
-import { DragNDropListener } from "../../classes/dragndroplistener";
+import { TouchAndDropListener } from "../../classes/touchanddroplistener";
 import { MainView } from "./mainview";
 // Components
 import "./rack";
@@ -40,7 +40,7 @@ function checkNotificationPromise(): boolean {
 export class Index {
     private _socketConnection: SignalRConnection;
     private _timestamp: number;
-    private _dragNDropListener: DragNDropListener;
+    private tndListener: TouchAndDropListener;
     private _notifyWhenTurn: boolean = false;
     public game: Game;
     public players: KnockoutObservableArray<IGamePlayer>;
@@ -116,8 +116,28 @@ export class Index {
 
         this._initSocketListener();
 
-        this._dragNDropListener = new DragNDropListener();
-        this._dragNDropListener.init();
+        this.tndListener = new TouchAndDropListener({
+            dropzone: "dz",
+            handle: "letter",
+            dropzoneHover: "drop-target",
+            beforeDrop: (data) => {
+                if (data.dropzone.classList.contains("letter") &&
+                    data.dropzone != data.original &&
+                    data.original.parentElement?.classList.contains("rack"))
+                {
+                    data.dropzone.parentElement!.insertBefore(
+                        data.dragged, data.dropzone);
+                    return true;
+                } 
+                if (data.dropzone.classList.contains("square") &&
+                    data.dropzone.children?.length === 0 &&
+                    data.dropzone.dataset.played != "true") {
+                    return data;
+                }
+                return false;
+            },
+        });
+        this.tndListener.init();
 
         this._askNotificationPermission();
     }
