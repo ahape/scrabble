@@ -121,6 +121,7 @@ export class Index {
             handle: "letter",
             dropzoneHover: "drop-target",
             beforeDrop: (data) => {
+                // If rearranging on rack
                 if (data.dropzone.classList.contains("letter") &&
                     data.dropzone != data.original &&
                     data.original.parentElement?.classList.contains("rack"))
@@ -129,6 +130,7 @@ export class Index {
                         data.dragged, data.dropzone);
                     return true;
                 } 
+                // If dropping onto the board
                 if (data.dropzone.classList.contains("square") &&
                     data.dropzone.children?.length === 0 &&
                     data.dropzone.dataset.played != "true") {

@@ -115,6 +115,10 @@ export class TouchAndDropListener {
         y: number, 
         dg: HTMLElement): Element | null 
     {
+        // If we were to call `elementFromPoint` right now, we'd undoubtedly
+        // get back the el we are dragging, which is undesired.
+        // In order to avoid this, we have to temporarily hide the dragged el
+
         const previousDisplay = getComputedStyle(dg).display;
 
         dg.style.display = "none";
@@ -134,34 +138,35 @@ export class TouchAndDropListener {
         this._height = rect.height;
         this._original = el;
         this._dragged = el.cloneNode(true) as HTMLElement;
+
         this._dragged.style.top = this._px(y, true);
         this._dragged.style.left = this._px(x);
         this._dragged.classList.add(this._draggingClass);
+
         this._original.classList.add(this._originalClass);
+
         document.body.appendChild(this._dragged);
     }
 
-    _stopDragging() {
-        if (this._dragged) {
-            this._dragged.classList.remove(this._draggingClass);
+    _stopDragging(dragged: HTMLElement, original: HTMLElement) {
+        dragged.classList.remove(this._draggingClass);
             
-            try {
-                document.body.removeChild(this._dragged);
-            } catch (err) { /* Might have been placed in dropzone */ }
-        }
-        if (this._original)
-            this._original.classList.remove(this._originalClass);
+            // If we didn't drop this anywhere
+        if (dragged.parentElement === document.body)
+            dragged.remove();
+
+        original.classList.remove(this._originalClass);
 
         this._dropzone.hover(null);
 
-        this._original = null;
-        this._dragged = null;
+        this._width = this._height = 0;
+        this._original = this._dragged = null;
     }
 
     _listenToMouseDown = (event: MouseEvent) => {
         const el = event.target as HTMLElement;
 
-        if (el && el.classList.contains(this._dragHandleClass)) {
+        if (el?.classList.contains(this._dragHandleClass)) {
             this._startDragging(el, event.pageX, event.pageY);
         }
     }
@@ -201,22 +206,22 @@ export class TouchAndDropListener {
     }
 
     _stopEventCommon(
-        vx: number, 
-        vy: number, 
-        dg: HTMLElement, 
-        og: HTMLElement) 
+        viewportX: number, 
+        viewportY: number, 
+        dragged: HTMLElement, 
+        original: HTMLElement) 
     {
-        let el = this._elementUnderDragged(vx, vy, dg);
+        let el = this._elementUnderDragged(viewportX, viewportY, dragged);
 
         while (el) {
             if (el.classList.contains(this._dropzone.class)) {
-                this._doDrop(el as HTMLElement, dg, og);
+                this._doDrop(el as HTMLElement, dragged, original);
                 break;
             }
             el = el.parentElement;
         }
 
-        this._stopDragging();
+        this._stopDragging(dragged, original);
     }
 
     _listenToMouseMove = (event: MouseEvent) => {
@@ -248,20 +253,18 @@ export class TouchAndDropListener {
     _moveEventCommon(
         x: number,
         y: number,
-        vx: number,
-        vy: number,
-        dg: HTMLElement) 
+        viewportX: number,
+        viewportY: number,
+        dragged: HTMLElement) 
     {
-        dg.style.top = this._px(y, true);
-        dg.style.left = this._px(x);
+        dragged.style.top = this._px(y, true);
+        dragged.style.left = this._px(x);
 
-        const el = this._elementUnderDragged(vx, vy, dg);
+        const el = this._elementUnderDragged(viewportX, viewportY, dragged);
 
-        if (el && el.classList.contains(this._dropzone.class)) {
+        if (el?.classList.contains(this._dropzone.class)) {
             this._dropzone.hover(el as HTMLElement);
-        } else {
-            this._dropzone.hover(null);
-        }
+        } else this._dropzone.hover(null);
     }
 
     _doDrop(
@@ -278,8 +281,6 @@ export class TouchAndDropListener {
             dropzone.appendChild(dragged);
         }
         // If data is object or true, perform post-drop cleanup
-        if (data) {
-            original.remove();
-        }
+        if (data) original.remove();
     }
 }
