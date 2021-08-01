@@ -121,13 +121,29 @@ export class Index {
             handle: "letter",
             dropzoneHover: "drop-target",
             beforeDrop: (data) => {
-                // If rearranging on rack
+                // If dropping onto the rack
+                if (data.dropzone.classList.contains("rack")) {
+                    const under = this.tndListener.elementUnderDragged(
+                        data.viewportX, data.viewportY, data.dragged);
+
+                    // If other tiles are on the rack, we want to drop
+                    // this tile in between the tiles being aimed at.
+                    if (under?.classList.contains("letter")) {
+                        // No-op if we are dropping onto ourself.
+                        if (under === data.original) return false;
+
+                        data.dropzone.insertBefore(data.dragged, under);
+
+                        return true;
+                    }
+
+                    // Just append, since this will be the only tile.
+                    return data;
+                }
                 if (data.dropzone.classList.contains("letter") &&
                     data.dropzone != data.original &&
                     data.original.parentElement?.classList.contains("rack"))
                 {
-                    data.dropzone.parentElement!.insertBefore(
-                        data.dragged, data.dropzone);
                     return true;
                 } 
                 // If dropping onto the board

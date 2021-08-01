@@ -18,13 +18,15 @@ export namespace TouchAndDropListener {
         dragged: HTMLElement;
         original: HTMLElement;
         dropzone: HTMLElement;
+        viewportX: number;
+        viewportY: number;
     }
 
     export interface DropzoneCssLogic {
         class: string;
         hoverClass: string;
-        lastDropzoneHovered: HTMLElement | null;
-        hover(this: DropzoneCssLogic, el: HTMLElement | null): void;
+        lastDropzoneHovered: Element | null;
+        hover(this: DropzoneCssLogic, el: Element | null): void;
     }
 }
 
@@ -70,7 +72,7 @@ export class TouchAndDropListener {
         this._beforeDrop = props.beforeDrop;
     }
 
-    init() {
+    public init() {
         document.body.addEventListener(
             "mousedown", this._listenToMouseDown, false);
         document.body.addEventListener(
@@ -87,13 +89,46 @@ export class TouchAndDropListener {
         this._injectNecessaryCss();
     }
 
-    _px(n: number, isY: boolean = false) {
+    public elementUnderDragged(
+        viewportX: number, 
+        viewportY: number, 
+        dragged: HTMLElement): Element | null 
+    {
+        // If we were to call `elementFromPoint` right now, we'd 
+        // get back the el we are dragging, which is undesired.
+        // In order to avoid this, we have to temporarily hide the dragged el
+
+        const previousDisplay = getComputedStyle(dragged).display;
+
+        dragged.style.display = "none";
+
+        const el = document.elementFromPoint(
+            viewportX + this._width / 2,
+            viewportY + this._height / 2);
+
+        dragged.style.display = previousDisplay;
+
+        return el;
+    }
+
+    private _px(n: number, isY: boolean = false) {
         // We offset the coords to make it look like the user
         // is grabbing the element by the middle instead of top/left.
         return n - (isY ? this._height : this._width) / 2 + "px";
     }
 
-    _injectNecessaryCss() {
+    /** Returns el or first el that meets dropzone criteria */
+    private _getParentDropzone(el: Element | null): Element | null {
+        while (el) {
+            if (el.classList.contains(this._dropzone.class)) {
+                return el;
+            }
+            el = el.parentElement;
+        }
+        return null;
+    }
+
+    private _injectNecessaryCss() {
         const styleEl = document.createElement("style");
         document.head.appendChild(styleEl);
         styleEl.sheet!.insertRule(`.${draggingClass} {
@@ -110,29 +145,8 @@ export class TouchAndDropListener {
         styleEl.sheet!.insertRule(`.${originalClass}{opacity:0.35}`);
     }
 
-    _elementUnderDragged(
-        x: number, 
-        y: number, 
-        dg: HTMLElement): Element | null 
-    {
-        // If we were to call `elementFromPoint` right now, we'd undoubtedly
-        // get back the el we are dragging, which is undesired.
-        // In order to avoid this, we have to temporarily hide the dragged el
 
-        const previousDisplay = getComputedStyle(dg).display;
-
-        dg.style.display = "none";
-
-        const el = document.elementFromPoint(
-            x + this._width / 2,
-            y + this._height / 2);
-
-        dg.style.display = previousDisplay;
-
-        return el;
-    }
-
-    _startDragging(el: HTMLElement, x: number, y: number) {
+    private _startDragging(el: HTMLElement, x: number, y: number) {
         const rect = el.getBoundingClientRect();
         this._width = rect.width;
         this._height = rect.height;
@@ -148,7 +162,7 @@ export class TouchAndDropListener {
         document.body.appendChild(this._dragged);
     }
 
-    _stopDragging(dragged: HTMLElement, original: HTMLElement) {
+    private _stopDragging(dragged: HTMLElement, original: HTMLElement) {
         dragged.classList.remove(this._draggingClass);
             
             // If we didn't drop this anywhere
@@ -163,7 +177,7 @@ export class TouchAndDropListener {
         this._original = this._dragged = null;
     }
 
-    _listenToMouseDown = (event: MouseEvent) => {
+    private _listenToMouseDown = (event: MouseEvent) => {
         const el = event.target as HTMLElement;
 
         if (el?.classList.contains(this._dragHandleClass)) {
@@ -171,7 +185,7 @@ export class TouchAndDropListener {
         }
     }
 
-    _listenToTouchStart = (event: TouchEvent) => {
+    private _listenToTouchStart = (event: TouchEvent) => {
         const el = event.target as HTMLElement;
 
         if (event.targetTouches.length === 1 &&
@@ -183,7 +197,7 @@ export class TouchAndDropListener {
         }
     }
 
-    _listenToMouseUp = (event: MouseEvent) => {
+    private _listenToMouseUp = (event: MouseEvent) => {
         if (this._dragged && this._original) {
             this._stopEventCommon(
                 event.clientX, 
@@ -193,7 +207,7 @@ export class TouchAndDropListener {
         }
     }
 
-    _listenToTouchEnd = (event: TouchEvent) => {
+    private _listenToTouchEnd = (event: TouchEvent) => {
         if (this._dragged && this._original) {
             const [vx, vy] = [
                 event.changedTouches[0].clientX,
@@ -205,26 +219,25 @@ export class TouchAndDropListener {
         }
     }
 
-    _stopEventCommon(
+    private _stopEventCommon(
         viewportX: number, 
         viewportY: number, 
         dragged: HTMLElement, 
         original: HTMLElement) 
     {
-        let el = this._elementUnderDragged(viewportX, viewportY, dragged);
+        const el = this.elementUnderDragged(viewportX, viewportY, dragged);
 
-        while (el) {
-            if (el.classList.contains(this._dropzone.class)) {
-                this._doDrop(el as HTMLElement, dragged, original);
-                break;
-            }
-            el = el.parentElement;
+        if (el) {
+            const dropzone = this._getParentDropzone(el as HTMLElement);
+
+            if (dropzone) 
+                this._doDrop(dropzone as HTMLElement, dragged, original, viewportX, viewportY);
         }
 
         this._stopDragging(dragged, original);
     }
 
-    _listenToMouseMove = (event: MouseEvent) => {
+    private _listenToMouseMove = (event: MouseEvent) => {
         if (this._dragged) {
             this._moveEventCommon(
                 event.pageX,
@@ -235,7 +248,7 @@ export class TouchAndDropListener {
         }
     }
 
-    _listenToTouchMove = (event: TouchEvent) => {
+    private _listenToTouchMove = (event: TouchEvent) => {
         if (this._dragged) {
             const [x, y] = [
                 event.targetTouches[0].pageX,
@@ -250,7 +263,7 @@ export class TouchAndDropListener {
         }
     }
 
-    _moveEventCommon(
+    private _moveEventCommon(
         x: number,
         y: number,
         viewportX: number,
@@ -260,19 +273,21 @@ export class TouchAndDropListener {
         dragged.style.top = this._px(y, true);
         dragged.style.left = this._px(x);
 
-        const el = this._elementUnderDragged(viewportX, viewportY, dragged);
+        const el = this.elementUnderDragged(viewportX, viewportY, dragged);
 
-        if (el?.classList.contains(this._dropzone.class)) {
-            this._dropzone.hover(el as HTMLElement);
-        } else this._dropzone.hover(null);
+        this._dropzone.hover(this._getParentDropzone(el));
     }
 
-    _doDrop(
+    private _doDrop(
         dropzone: HTMLElement, 
         dragged: HTMLElement, 
-        original: HTMLElement) 
+        original: HTMLElement,
+        viewportX: number,
+        viewportY: number) 
     {
-        let data: DragData | boolean = { dragged, original, dropzone };
+        let data: DragData | boolean = { 
+            dragged, original, dropzone, viewportX, viewportY,
+        };
         if (this._beforeDrop) {
             data = this._beforeDrop(data);
         }
