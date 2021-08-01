@@ -156,7 +156,8 @@ class Buttons {
                 this._game.actions.slice(0, actionIndex)
             );
             const playResult = playMove(lastMove, boardBeforeLastMove);
-            const words = playResult.words.map((x) => x.word);
+            const words = playResult.words.map((x) => x.word)
+                .filter(x => x !== "*BINGO*");
 
             const response = await fetch(
                 `/rest/move/validate?words=${words.join(",")}`
