@@ -22,7 +22,9 @@ class Buttons {
 
     public canGo: KnockoutComputed<boolean>;
     public canDraw: KnockoutComputed<boolean>;
+    public canSwap: KnockoutComputed<boolean>;
     public canChallenge: KnockoutComputed<boolean>;
+    public hasLetters: KnockoutComputed<boolean>;
 
     public constructor(params: {
         game: Game;
@@ -44,12 +46,24 @@ class Buttons {
             return this._game.canDraw();
         });
 
+        this.canSwap = ko.pureComputed(() => {
+            // Meh, explicitly subscribe to changes
+            this._game.currentStatus();
+            return this._game.canSwap();
+        });
+
+        this.hasLetters = ko.pureComputed(() => this._rack().length > 0);
+
         this.canChallenge = ko.pureComputed(() => {
             const state = this._game.currentState();
-            const lastAction = state.actions[state.actionIndex];
+            let [lastAction] = parseAction(state.actions[state.actionIndex]);
+
+            if (lastAction == ActionType.EndGame) {
+                [lastAction] = parseAction(state.actions[state.actionIndex - 1]);
+            }
 
             // Can only challenge is the last action was a "PLAY"
-            return lastAction.indexOf("PLAY ") === 0;
+            return lastAction === ActionType.Play;
         });
     }
 
@@ -143,13 +157,22 @@ class Buttons {
         }
     }
 
+    private _getLastPlayActionIndex(): number {
+        let actionIndex = this._game.actionIndex;
+        let lastAction: ActionType;
+        do [lastAction] = parseAction(this._game.actions[actionIndex]);
+        while (lastAction !== ActionType.Play && --actionIndex > 0);
+        if (actionIndex < 0) throw new Error("No previous play");
+        return actionIndex;
+    }
+
     private async _checkIfMoveIsValid(): Promise<Record<
         string,
         boolean
     > | null> {
         let result: Record<string, boolean> | null = null;
         try {
-            const actionIndex = this._game.actionIndex;
+            const actionIndex = this._getLastPlayActionIndex();
             const [, cmd] = parseAction(this._game.actions[actionIndex]);
             const lastMove = parsePlayCommand(cmd);
             const boardBeforeLastMove = createBoardFromActions(
@@ -187,7 +210,11 @@ class Buttons {
 
         if (anyInvalid) {
             summary += "\nUndoing last move and skipping turn";
-            this._game.undo();
+            const lastPlayIndex = this._getLastPlayActionIndex();
+
+            do this._game.undo();
+            while (this._game.actionIndex >= lastPlayIndex);
+
             this._game.skip();
             this._clicked("challenge");
         }

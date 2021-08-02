@@ -11,8 +11,9 @@
         const player = @Html.Raw(Model.Player?.ToString() ?? "null");
 
         require(["knockout", "pages/game/index"], function (ko, page) {
-            ko.applyBindings(
-                new page.Index(gameJson, players, player, timestamp));
+            window.___debug = new page.Index(
+                gameJson, players, player, timestamp);
+            ko.applyBindings(window.___debug);
         });
     </script>
 }
