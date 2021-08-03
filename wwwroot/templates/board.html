@@ -2,10 +2,11 @@
     <!-- ko foreach: { data: board, as: 'row' } -->
     <!-- ko foreach: row -->
     <div
-        class="square"
+        class="dz square"
         data-bind="
                 text: blankLetter || letter,
                 css: multiplierType ? multiplierType + multiplier : '',
+                attr: { 'data-played': Boolean(played) },
                 "
     ></div>
     <!-- /ko -->

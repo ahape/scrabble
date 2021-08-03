@@ -152,9 +152,11 @@ a[href] {
 }
 .rack {
     display: flex;
-    margin-top: 20px;
-    height: 35px;
+    height: 40px;
     justify-content: center;
+    margin: 15px auto 0;
+    width: calc(36px * 7);
+    border: 3px solid transparent;
 }
 .drop-target {
     border: 3px dashed aquamarine;

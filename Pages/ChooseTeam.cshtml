@@ -6,8 +6,9 @@
 @section Scripts {
     <script>
         require(["knockout", "pages/chooseteam/index"], function (ko, page) {
-            ko.applyBindings(new page.Index(
-                @Html.Raw(Model.ActivePlayers.ToString())));
+            window.___debug = new page.Index(
+                @Html.Raw(Model.ActivePlayers.ToString()));
+            ko.applyBindings(window.___debug);
         });
     </script>
 }

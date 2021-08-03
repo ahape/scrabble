@@ -10,7 +10,14 @@
     >
         Draw
     </button>
-    <button class="btn btn-dark" data-bind="click: onSwapClick">Swap</button>
+    <button
+        class="btn btn-dark"
+        data-bind="
+        enable: canSwap, 
+        click: onSwapClick"
+    >
+        Swap
+    </button>
     <button class="btn btn-dark" data-bind="click: onSkipClick">Skip</button>
     <!-- /ko -->
 
@@ -23,14 +30,26 @@
 
     <button
         class="btn btn-dark"
-        data-bind="enable: canChallenge, click: onChallengeClick"
+        data-bind="
+        enable: canChallenge, 
+        click: onChallengeClick"
     >
         Challenge
     </button>
-    <button class="btn btn-dark" data-bind="click: onRecallClick">
+    <button 
+        class="btn btn-dark" 
+        data-bind="
+        enable: hasLetters,
+        click: onRecallClick"
+    >
         Recall
     </button>
-    <button class="btn btn-dark" data-bind="click: onShuffleClick">
+    <button 
+        class="btn btn-dark" 
+        data-bind="
+        enable: hasLetters,
+        click: onShuffleClick"
+    >
         Shuffle
     </button>
 </div>
