@@ -124,7 +124,10 @@ export class Index {
                 // If dropping onto the rack
                 if (data.dropzone.classList.contains("rack")) {
                     const under = this.tndListener.elementUnderDragged(
-                        data.viewportX, data.viewportY, data.dragged);
+                        data.viewportX,
+                        data.viewportY,
+                        data.dragged
+                    );
 
                     // If other tiles are on the rack, we want to drop
                     // this tile in between the tiles being aimed at.
@@ -140,16 +143,12 @@ export class Index {
                     // Just append, since this will be the only tile.
                     return data;
                 }
-                if (data.dropzone.classList.contains("letter") &&
-                    data.dropzone != data.original &&
-                    data.original.parentElement?.classList.contains("rack"))
-                {
-                    return true;
-                } 
                 // If dropping onto the board
-                if (data.dropzone.classList.contains("square") &&
+                if (
+                    data.dropzone.classList.contains("square") &&
                     data.dropzone.children?.length === 0 &&
-                    data.dropzone.dataset.played != "true") {
+                    data.dropzone.dataset.played != "true"
+                ) {
                     return data;
                 }
                 return false;
