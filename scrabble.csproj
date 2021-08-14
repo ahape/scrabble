@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AndrewGaskill.ScrabbleMoveGenerator" Version="1.1.0" />
+    <PackageReference Include="AndrewGaskill.ScrabbleMoveGenerator" Version="1.1.1" />
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.1" />
     <PackageReference Include="Azure.Identity" Version="1.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.7" />
