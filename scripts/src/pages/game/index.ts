@@ -226,7 +226,7 @@ export class Index {
             .then(() =>
                 this._socketConnection.invoke("AddToGroup", this.game.id)
             )
-            .catch((err) => console.log(err));
+            .catch((err) => console.error(err));
     }
 
     private _handleStateChangeComputerOpp(): void {

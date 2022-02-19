@@ -101,7 +101,7 @@ class Buttons {
             try {
                 this._game.swap(ActionType.Swap + " " + letters.toUpperCase());
                 this._clicked("swap");
-            } catch (err) {
+            } catch (err: any) {
                 alert(err.message);
             }
         }
@@ -138,7 +138,7 @@ class Buttons {
             const playCommand = createPlayCommand(move, board);
 
             this._game.play("PLAY " + playCommand);
-        } catch (err) {
+        } catch (err: any) {
             alert(err.message);
             return;
         }
